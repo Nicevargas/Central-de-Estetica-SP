@@ -31,7 +31,7 @@ import BookingModal from './components/BookingModal';
 import TreatmentCard from './components/TreatmentCard';
 import ActiveBookingsList from './components/ActiveBookingsList';
 
-import logoUrl from './assets/images/logo.png';
+const logoUrl = '/logo.png';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'tratamentos'>('home');
