@@ -1,0 +1,6 @@
+{
+  "name": "Central da Estética",
+  "description": "Website institucional interativo para a clínica Central da Estética, com catálogo de tratamentos, agendamento de consultas e design premium.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
