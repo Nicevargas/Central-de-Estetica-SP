@@ -22,7 +22,7 @@ export interface Testimonial {
   text: string;
   stars: number;
   role: string;
-  avatarBg: string;
+  avatarBg?: string;
 }
 
 export interface FAQ {
@@ -42,3 +42,32 @@ export interface BookingRequest {
   notes?: string;
   status: 'pending' | 'confirmed';
 }
+
+export interface Promotion {
+  id: string;
+  badge: string;
+  title: string;
+  subtitle: string;
+  discount: string;
+  originalPrice: string;
+  promoPrice: string;
+  couponCode: string;
+  expiresInDays: number;
+  treatmentId?: string;
+  active?: boolean;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  category: string;
+  date: string;
+  readTime: string;
+  image: string;
+  featured?: boolean;
+}
+

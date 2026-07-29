@@ -23,38 +23,112 @@ import {
   CheckCircle2,
   Trash2,
   Instagram,
-  Facebook
+  Facebook,
+  ShieldCheck,
+  Award,
+  Users,
+  Stethoscope,
+  Settings,
+  Lock
 } from 'lucide-react';
-import { TREATMENTS, TESTIMONIALS, FAQS } from './data';
-import { BookingRequest, Treatment } from './types';
+import { FAQS } from './data';
+import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost } from './types';
+import {
+  getStoredTreatments,
+  saveStoredTreatments,
+  syncTreatments,
+  getStoredPromotions,
+  saveStoredPromotions,
+  syncPromotions,
+  getStoredTestimonials,
+  saveStoredTestimonials,
+  syncTestimonials,
+  getStoredBlogPosts,
+  saveStoredBlogPosts,
+  syncBlogPosts,
+  getStoredBookings,
+  saveStoredBookings,
+  syncBookings,
+  addBooking,
+  removeBooking,
+} from './lib/storage';
 import BookingModal from './components/BookingModal';
 import TreatmentCard from './components/TreatmentCard';
 import ActiveBookingsList from './components/ActiveBookingsList';
+import PromoBanner from './components/PromoBanner';
+import { BlogSection } from './components/BlogSection';
+import { BlogPage } from './components/BlogPage';
+import { BlogDetailModal } from './components/BlogDetailModal';
+import { AdminArea } from './components/AdminArea';
 
-const logoUrl = '/logo.png';
+const logoUrl = 'https://qzcrregtdhjumvfigwxj.supabase.co/storage/v1/object/public/imagens/logo.png';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'tratamentos'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'tratamentos' | 'blog'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
+
   const [preSelectedTreatment, setPreSelectedTreatment] = useState<string>('');
-  const [bookings, setBookings] = useState<BookingRequest[]>([]);
   const [openFaqId, setOpenFaqId] = useState<string | null>('faq-1');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [showStory, setShowStory] = useState(false);
 
-  // Load bookings from localStorage on mount
+  // Dynamic state backed by localStorage & Supabase
+  const [treatments, setTreatments] = useState<Treatment[]>(getStoredTreatments);
+  const [promotions, setPromotions] = useState<Promotion[]>(getStoredPromotions);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(getStoredTestimonials);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(getStoredBlogPosts);
+  const [bookings, setBookings] = useState<BookingRequest[]>(getStoredBookings);
+
+  // Sync with Supabase remote database on mount if configured
   useEffect(() => {
-    const saved = localStorage.getItem('central_estetica_bookings');
-    if (saved) {
-      try {
-        setBookings(JSON.parse(saved));
-      } catch (e) {
-        console.error('Error parsing bookings', e);
-      }
+    async function initSupabaseData() {
+      const syncedTreatments = await syncTreatments();
+      if (syncedTreatments) setTreatments(syncedTreatments);
+
+      const syncedPromos = await syncPromotions();
+      if (syncedPromos) setPromotions(syncedPromos);
+
+      const syncedTestimonials = await syncTestimonials();
+      if (syncedTestimonials) setTestimonials(syncedTestimonials);
+
+      const syncedPosts = await syncBlogPosts();
+      if (syncedPosts) setBlogPosts(syncedPosts);
+
+      const syncedBookings = await syncBookings();
+      if (syncedBookings) setBookings(syncedBookings);
     }
+    initSupabaseData();
   }, []);
+
+  // Save Handlers
+  const handleSaveTreatments = (data: Treatment[]) => {
+    setTreatments(data);
+    saveStoredTreatments(data);
+  };
+
+  const handleSavePromotions = (data: Promotion[]) => {
+    setPromotions(data);
+    saveStoredPromotions(data);
+  };
+
+  const handleSaveTestimonials = (data: Testimonial[]) => {
+    setTestimonials(data);
+    saveStoredTestimonials(data);
+  };
+
+  const handleSaveBlogPosts = (data: BlogPost[]) => {
+    setBlogPosts(data);
+    saveStoredBlogPosts(data);
+  };
+
+  const handleSaveBookings = (data: BookingRequest[]) => {
+    setBookings(data);
+    saveStoredBookings(data);
+  };
 
   // Sync scroll on tab changes
   useEffect(() => {
@@ -62,13 +136,17 @@ export default function App() {
   }, [activeTab]);
 
   const handleBookingSuccess = (newBooking: BookingRequest) => {
-    setBookings((prev) => [newBooking, ...prev]);
+    const updated = [newBooking, ...bookings];
+    setBookings(updated);
+    saveStoredBookings(updated);
+    addBooking(newBooking);
   };
 
   const handleCancelBooking = (id: string) => {
     const updated = bookings.filter((b) => b.id !== id);
     setBookings(updated);
-    localStorage.setItem('central_estetica_bookings', JSON.stringify(updated));
+    saveStoredBookings(updated);
+    removeBooking(id);
   };
 
   const triggerBooking = (treatmentId: string = '') => {
@@ -137,6 +215,16 @@ export default function App() {
               Tratamentos
             </button>
             <button
+              onClick={() => setActiveTab('blog')}
+              className={`font-semibold text-sm transition-all cursor-pointer pb-1 border-b-2 ${
+                activeTab === 'blog'
+                  ? 'text-primary border-primary'
+                  : 'text-on-surface-variant border-transparent hover:text-primary'
+              }`}
+            >
+              Blog
+            </button>
+            <button
               onClick={() => {
                 setActiveTab('home');
                 setTimeout(() => {
@@ -158,8 +246,17 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Action button */}
-          <div className="hidden md:block">
+          {/* Action buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="px-3.5 py-2 rounded-full font-bold text-xs bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-all flex items-center gap-1.5 cursor-pointer border border-stone-200 dark:border-stone-700"
+              title="Área do Administrador"
+            >
+              <Settings className="h-3.5 w-3.5 text-rose-600" />
+              <span>Painel Admin</span>
+            </button>
+
             <button
               onClick={() => triggerBooking()}
               className="primary-gradient text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-premium transition-all hover:opacity-90 active:scale-95 cursor-pointer"
@@ -223,6 +320,27 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => {
+                    setActiveTab('blog');
+                    setIsMenuOpen(false);
+                  }}
+                  className={`text-left font-semibold text-sm py-2 ${
+                    activeTab === 'blog' ? 'text-primary' : 'text-on-surface-variant'
+                  }`}
+                >
+                  Blog
+                </button>
+                <button
+                  onClick={() => {
+                    setIsAdminOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="text-left font-bold text-sm py-2 text-rose-600 flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>Painel Admin</span>
+                </button>
+                <button
+                  onClick={() => {
                     setActiveTab('home');
                     setIsMenuOpen(false);
                     setTimeout(() => {
@@ -272,7 +390,10 @@ export default function App() {
               transition={{ duration: 0.3 }}
             >
               {/* Hero Section */}
-              <section className="relative overflow-hidden pt-12 pb-20 md:py-24">
+              <section className="relative overflow-hidden pt-2 sm:pt-3 pb-12 md:pb-16">
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 mb-8">
+                  <PromoBanner promotions={promotions} onSelectPromo={(treatmentId) => triggerBooking(treatmentId)} />
+                </div>
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className="space-y-6">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-wider">
@@ -325,6 +446,51 @@ export default function App() {
                   </div>
                 </div>
               </section>
+
+              {/* Trust & Quality Indicators Bar */}
+              <div className="border-y border-outline-variant/15 bg-white/60 backdrop-blur-sm py-6">
+                <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="flex items-center gap-3.5 justify-center md:justify-start">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                      <Stethoscope className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-on-surface uppercase tracking-wider">Acompanhamento Médico</h4>
+                      <p className="text-[11px] text-on-surface-variant font-medium">Equipe multidisciplinar especializada</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3.5 justify-center md:justify-start">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-on-surface uppercase tracking-wider">Tecnologia Certificada</h4>
+                      <p className="text-[11px] text-on-surface-variant font-medium">Equipamentos 100% ANVISA</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3.5 justify-center md:justify-start">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-on-surface uppercase tracking-wider">Resultados Naturais</h4>
+                      <p className="text-[11px] text-on-surface-variant font-medium">Protocolos exclusivos e seguros</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3.5 justify-center md:justify-start">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-on-surface uppercase tracking-wider">+10.000 Pacientes</h4>
+                      <p className="text-[11px] text-on-surface-variant font-medium">Atendidos com excelência em SP</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Specialties Bento Grid Section */}
               <section className="py-20 bg-white">
@@ -500,6 +666,13 @@ export default function App() {
                 </section>
               )}
 
+              {/* Blog Featured Section */}
+              <BlogSection
+                posts={blogPosts}
+                onReadPost={(post) => setSelectedBlogPost(post)}
+                onViewAllPosts={() => setActiveTab('blog')}
+              />
+
               {/* Testimonials Section (Depoimentos) */}
               <section id="depoimentos" className="py-20 bg-surface-container-low overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6">
@@ -509,7 +682,7 @@ export default function App() {
                   </div>
 
                   <div className="flex gap-8 overflow-x-auto pb-10 snap-x scrollbar-hide scroll-smooth cursor-grab">
-                    {TESTIMONIALS.map((testimonial) => (
+                    {testimonials.map((testimonial) => (
                       <div
                         key={testimonial.id}
                         className="min-w-[300px] sm:min-w-[400px] snap-center bg-white p-8 rounded-3xl shadow-premium border border-outline-variant/10 flex flex-col justify-between"
@@ -539,7 +712,7 @@ export default function App() {
                 </div>
               </section>
             </motion.div>
-          ) : (
+          ) : activeTab === 'tratamentos' ? (
             /* Treatments Detailed View */
             <motion.div
               key="tratamentos"
@@ -617,7 +790,7 @@ export default function App() {
                     <div className="h-[1px] flex-grow bg-outline-variant/20" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {TREATMENTS.filter((t) => t.category === 'facial').map((t) => (
+                    {treatments.filter((t) => t.category === 'facial').map((t) => (
                       <TreatmentCard key={t.id} treatment={t} onSelect={(id) => triggerBooking(id)} />
                     ))}
                   </div>
@@ -630,7 +803,7 @@ export default function App() {
                     <div className="h-[1px] flex-grow bg-outline-variant/20" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    {TREATMENTS.filter((t) => t.category === 'corporal').map((t) => (
+                    {treatments.filter((t) => t.category === 'corporal').map((t) => (
                       <React.Fragment key={t.id}>
                         {t.highlight ? (
                           <div className="md:col-span-2 col-span-1 flex flex-col h-full">
@@ -653,7 +826,7 @@ export default function App() {
                     <div className="h-[1px] flex-grow bg-outline-variant/20" />
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {TREATMENTS.filter((t) => t.category === 'bem-estar').map((t) => (
+                    {treatments.filter((t) => t.category === 'bem-estar').map((t) => (
                       <div
                         key={t.id}
                         className="glass-card p-6 sm:p-10 rounded-3xl flex flex-col sm:flex-row gap-6 sm:gap-8 items-center border-white/40 shadow-sm"
@@ -726,6 +899,21 @@ export default function App() {
                   </div>
                 </section>
               </section>
+            </motion.div>
+          ) : (
+            /* Blog Tab View */
+            <motion.div
+              key="blog"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <BlogPage
+                posts={blogPosts}
+                onSelectPost={(post) => setSelectedBlogPost(post)}
+                onBookClick={() => triggerBooking()}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -831,6 +1019,14 @@ export default function App() {
               </li>
               <li>
                 <button
+                  onClick={() => setActiveTab('blog')}
+                  className="hover:text-primary transition-colors cursor-pointer text-left"
+                >
+                  Blog & Dicas
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => {
                     setActiveTab('home');
                     setTimeout(() => {
@@ -906,10 +1102,15 @@ export default function App() {
         {/* Legal area */}
         <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant font-medium">
           <div>© 2026 Clínica de Estética. Todos os direitos reservados.</div>
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
             <button className="hover:text-primary transition-colors cursor-pointer">Privacidade</button>
             <button className="hover:text-primary transition-colors cursor-pointer">Termos de Uso</button>
-            <button className="hover:text-primary transition-colors cursor-pointer">Mapa do Site</button>
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="text-rose-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <Lock className="h-3 w-3" /> Painel Gestor / Admin
+            </button>
           </div>
         </div>
       </footer>
@@ -938,6 +1139,30 @@ export default function App() {
         selectedTreatmentId={preSelectedTreatment}
         onBookingSuccess={handleBookingSuccess}
       />
+
+      {/* Blog Article Detail Modal */}
+      <BlogDetailModal
+        post={selectedBlogPost}
+        onClose={() => setSelectedBlogPost(null)}
+        onBookClick={() => triggerBooking()}
+      />
+
+      {/* Admin Panel Modal Overlay */}
+      {isAdminOpen && (
+        <AdminArea
+          treatments={treatments}
+          onSaveTreatments={handleSaveTreatments}
+          promotions={promotions}
+          onSavePromotions={handleSavePromotions}
+          testimonials={testimonials}
+          onSaveTestimonials={handleSaveTestimonials}
+          blogPosts={blogPosts}
+          onSaveBlogPosts={handleSaveBlogPosts}
+          bookings={bookings}
+          onSaveBookings={handleSaveBookings}
+          onClose={() => setIsAdminOpen(false)}
+        />
+      )}
     </div>
   );
 }
