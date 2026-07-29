@@ -59,6 +59,10 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
           <img
             src={treatment.image}
             alt={treatment.name}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+            }}
             className="w-full h-full object-cover rounded-l-3xl group-hover:scale-105 transition-transform duration-700"
           />
         </div>
@@ -79,6 +83,9 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
           src={treatment.image}
           alt={treatment.name}
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+          }}
         />
         {treatment.popular && (
           <div className="absolute top-4 left-4">

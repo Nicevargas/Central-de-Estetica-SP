@@ -8,7 +8,7 @@ export const TREATMENTS: Treatment[] = [
     category: 'facial',
     popular: true,
     benefits: ['Prevenção de rugas profundas', 'Elevação das sobrancelhas', 'Resultados naturais e elegantes'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBN6mAS0GY7g5i227Y8iLm2CJAn7Oh8ao6UhyS24sCRGq53bfGp5_Tl8nw2-UXzsJAJ-Nvd6DAqOXv-k5XoH--VZiM5-Zw9aJGe3l91WzWNqj6xiQsn7kTwqS-FBAfuJdxAZ3uJWc4WLHpwGg69EK1eFmcxIiYzCVEUMLLAp0REXWeJBu86qUvNgvRM-cItt5CGdiuDu-OT2T0ayAJD4U0rOptsxZYG3_I5cbUjUxNy8ap0diflMj5s7Q',
+    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 980,00',
     duration: '30 min'
   },
@@ -18,7 +18,7 @@ export const TREATMENTS: Treatment[] = [
     description: 'Remoção de impurezas, cravos e renovação celular para uma pele viçosa e saudável.',
     category: 'facial',
     benefits: ['Controle de oleosidade', 'Desobstrução de poros', 'Extração profissional sem cicatrizes'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBhlHxlbE90w6BcgjA9jPP1jp2OwR7nextm00QGKo9dHMwvoS6c546ObG4PTx3TbwzhpAmqNEHbu5GcK4yxAygg8m-l8ggV7e3T7QC1Q7DqOg8Nq0XYc3XZ0JwbLMPJq3WDA8KIbW7PsxPQM2VEfUdJ8vtmlPzDmAC5njOqxFr0oirppIAxgoxaIU-lJJ-p4Sn2iX8YMkPzpMl5kzV4e94RTywEWiIszWl5STSolCjzYAwXkLvigUK36Q',
+    image: 'https://images.unsplash.com/photo-1512290900676-26c2a48f4134?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 150,00',
     duration: '60 min'
   },
@@ -28,7 +28,7 @@ export const TREATMENTS: Treatment[] = [
     description: 'Lifting facial sem cortes através de ultrassom microfocado para flacidez e contorno.',
     category: 'facial',
     benefits: ['Estímulo de colágeno intenso', 'Efeito bichectomia-like', 'Melhora imediata e contínua'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_IjB2cUoPht2sl_DZYyB3vJMjlSCe1_wZjmTD5JGAQNWKA_UOeXHWzgSD7Dbnq0HAO0jg8lmZLuyVakuMYOgb28GZ3xdcRprPjj0zj7Ny7PrOzr_KTYyfkWEgPBNIVTMJM7x4xHmPpTKyYvriNGMk2_P4MSZtahQ5av3dvE5Ytv1zXrV4RPqzmbvhgQTtIlTaZmes1SarXwlIGe9K8B0erqu0ekfS6e6788Jj1w34XHPQ14uNhiyrVA',
+    image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 1.800,00',
     duration: '45 min'
   },
@@ -39,7 +39,7 @@ export const TREATMENTS: Treatment[] = [
     category: 'corporal',
     highlight: true,
     benefits: ['Redução de medidas', 'Foco em gordura localizada', 'Processo rápido e focado'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDdALPIr_mYm1IpZ7vCO9l1Ig0tpHhxV3V-0HKjFn9mecvFZyxFIyylHXBV5Cz0TWimfvBzTHZ0nmbiEBz5JkCoWJbCOkasFfIIzfs_541sZQS0n7fk332hqrrCuGN0lJei0Iwcvd2sWoE8c1vOUEAAJ655BarsW0f5bgvY0okJpDpZJ0MUvVr8rCak0xGAH6SF1ciLhUB1P9MeTgbUQPRQbVAEqtDa6c_6Y2OGYVmXLqBBfjkNEIrQRw',
+    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 350,00 por sessão',
     duration: '30 min'
   },
@@ -49,7 +49,7 @@ export const TREATMENTS: Treatment[] = [
     description: 'Terapia que combina frio e calor para combater flacidez e celulite.',
     category: 'corporal',
     benefits: ['Tratamento de flacidez', 'Redução de celulite', 'Contração imediata de fibras de colágeno'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCO93tAHf875s1-UCImJPNISVNu6pSRixbQieMiOPdiQfB-fsvVEPv9ONbzuFM6b5aZl2chHy5b5SRB2xZuyle3-LEA_nc_qf2z5I9kyNpjIDX4zlghYGpAJgtlyhUt8SCoPiBu-TEFS7QtVt3gnJvypQi3h2uC0thBGZ-z2YSDMwEKRiwQiovy-Dtic-ZEZQHrtgk65LI_mnNqWZIqbeyPcOxE4zx9yjN7vCiZrFkU9ALVkELxnVPKeA',
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 290,00 por sessão',
     duration: '40 min'
   },
@@ -59,7 +59,7 @@ export const TREATMENTS: Treatment[] = [
     description: 'Tecnologia ELOS para contorno corporal e redução da aparência de celulite.',
     category: 'corporal',
     benefits: ['Contorno corporal', 'Estímulo à circulação', 'Ação profunda no tecido adiposo'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCWvYCUfN8KRHHq1aHXZR4f0k_tMS-o0RBcufjxhi6kZDtOxLYQyGavdI6v-LulH6W8BiDu7HHToQOuh0VXzWgATFaRw3Aj2lVeLvbL81ROVkzy9T7vfDBCxpDzfaKwSIZa8IQ5cDc8swJ5TlkOePpyzk335MDGWGlFE38PE7stUnpx6UffXyUD-3phkq9Gu0Ww6JgYonm9vxZTYlPsLY5Fimp5QojPyMpLEWXDPY4h3BtEy8jTk_uNMA',
+    image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 320,00 por sessão',
     duration: '45 min'
   },
@@ -69,7 +69,7 @@ export const TREATMENTS: Treatment[] = [
     description: 'Um momento sagrado de desconexão. Alivia tensões musculares, reduz o estresse e promove o equilíbrio mental através de técnicas envolventes.',
     category: 'bem-estar',
     benefits: ['Alívio do estresse', 'Equilíbrio mental', 'Desconexão do cotidiano e relaxamento profundo'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCw7_SmkXnHIyc7_F-FA3t1X11EpJQvqaPjDwTQ2aLtOhUMXdgqLDWEVpBpKqmPwqQyLf4Sr2L-SmLYDEgazbCxczQFwvWSBOlQbJ7UlCCbmvJedznz56_yhA8y6SFokyeTBwnF2T0DWkxYY3_eJqWQ5KCpJv1YCpKLDpGS-oGGSgZjjqxXoykJlKcyqH89ZYyErMB_T5GMdu8r-fBazcVmoDtEDs4LTN44ug-4_iloD2jeSkxIx1-N1g',
+    image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 180,00',
     duration: '60 min'
   },
@@ -79,7 +79,7 @@ export const TREATMENTS: Treatment[] = [
     description: 'Manobras intensas e rápidas que auxiliam na redução de medidas, melhora da circulação e modelagem da silhueta corporal.',
     category: 'bem-estar',
     benefits: ['Melhora de circulação', 'Modelagem da silhueta', 'Auxílio na eliminação de toxinas'],
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDPZVdmtLQKU7wed_9R2C8ZeMLgoVs6ysuvkOpSNl7ylCw3K08TQudzAzu_lbIc6MDWX1vvD6SdfSaYIf48hIeFtoDlGU-xr6EBOWRi0q3CgYCWfDecwzj9hqBXQF7VATW7vhiGcYx2bGw9ENYGfm_fOu3qQz1T3ZFNZVQFlkFAARyIKdrLGB8vGRGfePRyxh7KaX5xAiO0pNPIdqKydueS84aRTH8aaDrPw3P2qnbXeSXTbSO89icK0w',
+    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
     price: 'R$ 220,00',
     duration: '50 min'
   }

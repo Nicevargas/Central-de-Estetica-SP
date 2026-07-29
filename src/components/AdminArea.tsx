@@ -128,10 +128,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   };
 
   const handleDeleteTreatment = (id: string) => {
-    if (confirm('Deseja realmente remover este tratamento?')) {
-      onSaveTreatments(treatments.filter((t) => t.id !== id));
-      notify('Tratamento removido.');
-    }
+    onSaveTreatments(treatments.filter((t) => t.id !== id));
+    notify('Tratamento/Serviço removido com sucesso.');
   };
 
   // --- PROMOTIONS HANDLERS ---
@@ -164,10 +162,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   };
 
   const handleDeletePromo = (id: string) => {
-    if (confirm('Deseja realmente remover este banner promocional?')) {
-      onSavePromotions(promotions.filter((p) => p.id !== id));
-      notify('Banner removido.');
-    }
+    onSavePromotions(promotions.filter((p) => p.id !== id));
+    notify('Banner promocional removido com sucesso.');
   };
 
   // --- TESTIMONIALS HANDLERS ---
@@ -194,10 +190,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   };
 
   const handleDeleteTestimonial = (id: string) => {
-    if (confirm('Deseja remover este depoimento?')) {
-      onSaveTestimonials(testimonials.filter((t) => t.id !== id));
-      notify('Depoimento removido.');
-    }
+    onSaveTestimonials(testimonials.filter((t) => t.id !== id));
+    notify('Depoimento removido com sucesso.');
   };
 
   // --- BLOG POSTS HANDLERS ---
@@ -230,10 +224,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   };
 
   const handleDeleteBlogPost = (id: string) => {
-    if (confirm('Deseja realmente remover este artigo do blog?')) {
-      onSaveBlogPosts(blogPosts.filter((p) => p.id !== id));
-      notify('Artigo removido do blog.');
-    }
+    onSaveBlogPosts(blogPosts.filter((p) => p.id !== id));
+    notify('Artigo removido do blog.');
   };
 
   // --- BOOKINGS HANDLERS ---
@@ -246,10 +238,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   };
 
   const handleDeleteBooking = (id: string) => {
-    if (confirm('Deseja excluir este agendamento da lista?')) {
-      onSaveBookings(bookings.filter((b) => b.id !== id));
-      notify('Agendamento excluído.');
-    }
+    onSaveBookings(bookings.filter((b) => b.id !== id));
+    notify('Agendamento excluído da lista com sucesso.');
   };
 
   if (!isAuthenticated) {
