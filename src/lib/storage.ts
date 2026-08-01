@@ -232,7 +232,18 @@ export async function removeBooking(id: string): Promise<void> {
 // Contact Info
 // =============================
 export function getStoredContactInfo(): ContactInfo {
-  return loadFromStorage<ContactInfo>(STORAGE_KEYS.CONTACT_INFO, DEFAULT_CONTACT_INFO);
+  const loaded = loadFromStorage<ContactInfo>(STORAGE_KEYS.CONTACT_INFO, DEFAULT_CONTACT_INFO);
+  if (
+    !loaded ||
+    loaded.whatsappNumber === '551130512433' ||
+    loaded.phonePrimary?.includes('3051-2433') ||
+    loaded.phonePrimary?.includes('3052') ||
+    loaded.phonePrimary?.includes('3052-1400')
+  ) {
+    saveStoredContactInfo(DEFAULT_CONTACT_INFO);
+    return DEFAULT_CONTACT_INFO;
+  }
+  return loaded;
 }
 
 export function saveStoredContactInfo(info: ContactInfo): void {
@@ -243,6 +254,16 @@ export async function syncContactInfo(): Promise<ContactInfo> {
   if (isSupabaseConfigured()) {
     const remote = await fetchContactInfoFromSupabase();
     if (remote) {
+      if (
+        remote.whatsappNumber === '551130512433' ||
+        remote.phonePrimary?.includes('3051-2433') ||
+        remote.phonePrimary?.includes('3052') ||
+        remote.phonePrimary?.includes('3052-1400')
+      ) {
+        await saveContactInfoToSupabase(DEFAULT_CONTACT_INFO);
+        saveStoredContactInfo(DEFAULT_CONTACT_INFO);
+        return DEFAULT_CONTACT_INFO;
+      }
       saveStoredContactInfo(remote);
       return remote;
     }

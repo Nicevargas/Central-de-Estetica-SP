@@ -17,7 +17,7 @@ export default function BookingModal({
   onClose,
   selectedTreatmentId = '',
   onBookingSuccess,
-  whatsappNumber = '551130512433',
+  whatsappNumber = '551194683765',
 }: BookingModalProps) {
   const [treatmentId, setTreatmentId] = useState(selectedTreatmentId);
   const [name, setName] = useState('');

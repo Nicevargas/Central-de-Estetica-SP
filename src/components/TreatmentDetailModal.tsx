@@ -30,7 +30,7 @@ export default function TreatmentDetailModal({
   treatment,
   onClose,
   onBook,
-  whatsappNumber = '551130512433',
+  whatsappNumber = '551194683765',
 }: TreatmentDetailModalProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [activeTab, setActiveTab] = useState<'visiting' | 'beforeAfter' | 'video' | 'specs' | 'postcare' | 'specialist'>('visiting');
@@ -41,7 +41,7 @@ export default function TreatmentDetailModal({
   // Prepare Share URLs
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
   const shareText = `Confira este procedimento de ${treatment.name} na Central da Estética! ${treatment.price ? `Por ${treatment.price}` : ''}`;
-  const rawWhatsappNum = whatsappNumber.replace(/\D/g, '') || '551130512433';
+  const rawWhatsappNum = whatsappNumber.replace(/\D/g, '') || '551194683765';
   const whatsappShareUrl = `https://wa.me/${rawWhatsappNum}?text=${encodeURIComponent(`${shareText}\n${currentUrl}`)}`;
   const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
   const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`;

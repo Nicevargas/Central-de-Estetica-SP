@@ -1586,7 +1586,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         type="text"
                         value={contactForm.phonePrimary}
                         onChange={(e) => setContactForm({ ...contactForm, phonePrimary: e.target.value })}
-                        placeholder="(11) 3051-2433 / (11) 3052-1400"
+                        placeholder="(11) 3151-2433 / (11) 9468-3765"
                         className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
                         required
                       />
@@ -1600,11 +1600,11 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         type="text"
                         value={contactForm.whatsappNumber}
                         onChange={(e) => setContactForm({ ...contactForm, whatsappNumber: e.target.value })}
-                        placeholder="551130512433"
+                        placeholder="551194683765"
                         className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none font-mono dark:text-white"
                         required
                       />
-                      <span className="text-[10px] text-stone-400 block mt-0.5">Apenas números com DDD e país (ex: 551130512433)</span>
+                      <span className="text-[10px] text-stone-400 block mt-0.5">Apenas números com DDD e país (ex: 551194683765)</span>
                     </div>
                   </div>
 
