@@ -32,7 +32,7 @@ import {
   Lock
 } from 'lucide-react';
 import { FAQS } from './data';
-import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost } from './types';
+import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
   getStoredTreatments,
   saveStoredTreatments,
@@ -51,6 +51,10 @@ import {
   syncBookings,
   addBooking,
   removeBooking,
+  getStoredContactInfo,
+  saveStoredContactInfo,
+  syncContactInfo,
+  addOrUpdateContactInfo,
 } from './lib/storage';
 import BookingModal from './components/BookingModal';
 import TreatmentCard from './components/TreatmentCard';
@@ -60,6 +64,7 @@ import { BlogSection } from './components/BlogSection';
 import { BlogPage } from './components/BlogPage';
 import { BlogDetailModal } from './components/BlogDetailModal';
 import { AdminArea } from './components/AdminArea';
+import TreatmentDetailModal from './components/TreatmentDetailModal';
 
 const logoUrl = 'https://qzcrregtdhjumvfigwxj.supabase.co/storage/v1/object/public/imagens/logo.png';
 
@@ -69,6 +74,7 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
+  const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(null);
 
   const [preSelectedTreatment, setPreSelectedTreatment] = useState<string>('');
   const [openFaqId, setOpenFaqId] = useState<string | null>('faq-1');
@@ -82,6 +88,7 @@ export default function App() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>(getStoredTestimonials);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(getStoredBlogPosts);
   const [bookings, setBookings] = useState<BookingRequest[]>(getStoredBookings);
+  const [contactInfo, setContactInfo] = useState<ContactInfo>(getStoredContactInfo);
 
   // Sync with Supabase remote database on mount if configured
   useEffect(() => {
@@ -100,9 +107,27 @@ export default function App() {
 
       const syncedBookings = await syncBookings();
       if (syncedBookings) setBookings(syncedBookings);
+
+      const syncedContact = await syncContactInfo();
+      if (syncedContact) setContactInfo(syncedContact);
     }
     initSupabaseData();
   }, []);
+
+  // Check URL parameter for direct treatment sharing (e.g. ?treatment=botox)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const treatmentParam = params.get('treatment');
+    if (treatmentParam && treatments.length > 0) {
+      const match = treatments.find(
+        (t) => t.id === treatmentParam || t.id.toLowerCase() === treatmentParam.toLowerCase()
+      );
+      if (match) {
+        setSelectedTreatmentForDetail(match);
+      }
+    }
+  }, [treatments]);
 
   // Save Handlers
   const handleSaveTreatments = (data: Treatment[]) => {
@@ -128,6 +153,11 @@ export default function App() {
   const handleSaveBookings = (data: BookingRequest[]) => {
     setBookings(data);
     saveStoredBookings(data);
+  };
+
+  const handleSaveContactInfo = (data: ContactInfo) => {
+    setContactInfo(data);
+    addOrUpdateContactInfo(data);
   };
 
   // Sync scroll on tab changes
@@ -791,7 +821,12 @@ export default function App() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {treatments.filter((t) => t.category === 'facial').map((t) => (
-                      <TreatmentCard key={t.id} treatment={t} onSelect={(id) => triggerBooking(id)} />
+                      <TreatmentCard
+                        key={t.id}
+                        treatment={t}
+                        onSelect={(id) => triggerBooking(id)}
+                        onViewDetails={(treatment) => setSelectedTreatmentForDetail(treatment)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -807,11 +842,19 @@ export default function App() {
                       <React.Fragment key={t.id}>
                         {t.highlight ? (
                           <div className="md:col-span-2 col-span-1 flex flex-col h-full">
-                            <TreatmentCard treatment={t} onSelect={(id) => triggerBooking(id)} />
+                            <TreatmentCard
+                              treatment={t}
+                              onSelect={(id) => triggerBooking(id)}
+                              onViewDetails={(treatment) => setSelectedTreatmentForDetail(treatment)}
+                            />
                           </div>
                         ) : (
                           <div className="md:col-span-1 col-span-1 flex flex-col h-full">
-                            <TreatmentCard treatment={t} onSelect={(id) => triggerBooking(id)} />
+                            <TreatmentCard
+                              treatment={t}
+                              onSelect={(id) => triggerBooking(id)}
+                              onViewDetails={(treatment) => setSelectedTreatmentForDetail(treatment)}
+                            />
                           </div>
                         )}
                       </React.Fragment>
@@ -846,12 +889,20 @@ export default function App() {
                           </div>
                           <div className="flex items-center justify-between mt-auto border-t border-outline-variant/10 pt-4 flex-col sm:flex-row gap-2">
                             <span className="text-primary font-bold text-sm sm:text-base">{t.duration} • {t.price}</span>
-                            <button
-                              onClick={() => triggerBooking(t.id)}
-                              className="px-6 py-2 bg-primary text-white rounded-full font-bold text-xs shadow-sm hover:opacity-95 transition-all cursor-pointer"
-                            >
-                              Agendar
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setSelectedTreatmentForDetail(t)}
+                                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 dark:bg-stone-800 dark:hover:bg-stone-700 dark:text-stone-200 rounded-full font-bold text-xs shadow-sm transition-all cursor-pointer"
+                              >
+                                Ver Página
+                              </button>
+                              <button
+                                onClick={() => triggerBooking(t.id)}
+                                className="px-5 py-2 bg-primary text-white rounded-full font-bold text-xs shadow-sm hover:opacity-95 transition-all cursor-pointer"
+                              >
+                                Agendar
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -964,7 +1015,7 @@ export default function App() {
             </p>
             <div className="flex gap-4 pt-2">
               <a
-                href="https://instagram.com/CENTRALDAESTETICASP"
+                href={contactInfo.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Siga-nos no Instagram"
@@ -973,7 +1024,7 @@ export default function App() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://facebook.com/CENTRALDAESTETICASP"
+                href={contactInfo.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Siga-nos no Facebook"
@@ -1048,18 +1099,18 @@ export default function App() {
               <p className="flex items-start gap-2">
                 <MapPin className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
                 <span>
-                  Rua Artur Frazão, 33<br />
-                  Jardim Paulista, São Paulo - SP<br />
-                  Brasil, CEP 01423-030
+                  {contactInfo.addressLine1}<br />
+                  {contactInfo.addressLine2}<br />
+                  CEP {contactInfo.cep}
                 </span>
               </p>
               <p className="flex items-center gap-2 font-bold text-primary">
-                <Phone className="h-4.5 w-4.5" />
-                <span>(11) 3052-1400 / 3052-1372</span>
+                <Phone className="h-4.5 w-4.5 shrink-0" />
+                <span>{contactInfo.phonePrimary}</span>
               </p>
               <p className="flex items-center gap-2 font-medium text-on-surface">
-                <Mail className="h-4.5 w-4.5 text-primary" />
-                <span>contatocentraldaestetica@gmail.com</span>
+                <Mail className="h-4.5 w-4.5 text-primary shrink-0" />
+                <span>{contactInfo.email}</span>
               </p>
             </div>
           </div>
@@ -1117,7 +1168,7 @@ export default function App() {
 
       {/* Floating WhatsApp Action FAB Button */}
       <a
-        href="https://wa.me/551130521400"
+        href={`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '551130512433'}`}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#25D366] text-white px-5 py-3 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group"
@@ -1138,7 +1189,18 @@ export default function App() {
         onClose={() => setIsBookingOpen(false)}
         selectedTreatmentId={preSelectedTreatment}
         onBookingSuccess={handleBookingSuccess}
+        whatsappNumber={contactInfo.whatsappNumber}
       />
+
+      {/* Treatment Detail Modal */}
+      {selectedTreatmentForDetail && (
+        <TreatmentDetailModal
+          treatment={selectedTreatmentForDetail}
+          onClose={() => setSelectedTreatmentForDetail(null)}
+          onBook={(id) => triggerBooking(id)}
+          whatsappNumber={contactInfo.whatsappNumber}
+        />
+      )}
 
       {/* Blog Article Detail Modal */}
       <BlogDetailModal
@@ -1160,6 +1222,8 @@ export default function App() {
           onSaveBlogPosts={handleSaveBlogPosts}
           bookings={bookings}
           onSaveBookings={handleSaveBookings}
+          contactInfo={contactInfo}
+          onSaveContactInfo={handleSaveContactInfo}
           onClose={() => setIsAdminOpen(false)}
         />
       )}

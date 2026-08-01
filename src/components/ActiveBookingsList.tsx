@@ -6,9 +6,10 @@ import { TREATMENTS } from '../data';
 interface ActiveBookingsListProps {
   bookings: any[];
   onCancelBooking: (id: string) => void;
+  whatsappNumber?: string;
 }
 
-export default function ActiveBookingsList({ bookings, onCancelBooking }: ActiveBookingsListProps) {
+export default function ActiveBookingsList({ bookings, onCancelBooking, whatsappNumber = '551130512433' }: ActiveBookingsListProps) {
   if (bookings.length === 0) {
     return null;
   }
@@ -26,7 +27,8 @@ export default function ActiveBookingsList({ bookings, onCancelBooking }: Active
   const openWhatsAppConfirm = (booking: any) => {
     const treatmentName = getTreatmentName(booking.treatmentId);
     const text = `Olá! Gostaria de confirmar meu agendamento na Central da Estética:\n\n*Procedimento:* ${treatmentName}\n*Nome:* ${booking.name}\n*Data:* ${booking.date.split('-').reverse().join('/')}\n*Horário:* ${booking.time}\n\nObrigado!`;
-    const url = `https://wa.me/551130521400?text=${encodeURIComponent(text)}`;
+    const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551130512433';
+    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
 

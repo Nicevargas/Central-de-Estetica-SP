@@ -6,10 +6,18 @@ import { Treatment } from '../types';
 interface TreatmentCardProps {
   treatment: Treatment;
   onSelect: (id: string) => void;
+  onViewDetails?: (treatment: Treatment) => void;
 }
 
-export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProps) {
+export default function TreatmentCard({ treatment, onSelect, onViewDetails }: TreatmentCardProps) {
   const isHighlight = treatment.highlight;
+
+  const handleOpenDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onViewDetails) {
+      onViewDetails(treatment);
+    }
+  };
 
   if (isHighlight) {
     return (
@@ -17,14 +25,15 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="md:col-span-2 bg-white rounded-2xl p-8 shadow-premium border border-outline-variant/10 flex flex-col justify-between overflow-hidden relative group"
+        onClick={handleOpenDetails}
+        className="md:col-span-2 bg-white rounded-2xl p-8 shadow-premium border border-outline-variant/10 flex flex-col justify-between overflow-hidden relative group cursor-pointer"
       >
         <div className="relative z-10 flex flex-col h-full justify-between">
           <div>
             <span className="inline-block px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-bold mb-4">
               Destaque Corporal
             </span>
-            <h3 className="font-serif text-2xl lg:text-3xl font-semibold mb-3 text-primary">
+            <h3 className="font-serif text-2xl lg:text-3xl font-semibold mb-3 text-primary group-hover:text-rose-600 transition-colors">
               {treatment.name}
             </h3>
             <p className="text-on-surface-variant text-sm md:text-base mb-6 max-w-md leading-relaxed">
@@ -42,9 +51,20 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
               ))}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {onViewDetails && (
+                <button
+                  onClick={handleOpenDetails}
+                  className="px-6 py-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-full font-semibold text-sm transition-all cursor-pointer"
+                >
+                  Ver Página & Fotos
+                </button>
+              )}
               <button
-                onClick={() => onSelect(treatment.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect(treatment.id);
+                }}
                 className="primary-gradient cursor-pointer text-white px-8 py-3 rounded-full font-semibold text-sm inline-flex items-center gap-2 group/btn shadow-premium transition-all hover:scale-105 active:scale-95"
               >
                 Agendar Agora
@@ -54,7 +74,7 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
           </div>
         </div>
 
-        {/* Decorative background image or giant symbol */}
+        {/* Decorative background image */}
         <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-15 md:opacity-100 md:block hidden">
           <img
             src={treatment.image}
@@ -75,7 +95,8 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-white rounded-2xl overflow-hidden shadow-premium group hover:-translate-y-1.5 border border-outline-variant/10 transition-all duration-500 flex flex-col justify-between"
+      onClick={handleOpenDetails}
+      className="bg-white rounded-2xl overflow-hidden shadow-premium group hover:-translate-y-1.5 border border-outline-variant/10 transition-all duration-500 flex flex-col justify-between cursor-pointer"
     >
       <div className="h-64 overflow-hidden relative">
         <img
@@ -110,7 +131,7 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
           <h3 className="font-serif text-xl font-semibold mb-2 text-primary group-hover:text-secondary transition-colors duration-300">
             {treatment.name}
           </h3>
-          <p className="text-on-surface-variant text-sm mb-4 leading-relaxed">
+          <p className="text-on-surface-variant text-sm mb-4 leading-relaxed line-clamp-2">
             {treatment.description}
           </p>
 
@@ -124,19 +145,33 @@ export default function TreatmentCard({ treatment, onSelect }: TreatmentCardProp
           </ul>
         </div>
 
-        <div className="pt-2 border-t border-outline-variant/10 flex items-center justify-between">
+        <div className="pt-3 border-t border-outline-variant/10 flex items-center justify-between gap-2">
           {treatment.price && (
             <div>
               <span className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider block">Valor</span>
-              <span className="font-bold text-primary">{treatment.price}</span>
+              <span className="font-bold text-primary text-sm">{treatment.price}</span>
             </div>
           )}
-          <button
-            onClick={() => onSelect(treatment.id)}
-            className="px-4 py-2 bg-primary/5 hover:bg-primary hover:text-white text-primary rounded-full font-semibold text-xs transition-colors duration-300 ml-auto cursor-pointer"
-          >
-            Agendar
-          </button>
+          
+          <div className="flex items-center gap-1.5 ml-auto">
+            {onViewDetails && (
+              <button
+                onClick={handleOpenDetails}
+                className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-full font-semibold text-xs transition-colors cursor-pointer"
+              >
+                Ver Página
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(treatment.id);
+              }}
+              className="px-4 py-1.5 bg-primary/10 hover:bg-primary hover:text-white text-primary rounded-full font-semibold text-xs transition-colors duration-300 cursor-pointer"
+            >
+              Agendar
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

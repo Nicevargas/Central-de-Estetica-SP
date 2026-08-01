@@ -9,6 +9,7 @@ interface BookingModalProps {
   onClose: () => void;
   selectedTreatmentId?: string;
   onBookingSuccess: (booking: any) => void;
+  whatsappNumber?: string;
 }
 
 export default function BookingModal({
@@ -16,6 +17,7 @@ export default function BookingModal({
   onClose,
   selectedTreatmentId = '',
   onBookingSuccess,
+  whatsappNumber = '551130512433',
 }: BookingModalProps) {
   const [treatmentId, setTreatmentId] = useState(selectedTreatmentId);
   const [name, setName] = useState('');
@@ -77,7 +79,8 @@ export default function BookingModal({
 
   const openWhatsApp = () => {
     const text = `Olá! Gostaria de confirmar meu agendamento na Central da Estética:\n\n*Procedimento:* ${selectedTreatment?.name}\n*Nome:* ${name}\n*Data:* ${date.split('-').reverse().join('/')}\n*Horário:* ${time}\n\nObrigado!`;
-    const url = `https://wa.me/551130521400?text=${encodeURIComponent(text)}`;
+    const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551130512433';
+    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
 

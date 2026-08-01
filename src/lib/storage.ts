@@ -1,9 +1,10 @@
-import { Treatment, Testimonial, Promotion, BlogPost, BookingRequest } from '../types';
-import { TREATMENTS, TESTIMONIALS, INITIAL_PROMOTIONS, INITIAL_BLOG_POSTS } from '../data';
+import { Treatment, Testimonial, Promotion, BlogPost, BookingRequest, ContactInfo } from '../types';
+import { TREATMENTS, TESTIMONIALS, INITIAL_PROMOTIONS, INITIAL_BLOG_POSTS, DEFAULT_CONTACT_INFO } from '../data';
 import {
   isSupabaseConfigured,
   fetchTreatmentsFromSupabase,
   createTreatmentInSupabase,
+  saveTreatmentToSupabase,
   deleteTreatmentInSupabase,
   fetchPromotionsFromSupabase,
   createPromotionInSupabase,
@@ -17,6 +18,8 @@ import {
   fetchBookingsFromSupabase,
   createBookingInSupabase,
   deleteBookingInSupabase,
+  fetchContactInfoFromSupabase,
+  saveContactInfoToSupabase,
 } from './supabase';
 
 const STORAGE_KEYS = {
@@ -25,6 +28,7 @@ const STORAGE_KEYS = {
   TESTIMONIALS: 'estetica_testimonials_v1',
   BLOG_POSTS: 'estetica_blog_posts_v1',
   BOOKINGS: 'estetica_bookings_v1',
+  CONTACT_INFO: 'estetica_contact_info_v1',
 };
 
 // Safe localStorage access
@@ -56,6 +60,13 @@ export function getStoredTreatments(): Treatment[] {
 
 export function saveStoredTreatments(treatments: Treatment[]): void {
   saveToStorage(STORAGE_KEYS.TREATMENTS, treatments);
+  if (isSupabaseConfigured()) {
+    treatments.forEach((t) => {
+      saveTreatmentToSupabase(t).catch((err) =>
+        console.warn('Notice: Sync treatment to Supabase failed:', err)
+      );
+    });
+  }
 }
 
 export async function syncTreatments(): Promise<Treatment[]> {
@@ -216,3 +227,33 @@ export async function removeBooking(id: string): Promise<void> {
     await deleteBookingInSupabase(id);
   }
 }
+
+// =============================
+// Contact Info
+// =============================
+export function getStoredContactInfo(): ContactInfo {
+  return loadFromStorage<ContactInfo>(STORAGE_KEYS.CONTACT_INFO, DEFAULT_CONTACT_INFO);
+}
+
+export function saveStoredContactInfo(info: ContactInfo): void {
+  saveToStorage(STORAGE_KEYS.CONTACT_INFO, info);
+}
+
+export async function syncContactInfo(): Promise<ContactInfo> {
+  if (isSupabaseConfigured()) {
+    const remote = await fetchContactInfoFromSupabase();
+    if (remote) {
+      saveStoredContactInfo(remote);
+      return remote;
+    }
+  }
+  return getStoredContactInfo();
+}
+
+export async function addOrUpdateContactInfo(info: ContactInfo): Promise<void> {
+  saveStoredContactInfo(info);
+  if (isSupabaseConfigured()) {
+    await saveContactInfoToSupabase(info);
+  }
+}
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Settings,
   Plus,
@@ -19,9 +19,17 @@ import {
   Unlock,
   RefreshCw,
   User,
-  LogOut
+  LogOut,
+  Phone,
+  Mail,
+  MapPin,
+  Instagram,
+  Facebook,
+  MessageCircle,
+  Globe,
+  Share2
 } from 'lucide-react';
-import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest } from '../types';
+import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
 
 interface AdminAreaProps {
   treatments: Treatment[];
@@ -39,6 +47,9 @@ interface AdminAreaProps {
   bookings: BookingRequest[];
   onSaveBookings: (data: BookingRequest[]) => void;
 
+  contactInfo: ContactInfo;
+  onSaveContactInfo: (data: ContactInfo) => void;
+
   onClose: () => void;
 }
 
@@ -53,6 +64,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   onSaveBlogPosts,
   bookings,
   onSaveBookings,
+  contactInfo,
+  onSaveContactInfo,
   onClose,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -61,7 +74,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'treatments' | 'promotions' | 'testimonials' | 'blog' | 'bookings'>('treatments');
+  const [activeTab, setActiveTab] = useState<'treatments' | 'promotions' | 'testimonials' | 'blog' | 'bookings' | 'contact'>('treatments');
   const [notification, setNotification] = useState<string | null>(null);
 
   // Form Editing States
@@ -69,6 +82,21 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const [editingPromo, setEditingPromo] = useState<Partial<Promotion> | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
+
+  // Contact Info Form State
+  const [contactForm, setContactForm] = useState<ContactInfo>(contactInfo);
+
+  useEffect(() => {
+    if (contactInfo) {
+      setContactForm(contactInfo);
+    }
+  }, [contactInfo]);
+
+  const handleSaveContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSaveContactInfo(contactForm);
+    notify('Informações de contato e redes sociais salvas com sucesso!');
+  };
 
   const notify = (msg: string) => {
     setNotification(msg);
@@ -135,30 +163,41 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   // --- PROMOTIONS HANDLERS ---
   const handleSavePromoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingPromo?.title) return;
+    if (!editingPromo?.title || !editingPromo?.title.trim()) {
+      notify('Por favor, informe o título da promoção.');
+      return;
+    }
 
     if (editingPromo.id) {
       const updated = promotions.map((p) => (p.id === editingPromo.id ? ({ ...p, ...editingPromo } as Promotion) : p));
       onSavePromotions(updated);
-      notify('Banner Promocional atualizado!');
+      notify('Banner Promocional atualizado com sucesso!');
     } else {
       const newPromo: Promotion = {
         id: `promo-${Date.now()}`,
         badge: editingPromo.badge || 'PROMOÇÃO ESPECIAL',
-        title: editingPromo.title || 'Título da Promoção',
+        title: editingPromo.title.trim(),
         subtitle: editingPromo.subtitle || 'Descrição da oferta especial.',
         discount: editingPromo.discount || '20% OFF',
         originalPrice: editingPromo.originalPrice || 'R$ 500',
         promoPrice: editingPromo.promoPrice || 'R$ 400',
         couponCode: editingPromo.couponCode || 'PROMO2026',
         expiresInDays: editingPromo.expiresInDays || 7,
-        treatmentId: editingPromo.treatmentId || 'botox',
+        treatmentId: editingPromo.treatmentId || (treatments.length > 0 ? treatments[0].id : 'botox'),
         active: editingPromo.active !== false,
       };
       onSavePromotions([newPromo, ...promotions]);
-      notify('Novo Banner Promocional criado!');
+      notify('Novo Banner Promocional criado com sucesso!');
     }
     setEditingPromo(null);
+  };
+
+  const handleTogglePromoActive = (id: string) => {
+    const updated = promotions.map((p) =>
+      p.id === id ? { ...p, active: p.active === false ? true : false } : p
+    );
+    onSavePromotions(updated);
+    notify('Status de exibição do banner alterado!');
   };
 
   const handleDeletePromo = (id: string) => {
@@ -455,6 +494,18 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
             <Calendar className="h-4 w-4" />
             <span>Agendamentos Recebidos ({bookings.length})</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('contact')}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'contact'
+                ? 'bg-rose-600 text-white shadow-sm'
+                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700'
+            }`}
+          >
+            <Phone className="h-4 w-4" />
+            <span>Contatos & Redes Sociais</span>
+          </button>
         </div>
 
         {/* Tab Contents Area */}
@@ -577,6 +628,222 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         placeholder="Ex: Rejuvenescimento, Estímulo de colágeno, Sem tempo de repouso"
                       />
                     </div>
+
+                    {/* Vídeo do Procedimento */}
+                    <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700">
+                      <label className="block text-xs font-bold mb-1 text-rose-700 dark:text-rose-400">
+                        URL do Vídeo do Procedimento (YouTube / Vimeo / MP4)
+                      </label>
+                      <input
+                        type="text"
+                        value={editingTreatment.videoUrl || ''}
+                        onChange={(e) => setEditingTreatment({ ...editingTreatment, videoUrl: e.target.value })}
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                        placeholder="Ex: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                      />
+                    </div>
+
+                    {/* Fotos Antes e Depois */}
+                    <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700">
+                      <span className="block text-xs font-bold mb-2 text-rose-700 dark:text-rose-400">
+                        Fotos Antes e Depois (Caso de Exemplo)
+                      </span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">URL Imagem ANTES</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.beforeAfterImages?.[0]?.before || ''}
+                            onChange={(e) => {
+                              const existing = [...(editingTreatment.beforeAfterImages || [])];
+                              if (!existing[0]) existing[0] = { before: '', after: '' };
+                              existing[0].before = e.target.value;
+                              setEditingTreatment({ ...editingTreatment, beforeAfterImages: existing });
+                            }}
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="https://..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">URL Imagem DEPOIS</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.beforeAfterImages?.[0]?.after || ''}
+                            onChange={(e) => {
+                              const existing = [...(editingTreatment.beforeAfterImages || [])];
+                              if (!existing[0]) existing[0] = { before: '', after: '' };
+                              existing[0].after = e.target.value;
+                              setEditingTreatment({ ...editingTreatment, beforeAfterImages: existing });
+                            }}
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ficha Técnica */}
+                    <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700 space-y-3">
+                      <span className="block text-xs font-bold text-rose-700 dark:text-rose-400">
+                        Ficha Técnica & Detalhes Médicos
+                      </span>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">Anestesia</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.technicalSpecs?.anesthesia || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                technicalSpecs: { ...(editingTreatment.technicalSpecs || {}), anesthesia: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: Anestésico Tópico em creme"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">Tempo de Recuperação</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.technicalSpecs?.recovery || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                technicalSpecs: { ...(editingTreatment.technicalSpecs || {}), recovery: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: Imediata (sem tempo de inatividade)"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">Visibilidade de Resultados</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.technicalSpecs?.resultsIn || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                technicalSpecs: { ...(editingTreatment.technicalSpecs || {}), resultsIn: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: Em 3 a 7 dias"
+                          />
+                        </div>
+
+                        <div className="md:col-span-3">
+                          <label className="block text-[11px] font-semibold mb-1">Indicado Para</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.technicalSpecs?.indicatedFor || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                technicalSpecs: { ...(editingTreatment.technicalSpecs || {}), indicatedFor: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: Rugas na testa, pés de galinha e rejuvenescimento facial"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dicas de Pós-Uso */}
+                    <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700">
+                      <label className="block text-xs font-bold mb-1 text-rose-700 dark:text-rose-400">
+                        Dicas de Pós-Uso / Cuidados Pós-Procedimento (1 por linha ou sep. por ponto e vírgula)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={editingTreatment.postCareTips?.join('\n') || ''}
+                        onChange={(e) =>
+                          setEditingTreatment({
+                            ...editingTreatment,
+                            postCareTips: e.target.value.split('\n').filter((t) => t.trim().length > 0),
+                          })
+                        }
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                        placeholder="Não massagear a área nas 48h;&#10;Usar protetor solar FPS 50+;&#10;Ingerir bastante água."
+                      />
+                    </div>
+
+                    {/* Profissional Executante */}
+                    <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700 space-y-3">
+                      <span className="block text-xs font-bold text-rose-700 dark:text-rose-400">
+                        Detalhes do Profissional que Executa
+                      </span>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">Nome do Profissional</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.specialist?.name || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                specialist: { ...(editingTreatment.specialist || { name: '', role: '' }), name: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: Dra. Amanda Rodrigues"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">Cargo / Especialidade</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.specialist?.role || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                specialist: { ...(editingTreatment.specialist || { name: '', role: '' }), role: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: Biomédica Esteta"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">Registro Profissional</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.specialist?.registration || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                specialist: { ...(editingTreatment.specialist || { name: '', role: '' }), registration: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: CRBM 34.892-SP"
+                          />
+                        </div>
+
+                        <div className="md:col-span-3">
+                          <label className="block text-[11px] font-semibold mb-1">Foto do Profissional (URL)</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.specialist?.avatar || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                specialist: { ...(editingTreatment.specialist || { name: '', role: '' }), avatar: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex gap-2 justify-end pt-2">
@@ -647,14 +914,20 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-serif text-xl font-bold">Banners de Promoção (Carrossel Hero)</h3>
-                  <p className="text-xs text-stone-500">Altere ofertas, cupons de desconto e validade</p>
+                  <p className="text-xs text-stone-500">Altere ofertas, cupons de desconto, vinculação a tratamentos e visibilidade no site</p>
                 </div>
                 <button
                   onClick={() =>
                     setEditingPromo({
-                      badge: 'OFERTA EXCLUSIVA',
-                      discount: '20% OFF',
+                      badge: 'OFERTA DESTAQUE DO MÊS',
+                      title: 'Nova Promoção de Estética',
+                      subtitle: 'Agende hoje mesmo e garanta descontos exclusivos em nossa clínica.',
+                      discount: '25% OFF',
+                      originalPrice: 'R$ 800',
+                      promoPrice: 'R$ 600',
+                      couponCode: 'ESTETICA25',
                       expiresInDays: 7,
+                      treatmentId: treatments.length > 0 ? treatments[0].id : 'botox',
                       active: true,
                     })
                   }
@@ -668,11 +941,21 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
               {editingPromo && (
                 <form
                   onSubmit={handleSavePromoSubmit}
-                  className="p-5 bg-rose-50/50 dark:bg-stone-800/80 rounded-2xl border border-rose-200 dark:border-stone-700 space-y-4"
+                  className="p-5 bg-rose-50/70 dark:bg-stone-800/90 rounded-2xl border border-rose-200 dark:border-stone-700 space-y-4 shadow-lg animate-fade-in"
                 >
-                  <h4 className="font-bold text-sm text-rose-700 dark:text-rose-400">
-                    {editingPromo.id ? 'Editar Banner Promocional' : 'Criar Novo Banner Promocional'}
-                  </h4>
+                  <div className="flex items-center justify-between pb-2 border-b border-rose-200 dark:border-stone-700">
+                    <h4 className="font-bold text-sm text-rose-700 dark:text-rose-400 flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      {editingPromo.id ? 'Editar Banner Promocional' : 'Criar Novo Banner Promocional'}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setEditingPromo(null)}
+                      className="p-1 rounded-lg hover:bg-rose-200 dark:hover:bg-stone-700 text-stone-500 text-xs"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -682,7 +965,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         required
                         value={editingPromo.badge || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, badge: e.target.value })}
-                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-medium"
                       />
                     </div>
 
@@ -694,18 +977,19 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         placeholder="Ex: 30% OFF ou R$ 300 OFF"
                         value={editingPromo.discount || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, discount: e.target.value })}
-                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-medium"
                       />
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold mb-1">Título da Promoção</label>
+                      <label className="block text-xs font-bold mb-1">Título da Promoção *</label>
                       <input
                         type="text"
                         required
+                        placeholder="Ex: Combo Brilho & Rejuvenescimento"
                         value={editingPromo.title || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, title: e.target.value })}
-                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-semibold"
                       />
                     </div>
 
@@ -713,6 +997,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <label className="block text-xs font-bold mb-1">Subtítulo / Descrição da Oferta</label>
                       <input
                         type="text"
+                        placeholder="Ex: Botox 3 áreas + Peeling de Diamante para uma pele renovada."
                         value={editingPromo.subtitle || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, subtitle: e.target.value })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
@@ -720,9 +1005,10 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1">Preço Original</label>
+                      <label className="block text-xs font-bold mb-1">Preço Original (De)</label>
                       <input
                         type="text"
+                        placeholder="Ex: R$ 1.200"
                         value={editingPromo.originalPrice || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, originalPrice: e.target.value })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
@@ -730,12 +1016,13 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1">Preço Promocional</label>
+                      <label className="block text-xs font-bold mb-1">Preço Promocional (Por)</label>
                       <input
                         type="text"
+                        placeholder="Ex: R$ 840"
                         value={editingPromo.promoPrice || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, promoPrice: e.target.value })}
-                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-bold text-rose-600"
                       />
                     </div>
 
@@ -743,9 +1030,10 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <label className="block text-xs font-bold mb-1">Código do Cupom</label>
                       <input
                         type="text"
+                        placeholder="ESTETICA30"
                         value={editingPromo.couponCode || ''}
-                        onChange={(e) => setEditingPromo({ ...editingPromo, couponCode: e.target.value })}
-                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl uppercase font-mono"
+                        onChange={(e) => setEditingPromo({ ...editingPromo, couponCode: e.target.value.toUpperCase() })}
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl uppercase font-mono tracking-wider font-bold"
                       />
                     </div>
 
@@ -753,10 +1041,64 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <label className="block text-xs font-bold mb-1">Validade (em dias)</label>
                       <input
                         type="number"
-                        value={editingPromo.expiresInDays || 5}
-                        onChange={(e) => setEditingPromo({ ...editingPromo, expiresInDays: parseInt(e.target.value) })}
+                        min="1"
+                        max="90"
+                        value={editingPromo.expiresInDays || 7}
+                        onChange={(e) => setEditingPromo({ ...editingPromo, expiresInDays: parseInt(e.target.value) || 1 })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Vincular ao Tratamento do Catálogo</label>
+                      <select
+                        value={editingPromo.treatmentId || ''}
+                        onChange={(e) => setEditingPromo({ ...editingPromo, treatmentId: e.target.value })}
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                      >
+                        <option value="">Nenhum (Agendamento Geral)</option>
+                        {treatments.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name} ({t.category})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-4">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingPromo.active !== false}
+                          onChange={(e) => setEditingPromo({ ...editingPromo, active: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer dark:bg-stone-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:after:border-stone-600 peer-checked:bg-rose-600"></div>
+                      </label>
+                      <span className="text-xs font-bold">
+                        {editingPromo.active !== false ? 'Banner Ativo no Carrossel Hero' : 'Banner Oculto / Rascunho'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Preview */}
+                  <div className="pt-2 border-t border-rose-200 dark:border-stone-700">
+                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-2">Pré-visualização do Banner:</span>
+                    <div className="p-4 bg-gradient-to-r from-rose-100/80 via-amber-50 to-white rounded-2xl border border-rose-300/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                            {editingPromo.badge || 'PROMOÇÃO'}
+                          </span>
+                          <span className="text-xs font-extrabold text-rose-700">{editingPromo.discount || '20% OFF'}</span>
+                        </div>
+                        <h5 className="font-bold text-sm text-stone-900">{editingPromo.title || 'Título da Promoção'}</h5>
+                        <p className="text-xs text-stone-600">{editingPromo.subtitle || 'Subtítulo da oferta'}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="line-through text-xs text-stone-400 block">{editingPromo.originalPrice || 'R$ 0'}</span>
+                        <span className="font-extrabold text-sm text-rose-600">{editingPromo.promoPrice || 'R$ 0'}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -764,13 +1106,13 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                     <button
                       type="button"
                       onClick={() => setEditingPromo(null)}
-                      className="px-4 py-2 text-xs font-bold bg-stone-200 dark:bg-stone-700 rounded-xl cursor-pointer"
+                      className="px-4 py-2 text-xs font-bold bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-xl cursor-pointer hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2 text-xs font-bold bg-rose-600 text-white rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+                      className="px-5 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 transition-all active:scale-95"
                     >
                       <Save className="h-3.5 w-3.5" />
                       <span>Salvar Banner</span>
@@ -783,27 +1125,52 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                 {promotions.map((p) => (
                   <div
                     key={p.id}
-                    className="p-5 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                    className={`p-5 rounded-2xl border transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+                      p.active !== false
+                        ? 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700'
+                        : 'bg-stone-100/50 dark:bg-stone-900/40 border-stone-200/50 dark:border-stone-800 opacity-60'
+                    }`}
                   >
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-stone-900 px-2 py-0.5 rounded-md">
                           {p.badge}
                         </span>
                         <span className="text-xs font-extrabold text-rose-600">{p.discount}</span>
-                        <span className="text-xs text-stone-400 font-mono bg-stone-200 dark:bg-stone-700 px-2 py-0.5 rounded">
+                        <span className="text-xs text-stone-500 font-mono bg-stone-200 dark:bg-stone-700 px-2 py-0.5 rounded">
                           Cupom: {p.couponCode}
                         </span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            p.active !== false
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                              : 'bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-300'
+                          }`}
+                        >
+                          {p.active !== false ? 'Ativo no Site' : 'Oculto'}
+                        </span>
                       </div>
-                      <h4 className="font-bold text-base">{p.title}</h4>
+                      <h4 className="font-bold text-base text-stone-900 dark:text-stone-100">{p.title}</h4>
                       <p className="text-xs text-stone-500">{p.subtitle}</p>
                       <div className="text-xs space-x-2 pt-1">
                         <span className="line-through text-stone-400">{p.originalPrice}</span>
                         <span className="text-rose-600 font-bold">{p.promoPrice}</span>
+                        <span className="text-stone-400 font-medium">({p.expiresInDays} dias de validade)</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handleTogglePromoActive(p.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                          p.active !== false
+                            ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-300'
+                            : 'bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-200'
+                        }`}
+                        title={p.active !== false ? 'Ocultar do Carrossel' : 'Exibir no Carrossel'}
+                      >
+                        {p.active !== false ? 'Ativo' : 'Oculto'}
+                      </button>
                       <button
                         onClick={() => setEditingPromo(p)}
                         className="p-2 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-xl transition-colors cursor-pointer"
@@ -1189,6 +1556,240 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ================= CONTACT TAB ================= */}
+          {activeTab === 'contact' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-serif text-xl font-bold">Informações de Contato e Redes Sociais</h3>
+                <p className="text-xs text-stone-500">
+                  Altere telefone, WhatsApp, e-mail, endereço e links de redes sociais exibidos no site
+                </p>
+              </div>
+
+              <form onSubmit={handleSaveContactSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Form Fields Column */}
+                <div className="lg:col-span-7 bg-stone-50 dark:bg-stone-800/50 p-6 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-4">
+                  <h4 className="font-bold text-sm text-rose-600 dark:text-rose-400 flex items-center gap-2 pb-2 border-b border-stone-200 dark:border-stone-700">
+                    <Phone className="h-4 w-4" />
+                    Telefones e Atendimento
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300">
+                        Telefone Fixo / Exibição
+                      </label>
+                      <input
+                        type="text"
+                        value={contactForm.phonePrimary}
+                        onChange={(e) => setContactForm({ ...contactForm, phonePrimary: e.target.value })}
+                        placeholder="(11) 3051-2433 / (11) 3052-1400"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300">
+                        Número do WhatsApp (link wa.me)
+                      </label>
+                      <input
+                        type="text"
+                        value={contactForm.whatsappNumber}
+                        onChange={(e) => setContactForm({ ...contactForm, whatsappNumber: e.target.value })}
+                        placeholder="551130512433"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none font-mono dark:text-white"
+                        required
+                      />
+                      <span className="text-[10px] text-stone-400 block mt-0.5">Apenas números com DDD e país (ex: 551130512433)</span>
+                    </div>
+                  </div>
+
+                  <h4 className="font-bold text-sm text-rose-600 dark:text-rose-400 flex items-center gap-2 pt-2 pb-2 border-b border-stone-200 dark:border-stone-700">
+                    <Mail className="h-4 w-4" />
+                    E-mail Oficial
+                  </h4>
+
+                  <div>
+                    <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300">
+                      Endereço de E-mail
+                    </label>
+                    <input
+                      type="email"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                      placeholder="contatocentraldaestetica@gmail.com"
+                      className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
+                      required
+                    />
+                  </div>
+
+                  <h4 className="font-bold text-sm text-rose-600 dark:text-rose-400 flex items-center gap-2 pt-2 pb-2 border-b border-stone-200 dark:border-stone-700">
+                    <MapPin className="h-4 w-4" />
+                    Endereço Físico
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300">
+                        Rua e Número (Linha 1)
+                      </label>
+                      <input
+                        type="text"
+                        value={contactForm.addressLine1}
+                        onChange={(e) => setContactForm({ ...contactForm, addressLine1: e.target.value })}
+                        placeholder="Rua Artur Frazão, 33"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300">
+                          Bairro, Cidade e Estado (Linha 2)
+                        </label>
+                        <input
+                          type="text"
+                          value={contactForm.addressLine2}
+                          onChange={(e) => setContactForm({ ...contactForm, addressLine2: e.target.value })}
+                          placeholder="Jardim Paulista, São Paulo - SP"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300">
+                          CEP
+                        </label>
+                        <input
+                          type="text"
+                          value={contactForm.cep}
+                          onChange={(e) => setContactForm({ ...contactForm, cep: e.target.value })}
+                          placeholder="01423-030"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <h4 className="font-bold text-sm text-rose-600 dark:text-rose-400 flex items-center gap-2 pt-2 pb-2 border-b border-stone-200 dark:border-stone-700">
+                    <Share2 className="h-4 w-4" />
+                    Redes Sociais
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                        <Instagram className="h-3.5 w-3.5 text-pink-600" />
+                        URL do Instagram
+                      </label>
+                      <input
+                        type="url"
+                        value={contactForm.instagramUrl}
+                        onChange={(e) => setContactForm({ ...contactForm, instagramUrl: e.target.value })}
+                        placeholder="https://instagram.com/centraldaesteticasp"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1 text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                        <Facebook className="h-3.5 w-3.5 text-blue-600" />
+                        URL do Facebook
+                      </label>
+                      <input
+                        type="url"
+                        value={contactForm.facebookUrl}
+                        onChange={(e) => setContactForm({ ...contactForm, facebookUrl: e.target.value })}
+                        placeholder="https://facebook.com/CENTRALDAESTETICASP"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm py-3 rounded-xl transition-all cursor-pointer shadow-md flex items-center justify-center gap-2 active:scale-98"
+                    >
+                      <Save className="h-4 w-4" />
+                      <span>Salvar Informações de Contato</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live Preview Box */}
+                <div className="lg:col-span-5 space-y-4">
+                  <div className="p-5 bg-stone-900 text-stone-200 rounded-2xl border border-stone-800 space-y-4 shadow-lg sticky top-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-stone-800 text-rose-400 font-serif font-bold text-sm">
+                      <Eye className="h-4 w-4" />
+                      <span>Pré-visualização no Rodapé</span>
+                    </div>
+
+                    <div className="space-y-3 text-xs leading-relaxed">
+                      <div>
+                        <span className="text-[10px] text-stone-500 uppercase tracking-wider block mb-1 font-bold">Endereço</span>
+                        <div className="flex items-start gap-2 text-stone-300">
+                          <MapPin className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                          <div>
+                            <p>{contactForm.addressLine1 || 'Rua...'}</p>
+                            <p>{contactForm.addressLine2 || 'Bairro/Cidade'}</p>
+                            <p>CEP {contactForm.cep || '00000-000'}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-stone-800">
+                        <span className="text-[10px] text-stone-500 uppercase tracking-wider block mb-1 font-bold">Telefone</span>
+                        <div className="flex items-center gap-2 font-bold text-rose-400">
+                          <Phone className="h-4 w-4 shrink-0" />
+                          <span>{contactForm.phonePrimary || '(00) 0000-0000'}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-stone-800">
+                        <span className="text-[10px] text-stone-500 uppercase tracking-wider block mb-1 font-bold">E-mail</span>
+                        <div className="flex items-center gap-2 text-stone-300">
+                          <Mail className="h-4 w-4 text-rose-500 shrink-0" />
+                          <span>{contactForm.email || 'contato@clinica.com'}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-stone-800">
+                        <span className="text-[10px] text-stone-500 uppercase tracking-wider block mb-2 font-bold">Botão Flutuante do WhatsApp</span>
+                        <div className="inline-flex items-center gap-2 bg-[#25D366] text-white px-4 py-2 rounded-full font-bold text-xs shadow-md">
+                          <MessageCircle className="h-4 w-4" />
+                          <span>Mensagem (wa.me/{contactForm.whatsappNumber.replace(/\D/g, '') || '55...'})</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-stone-800">
+                        <span className="text-[10px] text-stone-500 uppercase tracking-wider block mb-2 font-bold">Redes Sociais</span>
+                        <div className="flex items-center gap-3">
+                          {contactForm.instagramUrl && (
+                            <div className="w-8 h-8 rounded-full border border-stone-700 flex items-center justify-center text-rose-400">
+                              <Instagram className="h-4 w-4" />
+                            </div>
+                          )}
+                          {contactForm.facebookUrl && (
+                            <div className="w-8 h-8 rounded-full border border-stone-700 flex items-center justify-center text-rose-400">
+                              <Facebook className="h-4 w-4" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest } from '../types';
+import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -18,55 +18,184 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured()
 
 export async function fetchTreatmentsFromSupabase(): Promise<Treatment[] | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase
-    .from('treatments')
-    .select('*')
-    .order('name');
-  if (error) {
-    console.error('Error fetching treatments from Supabase:', error);
+  try {
+    const { data, error } = await supabase
+      .from('treatments')
+      .select('*')
+      .order('name');
+    if (error) {
+      console.warn('Notice: Error fetching treatments from Supabase:', error.message);
+      return null;
+    }
+    if (!data) return [];
+
+    return data.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      category: row.category,
+      popular: row.popular ?? false,
+      highlight: row.highlight ?? false,
+      duration: row.duration,
+      price: row.price,
+      image: row.image,
+      benefits: Array.isArray(row.benefits) ? row.benefits : [],
+      beforeAfterImages: row.before_after_images || row.beforeAfterImages || [],
+      videoUrl: row.video_url || row.videoUrl || '',
+      technicalSpecs: row.technical_specs || row.technicalSpecs || {},
+      postCareTips: Array.isArray(row.post_care_tips) ? row.post_care_tips : (Array.isArray(row.postCareTips) ? row.postCareTips : []),
+      specialist: row.specialist || null,
+    }));
+  } catch (err) {
+    console.warn('Notice: Exception fetching treatments from Supabase:', err);
     return null;
   }
-  return data as Treatment[];
 }
 
 export async function createTreatmentInSupabase(treatment: Treatment): Promise<Treatment | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase
-    .from('treatments')
-    .insert([treatment])
-    .select()
-    .single();
-  if (error) {
-    console.error('Error creating treatment in Supabase:', error);
+  try {
+    const dbRow = {
+      id: treatment.id,
+      name: treatment.name,
+      description: treatment.description,
+      category: treatment.category,
+      popular: treatment.popular || false,
+      highlight: treatment.highlight || false,
+      duration: treatment.duration || '',
+      price: treatment.price || '',
+      image: treatment.image || '',
+      benefits: treatment.benefits || [],
+      before_after_images: treatment.beforeAfterImages || [],
+      video_url: treatment.videoUrl || '',
+      technical_specs: treatment.technicalSpecs || {},
+      post_care_tips: treatment.postCareTips || [],
+      specialist: treatment.specialist || null,
+    };
+
+    const { data, error } = await supabase
+      .from('treatments')
+      .insert([dbRow])
+      .select()
+      .single();
+
+    if (error) {
+      console.warn('Notice: Error creating treatment in Supabase:', error.message);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      popular: data.popular,
+      highlight: data.highlight,
+      duration: data.duration,
+      price: data.price,
+      image: data.image,
+      benefits: data.benefits,
+      beforeAfterImages: data.before_after_images || [],
+      videoUrl: data.video_url || '',
+      technicalSpecs: data.technical_specs || {},
+      postCareTips: data.post_care_tips || [],
+      specialist: data.specialist || null,
+    };
+  } catch (err) {
+    console.warn('Notice: Exception creating treatment in Supabase:', err);
     return null;
   }
-  return data as Treatment;
 }
 
 export async function updateTreatmentInSupabase(id: string, updates: Partial<Treatment>): Promise<boolean> {
   if (!supabase) return false;
-  const { error } = await supabase
-    .from('treatments')
-    .update(updates)
-    .eq('id', id);
-  if (error) {
-    console.error('Error updating treatment in Supabase:', error);
+  try {
+    const dbRow: Record<string, unknown> = {};
+    if (updates.name !== undefined) dbRow.name = updates.name;
+    if (updates.description !== undefined) dbRow.description = updates.description;
+    if (updates.category !== undefined) dbRow.category = updates.category;
+    if (updates.popular !== undefined) dbRow.popular = updates.popular;
+    if (updates.highlight !== undefined) dbRow.highlight = updates.highlight;
+    if (updates.duration !== undefined) dbRow.duration = updates.duration;
+    if (updates.price !== undefined) dbRow.price = updates.price;
+    if (updates.image !== undefined) dbRow.image = updates.image;
+    if (updates.benefits !== undefined) dbRow.benefits = updates.benefits;
+    if (updates.beforeAfterImages !== undefined) dbRow.before_after_images = updates.beforeAfterImages;
+    if (updates.videoUrl !== undefined) dbRow.video_url = updates.videoUrl;
+    if (updates.technicalSpecs !== undefined) dbRow.technical_specs = updates.technicalSpecs;
+    if (updates.postCareTips !== undefined) dbRow.post_care_tips = updates.postCareTips;
+    if (updates.specialist !== undefined) dbRow.specialist = updates.specialist;
+
+    const { error } = await supabase
+      .from('treatments')
+      .update(dbRow)
+      .eq('id', id);
+
+    if (error) {
+      console.warn('Notice: Error updating treatment in Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception updating treatment in Supabase:', err);
     return false;
   }
-  return true;
+}
+
+export async function saveTreatmentToSupabase(treatment: Treatment): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const dbRow = {
+      id: treatment.id,
+      name: treatment.name,
+      description: treatment.description,
+      category: treatment.category,
+      popular: treatment.popular || false,
+      highlight: treatment.highlight || false,
+      duration: treatment.duration || '',
+      price: treatment.price || '',
+      image: treatment.image || '',
+      benefits: treatment.benefits || [],
+      before_after_images: treatment.beforeAfterImages || [],
+      video_url: treatment.videoUrl || '',
+      technical_specs: treatment.technicalSpecs || {},
+      post_care_tips: treatment.postCareTips || [],
+      specialist: treatment.specialist || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from('treatments')
+      .upsert(dbRow, { onConflict: 'id' });
+
+    if (error) {
+      console.warn('Notice: Error saving/upserting treatment in Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception saving treatment to Supabase:', err);
+    return false;
+  }
 }
 
 export async function deleteTreatmentInSupabase(id: string): Promise<boolean> {
   if (!supabase) return false;
-  const { error } = await supabase
-    .from('treatments')
-    .delete()
-    .eq('id', id);
-  if (error) {
-    console.error('Error deleting treatment from Supabase:', error);
+  try {
+    const { error } = await supabase
+      .from('treatments')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.warn('Notice: Error deleting treatment from Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception deleting treatment from Supabase:', err);
     return false;
   }
-  return true;
 }
 
 // ==========================================
@@ -468,4 +597,71 @@ export async function deleteBookingInSupabase(id: string): Promise<boolean> {
     return false;
   }
   return true;
+}
+
+// ==========================================
+// 6. CONTACT INFO / SITE SETTINGS CRUD
+// ==========================================
+
+export async function fetchContactInfoFromSupabase(): Promise<ContactInfo | null> {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('*')
+      .eq('id', 'default')
+      .maybeSingle();
+
+    if (error || !data) {
+      if (error) {
+        console.warn('Notice: site_settings table not available or uninitialized in Supabase, using local storage:', error.message);
+      }
+      return null;
+    }
+
+    return {
+      phonePrimary: data.phone_primary,
+      whatsappNumber: data.whatsapp_number,
+      email: data.email,
+      addressLine1: data.address_line1,
+      addressLine2: data.address_line2,
+      cep: data.cep,
+      instagramUrl: data.instagram_url,
+      facebookUrl: data.facebook_url,
+    };
+  } catch (err) {
+    console.warn('Notice: Exception fetching site_settings from Supabase:', err);
+    return null;
+  }
+}
+
+export async function saveContactInfoToSupabase(info: ContactInfo): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const dbRow = {
+      id: 'default',
+      phone_primary: info.phonePrimary,
+      whatsapp_number: info.whatsappNumber,
+      email: info.email,
+      address_line1: info.addressLine1,
+      address_line2: info.addressLine2,
+      cep: info.cep,
+      instagram_url: info.instagramUrl,
+      facebook_url: info.facebookUrl,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert(dbRow, { onConflict: 'id' });
+
+    if (error) {
+      console.warn('Notice: Could not save site_settings to Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception saving site_settings to Supabase:', err);
+    return false;
+  }
 }
