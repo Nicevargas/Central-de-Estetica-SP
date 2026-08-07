@@ -30,7 +30,7 @@ export interface Treatment {
   id: string;
   name: string;
   description: string;
-  category: 'facial' | 'corporal' | 'bem-estar';
+  category: 'facial' | 'corporal' | 'capilar' | 'bem-estar';
   popular?: boolean;
   highlight?: boolean;
   duration?: string;

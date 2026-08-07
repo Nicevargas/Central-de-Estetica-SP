@@ -23,8 +23,8 @@ import {
 } from './supabase';
 
 const STORAGE_KEYS = {
-  TREATMENTS: 'estetica_treatments_v1',
-  PROMOTIONS: 'estetica_promotions_v1',
+  TREATMENTS: 'estetica_treatments_v3',
+  PROMOTIONS: 'estetica_promotions_v2',
   TESTIMONIALS: 'estetica_testimonials_v1',
   BLOG_POSTS: 'estetica_blog_posts_v1',
   BOOKINGS: 'estetica_bookings_v1',
@@ -55,7 +55,13 @@ function saveToStorage<T>(key: string, value: T): void {
 // Treatments
 // =============================
 export function getStoredTreatments(): Treatment[] {
-  return loadFromStorage<Treatment[]>(STORAGE_KEYS.TREATMENTS, TREATMENTS);
+  const stored = loadFromStorage<Treatment[]>(STORAGE_KEYS.TREATMENTS, TREATMENTS);
+  const oldIds = ['limpeza-de-pele', 'ultraformer-iii', 'lipo-enzimatica', 'criofrequencia', 'velashape', 'massagem-relaxante', 'massagem-modeladora', 'botox'];
+  if (!stored || stored.length === 0 || !stored.some((t) => t.id === 'secagem-vasinhos') || stored.some((t) => oldIds.includes(t.id))) {
+    saveStoredTreatments(TREATMENTS);
+    return TREATMENTS;
+  }
+  return stored;
 }
 
 export function saveStoredTreatments(treatments: Treatment[]): void {

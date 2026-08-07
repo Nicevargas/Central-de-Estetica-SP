@@ -14,297 +14,406 @@ export const DEFAULT_CONTACT_INFO: ContactInfo = {
 
 export const TREATMENTS: Treatment[] = [
   {
-    id: 'botox',
-    name: 'Botox (Toxina Botulínica)',
-    description: 'Suavize linhas de expressão na testa, pés de galinha e glabela com prevenção do envelhecimento precoce e resultados elegantes e naturais.',
-    category: 'facial',
+    id: 'secagem-vasinhos',
+    name: 'Secagem de Vasinhos (Laser & PEIM Injetável)',
+    description: 'O nosso protocolo exclusivo associa laser específico para vasos e aplicações injetáveis (PEIM) para a desobstrução, esclerose e cauterização efetiva de vasos e microvarizes.',
+    category: 'corporal',
     popular: true,
-    benefits: ['Prevenção de rugas profundas', 'Elevação harmônica das sobrancelhas', 'Resultados naturais e sem efeito congelado', 'Procedimento rápido sem necessidade de repouso'],
-    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 980,00',
-    duration: '30 min',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    beforeAfterImages: [
-      {
-        before: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80',
-        after: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
-        label: 'Linhas de expressão na testa e glabela (30 dias após)'
-      },
-      {
-        before: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
-        after: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80',
-        label: 'Suavização periocular / Pés de galinha'
-      }
+    highlight: true,
+    benefits: [
+      'Procedimento campeão de atração e satisfação dos clientes',
+      'Associação de Laser vascular de alta precisão e aplicação injetável (PEIM)',
+      'Desobstrução, cauterização e clareamento rápido dos vasinhos nas pernas',
+      'Resultados visíveis sem necessidade de repouso ou cirurgia'
     ],
-    technicalSpecs: {
-      duration: '30 a 45 minutos',
-      anesthesia: 'Anestésico tópico de alta potência',
-      recovery: 'Imediata (sem tempo de inatividade)',
-      indicatedFor: 'Rugas dinâmicas na testa, glabela, pés de galinha e prevenção do envelhecimento',
-      resultsIn: 'Início em 3 a 5 dias, resultado final em 14 dias',
-      sessionsRequired: '1 sessão a cada 4 a 6 meses'
-    },
-    postCareTips: [
-      'Não deitar ou abaixar a cabeça por 4 horas após a aplicação.',
-      'Evitar praticar atividades físicas intensas nas primeiras 24 horas.',
-      'Não massagear ou pressionar as áreas aplicadas durante 48 horas.',
-      'Usar protetor solar FPS 50+ diariamente e evitar exposição solar direta.'
-    ],
-    specialist: {
-      name: 'Dra. Amanda Rodrigues',
-      role: 'Biomédica Esteta & Especialista em Harmonização Facial',
-      registration: 'CRBM 34.892-SP',
-      bio: 'Mais de 10 anos de experiência em procedimentos injetáveis e rejuvenescimento facial natural.',
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80'
-    }
-  },
-  {
-    id: 'limpeza-de-pele',
-    name: 'Limpeza de Pele Profunda',
-    description: 'Remoção de impurezas, cravos e renovação celular com vapor de ozônio, extração manual cuidadosa e fototerapia LED.',
-    category: 'facial',
-    benefits: ['Controle efetivo da oleosidade', 'Desobstrução e afinamento dos poros', 'Extração profissional asséptica sem cicatrizes', 'Aumento imediato do viço e luminosidade'],
-    image: 'https://images.unsplash.com/photo-1512290900676-26c2a48f4134?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 150,00',
-    duration: '60 min',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    beforeAfterImages: [
-      {
-        before: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
-        after: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
-        label: 'Extração de cravos e desobstrução de poros'
-      }
-    ],
-    technicalSpecs: {
-      duration: '60 a 75 minutos',
-      anesthesia: 'Não necessária (Creme amolecedor térmico)',
-      recovery: '1 a 2 dias (leve vermelhidão transitória)',
-      indicatedFor: 'Todos os tipos de pele, em especial oleosas e acneicas',
-      resultsIn: 'Imediato (pele limpa e viçosa)',
-      sessionsRequired: 'Manutenção mensal recomendada'
-    },
-    postCareTips: [
-      'Não utilizar maquiagem pesada nas 12 horas seguintes ao procedimento.',
-      'Usar protetor solar físico com FPS 50+ e reaplicar a cada 3 horas.',
-      'Evitar o uso de ácidos ou esfoliantes por pelo menos 5 dias.',
-      'Manter a pele higienizada com sabonete neutro indicado pela especialista.'
-    ],
-    specialist: {
-      name: 'Carla Silveira',
-      role: 'Esteticista Cosmetóloga Sênior',
-      registration: 'EST-SP 12.450',
-      bio: 'Especialista em tratamentos dermocosméticos, peelings e restauração da barreira cutânea.',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
-    }
-  },
-  {
-    id: 'ultraformer-iii',
-    name: 'Ultraformer III',
-    description: 'Lifting facial sem cortes através de ultrassom micro e macrofocado para combate à flacidez, papada e definição do contorno mandíbula.',
-    category: 'facial',
-    benefits: ['Estímulo de colágeno profundo no SMAS', 'Efeito bichectomia-like e afinamento facial', 'Melhora imediata com evolução contínua por 3 meses', 'Sem cortes, agujas ou tempo de afastamento'],
-    image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 1.800,00',
+    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=800&q=80',
+    price: 'A partir de R$ 380,00',
     duration: '45 min',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     beforeAfterImages: [
       {
         before: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80',
         after: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
-        label: 'Definição do contorno mandibular e redução de papada'
+        label: 'Eliminação de microvasos e vasinhos aparentes nas pernas'
       }
     ],
     technicalSpecs: {
       duration: '45 a 60 minutos',
-      anesthesia: 'Anestésico tópico em creme',
-      recovery: 'Retorno imediato às atividades normais',
-      indicatedFor: 'Flacidez facial, perda de contorno, papada e código de barras',
-      resultsIn: '20% imediato e 100% do pico em 90 dias',
-      sessionsRequired: '1 a 2 sessões anuais'
+      anesthesia: 'Resfriamento cutâneo em tempo real e gel anestésico tópico',
+      recovery: 'Retorno imediato às atividades diárias',
+      indicatedFor: 'Telangiectasias, vasinhos aparentes, microvarizes nas pernas e coxas',
+      resultsIn: 'Resultados visíveis desde as primeiras sessões',
+      sessionsRequired: '3 a 5 sessões (intervalo de 15 a 30 dias)'
     },
     postCareTips: [
-      'Higienizar a pele com água morna e sabonete suave.',
-      'Consumir suplementação de colágeno e vitamina C conforme orientação.',
-      'Evitar banhos excessivamente quentes no dia da aplicação.',
-      'Utilizar filtro solar FPS 50+ todos os dias.'
+      'Evitar exposição direta ao sol na região tratada por 14 dias.',
+      'Usar protetor solar corporal diariamente.',
+      'Utilizar meias de compressão suave se recomendado pela especialista.',
+      'Evitar banhos quentes ou saunas nas primeiras 48 horas.'
     ],
     specialist: {
       name: 'Dra. Amanda Rodrigues',
-      role: 'Biomédica Esteta & Especialista em Tecnologias Médicas',
+      role: 'Biomédica Esteta & Especialista Vascular Estética',
       registration: 'CRBM 34.892-SP',
-      bio: 'Especialista certificada em plataformas de ultrassom microfocado e radiofrequência médica.',
+      bio: 'Especialista no tratamento combinado de telangiectasias com laser vascular e PEIM de alta performance.',
       avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80'
     }
   },
   {
-    id: 'lipo-enzimatica',
-    name: 'Lipo Enzimática',
-    description: 'Combata a gordura localizada de forma minimamente invasiva com aplicação direcionada de mesclas enzimáticas lipolíticas altamente concentradas.',
-    category: 'corporal',
-    highlight: true,
-    benefits: ['Redução expressiva de medidas na área tratada', 'Ação direta no tecido adiposo sem cirurgia', 'Combinação de enzimas para quebra e eliminação de gordura', 'Procedimento rápido e seguro'],
-    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 350,00 por sessão',
+    id: 'botox-dysport',
+    name: 'Botox & Dysport (Toxina Botulínica)',
+    description: 'Prevenção e suavização de linhas de expressão na testa, pés de galinha, glabela e arquear das sobrancelhas com Dysport e Botox de extrema pureza e acabamento natural.',
+    category: 'facial',
+    popular: true,
+    benefits: [
+      'Toxina Botulínica de alta precisão (Dysport / Botox)',
+      'Prevenção de rugas profundas e alívio do aspecto cansado',
+      'Elevação harmônica do olhar sem efeito congelado',
+      'Procedimento rápido de 30 minutos sem afastamento'
+    ],
+    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
+    price: 'A partir de R$ 980,00',
     duration: '30 min',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    beforeAfterImages: [
-      {
-        before: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&w=600&q=80',
-        after: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80',
-        label: 'Redução de gordura infra-abdominal após 4 sessões'
-      }
-    ],
     technicalSpecs: {
       duration: '30 minutos',
-      anesthesia: 'Anestésico local integrado na aplicação',
-      recovery: 'Retorno imediato (sensibilidade leve por 24-48h)',
-      indicatedFor: 'Gordura localizada no abdômen, flancos, culotes e braços',
-      resultsIn: 'Visíveis a partir da 2ª ou 3ª sessão',
-      sessionsRequired: 'Recomendado protocolo de 4 a 6 sessões'
+      anesthesia: 'Anestésico tópico de alta eficácia',
+      recovery: 'Imediata (sem tempo de repouso)',
+      indicatedFor: 'Rugas dinâmicas na testa, glabela, pés de galinha e arquear do olhar',
+      resultsIn: 'Início de ação em 3 a 5 dias, pico aos 14 dias',
+      sessionsRequired: '1 aplicação a cada 4 a 6 meses'
     },
     postCareTips: [
-      'Ingerir no mínimo 2 a 3 litros de água por dia para auxiliar na eliminação das toxinas.',
-      'Realizar drenagem linfática 48h após a aplicação.',
-      'Evitar ingestão de bebidas alcoólicas e alimentos ultraprocessados nas 48h seguintes.',
-      'Utilizar cinta modeladora caso seja indicado pelo profissional.'
+      'Não deitar ou abaixar a cabeça por 4 horas após a aplicação.',
+      'Evitar atividades físicas intensas por 24 horas.',
+      'Não massagear a região tratada nas primeiras 48 horas.'
+    ],
+    specialist: {
+      name: 'Dra. Amanda Rodrigues',
+      role: 'Biomédica Esteta',
+      registration: 'CRBM 34.892-SP',
+      bio: 'Especialista em aplicação estratégica de toxina botulínica para rejuvenescimento natural.',
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80'
+    }
+  },
+  {
+    id: 'radiesse-sculptra',
+    name: 'Radiesse & Sculptra (Bioestimuladores Injetáveis de Alta Performance)',
+    description: 'Bioestimuladores de colágeno à base de Hidroxiapatita de Cálcio (Radiesse) e Ácido Poli-L-Láctico (Sculptra) para firmeza, densidade e sustentação profunda da pele.',
+    category: 'facial',
+    highlight: true,
+    benefits: [
+      'Estímulo contínuo de colágeno pelo próprio organismo',
+      'Combate efetivo da flacidez facial, pescoço e corporal',
+      'Efeito firmeza e melhora da qualidade da pele por até 2 anos',
+      'Bioestruturação sem alterar os traços originais da face'
+    ],
+    image: 'https://images.unsplash.com/photo-1512290900676-26c2a48f4134?auto=format&fit=crop&w=800&q=80',
+    price: 'A partir de R$ 1.950,00',
+    duration: '45 min',
+    technicalSpecs: {
+      duration: '45 a 60 minutos',
+      anesthesia: 'Anestésico local com lidocaína integrada',
+      recovery: 'Tranquila (pequenos pontos de aplicação)',
+      indicatedFor: 'Flacidez facial, perda de firmeza no pescoço, colo, braços e glúteos',
+      resultsIn: 'Aparecimento progressivo a partir de 30 dias (pico aos 90 dias)',
+      sessionsRequired: '1 a 3 sessões (conforme grau de flacidez)'
+    },
+    postCareTips: [
+      'Realizar a massagem "5x5" (5 minutos, 5 vezes ao dia, por 5 dias) se Sculptra.',
+      'Usar protetor solar diariamente.',
+      'Manter boa ingestão de água e suplementação de vitamina C.'
     ],
     specialist: {
       name: 'Dr. Lucas Mendes',
-      role: 'Farmacêutico Esteta & Especialista em Injetáveis Corporais',
+      role: 'Farmacêutico Esteta & Especialista em Injetáveis',
       registration: 'CRF 58.102-SP',
-      bio: 'Especialista em farmacologia aplicada à estética corporal e mesoterapia de alta performance.',
+      bio: 'Especialista em remodelação dérmica e vetorização com bioestimuladores de colágeno.',
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80'
     }
   },
   {
-    id: 'criofrequencia',
-    name: 'Criofrequência',
-    description: 'Terapia avançada que combina o choque térmico do frio externo (-10°C) com o calor interno para combater a flacidez e destruir células de gordura.',
-    category: 'corporal',
-    benefits: ['Tratamento duplo de flacidez e gordura simultaneamente', 'Redução visível de celulite e melhora da textura', 'Contração imediata das fibras de colágeno', 'Confortável e indolor devido ao resfriamento'],
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 290,00 por sessão',
-    duration: '40 min',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    beforeAfterImages: [
-      {
-        before: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80',
-        after: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=600&q=80',
-        label: 'Firmeza tissular nas coxas e glúteos'
-      }
+    id: 'laser-lavieen',
+    name: 'Laser Lavieén (Tecnologia BB Laser)',
+    description: 'Tecnologia de Laser Thulium não ablativo que proporciona o famoso "Efeito BB Cream": clareamento de manchas, viço extremo, uniformização de tom e fechamento de poros.',
+    category: 'facial',
+    popular: true,
+    benefits: [
+      'Pele de porcelana com efeito iluminação e viço instantâneo',
+      'Clareamento de melasma, sardas e manchas de acne',
+      'Tratamento de poros dilatados e linhas finas',
+      'Baixo downtime (retorno rápido à rotina de maquiagem)'
     ],
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+    price: 'R$ 850,00 por sessão',
+    duration: '45 min',
     technicalSpecs: {
-      duration: '40 a 50 minutos',
-      anesthesia: 'Não necessária (Crio-cabeçote gelado a -10°C)',
-      recovery: 'Imediata',
-      indicatedFor: 'Flacidez tissular corporal/facial, celulite e gordura localizada',
-      resultsIn: 'Efeito lifting imediato e remodelamento contínuo',
-      sessionsRequired: '6 a 8 sessões quinzenais'
+      duration: '45 minutos',
+      anesthesia: 'Anestésico tópico prévio',
+      recovery: '1 a 3 dias (leve sensação de pele aveludada/areia)',
+      indicatedFor: 'Manchas, melasma, poros abertos, rugas finas e falta de brilho',
+      resultsIn: 'Primeiros efeitos de brilho em 3 a 7 dias',
+      sessionsRequired: '1 a 3 sessões mensais'
     },
     postCareTips: [
-      'Manter excelente hidratação oral.',
-      'Evitar a aplicação de géis frios logo após a sessão para não cortar a neocolagenogênese.',
-      'Manter rotina de exercícios físicos para potencializar o metabolismo lipídico.'
+      'Uso rigoroso de protetor solar FPS 50+ com cor.',
+      'Caprichar na hidratação com regeneradores labiais/cutâneos.',
+      'Evitar exposição ao sol direto nos primeiros 10 dias.'
     ],
     specialist: {
-      name: 'Carla Silveira',
-      role: 'Esteticista Cosmetóloga Sênior',
-      registration: 'EST-SP 12.450',
-      bio: 'Especialista em eletroterapia corporal e tecnologias de remodelação de silhueta.',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
+      name: 'Dra. Amanda Rodrigues',
+      role: 'Biomédica Esteta',
+      registration: 'CRBM 34.892-SP',
+      bio: 'Especialista certificada em plataformas de Laser Thulium e rejuvenescimento pré-evento.',
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80'
     }
   },
   {
-    id: 'velashape',
-    name: 'Velashape',
-    description: 'Tecnologia médica ELOS combinando radiofrequência bipolar, luz infravermelha e vácuo para drenagem e combate severo da celulite.',
-    category: 'corporal',
-    benefits: ['Aumento significativo da circulação e drenagem celular', 'Melhora acentuada do aspecto de casca de laranja', 'Redução da circunferência corporal tratada', 'Sensação agradável semelhante a uma massagem profunda'],
-    image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 320,00 por sessão',
-    duration: '45 min',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    id: 'ultraformer',
+    name: 'Ultraformer (Ultrassom Micro e Macrofocado)',
+    description: 'Lifting facial e corporal sem cortes. Atua no SMAS (camada muscular) para estímulo de colágeno profundo, ancoragem da pele e redução seletiva de gordura da papada.',
+    category: 'facial',
+    popular: true,
+    benefits: [
+      'Efeito lifting natural sem necessidade de cirurgia',
+      'Definição do contorno da mandíbula e afinamento de papada',
+      'Combate rigoroso à flacidez do pescoço e pálpebras',
+      'Resultados que evoluem continuamente por até 3 meses'
+    ],
+    image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
+    price: 'A partir de R$ 1.500,00',
+    duration: '50 min',
     technicalSpecs: {
-      duration: '45 minutos',
-      anesthesia: 'Não necessária (massagem a vácuo aquecida)',
-      recovery: 'Imediata',
-      indicatedFor: 'Celulite em todos os graus, retenção de líquidos e contorno de coxas/glúteos',
-      resultsIn: 'A partir da 3ª sessão',
-      sessionsRequired: '6 a 10 sessões semanais'
+      duration: '45 a 60 minutos',
+      anesthesia: 'Anestésico em creme',
+      recovery: 'Sem tempo de afastamento',
+      indicatedFor: 'Flacidez facial e corporal, papada, sulco nasogeniano e perda de contorno',
+      resultsIn: 'Efeito imediato de contração + pico do colágeno aos 90 dias',
+      sessionsRequired: '1 a 2 sessões por ano'
     },
     postCareTips: [
-      'Beba bastante água antes e depois de cada sessão.',
-      'Evitar sol direto na região caso haja leve hiperemia (vermelhidão).',
-      'Associar a uma dieta equilibrada baixa em sódio.'
+      'Manter uso habitual de protetor solar.',
+      'Hidratar bem a pele diariamente.',
+      'Pode ocorrer leve sensibilidade tátil no contorno ósseo por alguns dias.'
+    ],
+    specialist: {
+      name: 'Dra. Amanda Rodrigues',
+      role: 'Biomédica Esteta',
+      registration: 'CRBM 34.892-SP',
+      bio: 'Especialista em ultrassom focado e sustentação tecidual.',
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80'
+    }
+  },
+  {
+    id: 'emagrecimento',
+    name: 'Protocolo de Emagrecimento Consciente & Alta Performance',
+    description: 'Abordagem integrada para redução de peso e gordura visceral combinando enzimas metabólicas, aceleradores lipolíticos e acompanhamento estratégico da silhueta.',
+    category: 'corporal',
+    benefits: [
+      'Aceleração do metabolismo e estimulação do gasto calórico',
+      'Mesclas injetáveis metabólicas e desintoxicantes seguras',
+      'Preservação de massa magra e redução seletiva de gordura',
+      'Protocolo individualizado com acompanhamento contínuo'
+    ],
+    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
+    price: 'A partir de R$ 450,00',
+    duration: '45 min',
+    technicalSpecs: {
+      duration: '45 minutos por sessão',
+      anesthesia: 'Não necessária',
+      recovery: 'Imediata',
+      indicatedFor: 'Perda de peso, redução de gordura corporal global e otimização metabólica',
+      resultsIn: 'Perceptível desde a 2ª semana de acompanhamento',
+      sessionsRequired: 'Programa de 4 a 8 sessões semanais'
+    },
+    postCareTips: [
+      'Aumentar o consumo de água para pelo menos 2,5L diários.',
+      'Manter alimentação balanceada orientada no protocolo.',
+      'Praticar exercícios físicos regulares.'
     ],
     specialist: {
       name: 'Dr. Lucas Mendes',
       role: 'Farmacêutico Esteta',
       registration: 'CRF 58.102-SP',
-      bio: 'Especialista em fisiopatologia do tecido adiposo e protocolos corporais combinados.',
+      bio: 'Especialista em modulação metabólica e bioativos para perda de peso.',
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80'
     }
   },
   {
-    id: 'massagem-relaxante',
-    name: 'Massagem Relaxante',
-    description: 'Um momento sagrado de desconexão. Alivia tensões musculares, reduz o cortisol e promove o equilíbrio mental através de técnicas suecas e aromaterapia com óleos essenciais puros.',
-    category: 'bem-estar',
-    benefits: ['Alívio profundo do estresse e da ansiedade', 'Relaxamento muscular e alívio de nós de tensão', 'Estímulo da circulação e liberação de endorfinas', 'Ambiente climatizado com cromoterapia e música suave'],
-    image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 180,00',
-    duration: '60 min',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    id: 'terapia-capilar',
+    name: 'Tratamento para Queda de Cabelo (Com Ativos & Tecnologia Associada)',
+    description: 'Protocolo especializado contra calvície e queda capilar acentuada. Associa microagulhamento com ativos fatores de crescimento, intradermoterapia e LEDterapia para estancar a queda e estimular novos fios.',
+    category: 'capilar',
+    benefits: [
+      'Interrupção da queda acentuada de cabelos (eflúvio e alopecia)',
+      'Estimulação direta de novos fios e engrossamento capilar',
+      'Aplicação de ativos fatores de crescimento e intradermoterapia',
+      'Fotobiomodulação por LED para ativar a circulação no couro cabeludo'
+    ],
+    image: 'https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?auto=format&fit=crop&w=800&q=80',
+    price: 'R$ 380,00 por sessão',
+    duration: '45 min',
     technicalSpecs: {
-      duration: '60 a 90 minutos',
-      anesthesia: 'Não aplicável',
-      recovery: 'Sensação de leveza imediata',
-      indicatedFor: 'Tensão muscular, estresse, insônia e fadiga física/mental',
-      resultsIn: 'Imediato',
-      sessionsRequired: 'Semanal ou quinzenal'
+      duration: '45 a 60 minutos',
+      anesthesia: 'Anestésico tópico leve no couro cabeludo',
+      recovery: 'Retorno imediato às atividades',
+      indicatedFor: 'Eflúvio telógeno, calvície masculina e feminina, queda pós-dengue/estresse e fios finos',
+      resultsIn: 'Redução da queda em 3 a 4 semanas; novos fios em 60 a 90 dias',
+      sessionsRequired: 'Protocolo de 5 a 10 sessões quinzenais'
     },
     postCareTips: [
-      'Evite compromissos muito agitados logo após o atendimento.',
-      'Tome um chá morno hidratante (camomila ou erva-doce).',
-      'Mantenha boa hidratação para potencializar a eliminação de resíduos metabólicos.'
+      'Não lavar os cabelos por 12 horas após a sessão para melhor absorção dos ativos.',
+      'Evitar exposição ao sol direto no couro cabeludo no dia da aplicação.',
+      'Usar o tônico/medicação homecare prescrito pela especialista.'
+    ],
+    specialist: {
+      name: 'Carla Silveira',
+      role: 'Especialista em Terapia Capilar & Tricologia',
+      registration: 'EST-SP 12.450',
+      bio: 'Especialista em patologias do couro cabeludo e protocolos de fortalecimento capilar.',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
+    }
+  },
+  {
+    id: 'gluteo-max',
+    name: 'Glúteo Max (Harmonização Glútea)',
+    description: 'Protocolo completo para remodelação, sustentação e volumização dos glúteos. Associa bioestimuladores de colágeno, preenchimento e ativos tensores para empinar e arredondar os glúteos.',
+    category: 'corporal',
+    popular: true,
+    benefits: [
+      'Efeito levanta bumbum e definição do contorno das nádegas',
+      'Preenchimento de depressões laterais ("hip dips") e celulites profundas',
+      'Estímulo potente de firmeza contra a flacidez glútea',
+      'Resultado natural e imediato sem cirurgia ou prótese'
+    ],
+    image: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&w=800&q=80',
+    price: 'A partir de R$ 1.200,00',
+    duration: '50 min',
+    technicalSpecs: {
+      duration: '50 a 60 minutos',
+      anesthesia: 'Anestésico local integrado',
+      recovery: 'Tranquila (evitar exercícios de glúteos por 48h)',
+      indicatedFor: 'Flacidez glútea, falta de volume, depressão trocantérica e descaimento',
+      resultsIn: 'Efeito volumizador imediato + melhora contínua da firmeza em 30 a 60 dias',
+      sessionsRequired: '1 a 3 sessões'
+    },
+    postCareTips: [
+      'Evitar treino pesado de pernas e glúteos nas primeiras 48 horas.',
+      'Seguir orientações de massagem ou repouso prestadas pela equipe.',
+      'Beba bastante água para auxiliar a síntese de colágeno.'
+    ],
+    specialist: {
+      name: 'Dr. Lucas Mendes',
+      role: 'Farmacêutico Esteta',
+      registration: 'CRF 58.102-SP',
+      bio: 'Especialista em harmonização glútea e remodelagem de contorno corporal.',
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80'
+    }
+  },
+  {
+    id: 'massagens',
+    name: 'Massagens (Drenagem Linfática, Relaxante e Modeladora)',
+    description: 'Menu completo de massagens manuais adaptadas ao seu objetivo: Drenagem Linfática para edemas/retenção, Massagem Relaxante com aromaterapia e Massagem Modeladora Redutora.',
+    category: 'bem-estar',
+    benefits: [
+      'Redução imediata de inchaços e retenção de líquidos',
+      'Modelagem da cintura e pernas através de manobras intensas',
+      'Alívio profundo do estresse, ansiedade e dores musculares',
+      'Aumento da circulação e renovação energética'
+    ],
+    image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=800&q=80',
+    price: 'A partir de R$ 180,00',
+    duration: '60 min',
+    technicalSpecs: {
+      duration: '50 a 75 minutos',
+      anesthesia: 'Não aplicável',
+      recovery: 'Sensação imediata de leveza e bem-estar',
+      indicatedFor: 'Retenção hídrica, estresse, cansaço, edemas e gordura localizada',
+      resultsIn: 'Sensação e desinchamento imediatos na 1ª sessão',
+      sessionsRequired: 'Avulso ou pacotes semanais'
+    },
+    postCareTips: [
+      'Beba um copo de água logo após o término da sessão.',
+      'Evitar refeições pesadas na hora seguinte à massagem.',
+      'Aproveite a sensação de relaxamento para descansar.'
     ],
     specialist: {
       name: 'Isabela Fontes',
       role: 'Massoterapeuta & Terapeuta Holística',
       registration: 'CRTH 8.910',
-      bio: 'Mais de 8 anos dedicados às artes do toque integrativo, aromaterapia e bem-estar integral.',
+      bio: 'Especialista em técnicas de drenagem linfática e massoterapia integrativa.',
       avatar: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&w=300&q=80'
     }
   },
   {
-    id: 'massagem-modeladora',
-    name: 'Massagem Modeladora',
-    description: 'Manobras intensas, firmes e rápidas que auxiliam no remodelamento corporal, ativação do metabolismo e drenagem de toxinas acumuladas nos tecidos.',
-    category: 'bem-estar',
-    benefits: ['Melhora expressiva da circulação e drenagem linfática', 'Modelagem da silhueta em áreas estratégicas', 'Auxílio direto na eliminação de toxinas e retenção', 'Tônus muscular reativado'],
+    id: 'gordura-localizada',
+    name: 'Gordura Localizada (Lipo Enzimática)',
+    description: 'Combate focado às gordurinhas difíceis do abdômen, flancos, culotes, papada e braços com aplicação de enzimas lipolíticas concentradas que destroem as células de gordura.',
+    category: 'corporal',
+    highlight: true,
+    benefits: [
+      'Ação direta no tecido adiposo sem necessidade de cortes',
+      'Redução perceptível de medidas e afinamento da silhueta',
+      'Combinação personalizada de enzimas queimadoras de gordura',
+      'Aplicação rápida e segura com retorno imediato à rotina'
+    ],
     image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 220,00',
-    duration: '50 min',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    price: 'R$ 350,00 por sessão',
+    duration: '30 min',
     technicalSpecs: {
-      duration: '50 minutos',
-      anesthesia: 'Não aplicável',
-      recovery: 'Imediata',
-      indicatedFor: 'Retenção hídrica, celulite, perda de tônus e modelagem da cintura',
-      resultsIn: 'Visível logo após a 1ª sessão (redução de inchaço)',
-      sessionsRequired: '1 a 2 vezes por semana'
+      duration: '30 a 40 minutos',
+      anesthesia: 'Anestésico local integrado',
+      recovery: 'Retorno imediato às atividades normais',
+      indicatedFor: 'Gordura acumulada no abdômen, flancos, papada, culotes e dobras do sutiã',
+      resultsIn: 'A partir da 2ª ou 3ª sessão',
+      sessionsRequired: 'Protocolo recomendado de 4 a 6 sessões'
     },
     postCareTips: [
-      'Beber 500ml de água logo após a sessão.',
-      'Evitar refeições pesadas 1 hora antes e 1 hora após.',
-      'Manter atividades físicas aeróbicas regulares.'
+      'Beber 2 a 3 litros de água diariamente para eliminar gordura metabolizada.',
+      'Praticar atividade física moderada após a sessão.',
+      'Evitar bebidas alcoólicas por 48 horas.'
     ],
     specialist: {
-      name: 'Isabela Fontes',
-      role: 'Massoterapeuta & Terapeuta Holística',
-      registration: 'CRTH 8.910',
-      bio: 'Especialista em manobras de remodelagem corporal e drenagem método exclusivo.',
-      avatar: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&w=300&q=80'
+      name: 'Dr. Lucas Mendes',
+      role: 'Farmacêutico Esteta',
+      registration: 'CRF 58.102-SP',
+      bio: 'Especialista em mesoterapia lipolítica e redução de medidas.',
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80'
+    }
+  },
+  {
+    id: 'flacidez',
+    name: 'Flacidez (Criofrequência & Bioestimulação)',
+    description: 'Combinação potente do choque térmico da Criofrequência com tecnologia multipolar para contração imediata das fibras e remodelação profunda do colágeno corporal e facial.',
+    category: 'corporal',
+    benefits: [
+      'Efeito tensor imediato e pele visivelmente mais firme',
+      'Estímulo intenso e duradouro de novas fibras de colágeno e elastina',
+      'Tratamento indolor e confortável com resfriamento a -10°C',
+      'Excelente para flacidez do abdômen pós-parto, pernas, braços e papada'
+    ],
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+    price: 'R$ 290,00 por sessão',
+    duration: '40 min',
+    technicalSpecs: {
+      duration: '40 a 50 minutos',
+      anesthesia: 'Não necessária (cabeçote gelado a -10°C)',
+      recovery: 'Imediata',
+      indicatedFor: 'Flacidez tissular corporal e facial, umbigo triste, celulite e perda de tônus',
+      resultsIn: 'Lifting perceptível na 1ª sessão com evolução quinzenal',
+      sessionsRequired: '6 a 8 sessões quinzenais'
+    },
+    postCareTips: [
+      'Beba bastante água.',
+      'Evite o uso de cosméticos congelantes logo após a sessão.',
+      'Manter alimentação rica em proteínas e vitamina C.'
+    ],
+    specialist: {
+      name: 'Carla Silveira',
+      role: 'Esteticista Cosmetóloga Sênior',
+      registration: 'EST-SP 12.450',
+      bio: 'Especialista em tecnologia médica para firmeza cutânea e eletroterapia.',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
     }
   }
 ];
@@ -357,41 +466,41 @@ export const FAQS: FAQ[] = [
 export const INITIAL_PROMOTIONS: Promotion[] = [
   {
     id: 'promo-1',
-    badge: 'OFERTA DESTAQUE DO MÊS',
-    title: 'Combo Brilho & Rejuvenescimento',
-    subtitle: 'Botox 3 áreas + Peeling de Diamante para uma pele renovada e radiante.',
+    badge: 'OFERTA CAMPEÃ DE ATRAÇÃO',
+    title: 'Protocolo Secagem de Vasinhos (Laser + Injetável)',
+    subtitle: 'Ação rápida contra vasinhos e microvarizes com laser vascular de alta precisão e PEIM.',
     discount: '30% OFF',
-    originalPrice: 'R$ 1.200',
-    promoPrice: 'R$ 840',
-    couponCode: 'ESTETICA30',
+    originalPrice: 'R$ 550',
+    promoPrice: 'R$ 380',
+    couponCode: 'PERNASLINDAS',
     expiresInDays: 5,
-    treatmentId: 'botox',
+    treatmentId: 'secagem-vasinhos',
     active: true,
   },
   {
     id: 'promo-2',
     badge: 'ESTÍMULO DE COLÁGENO',
-    title: 'Protocolo Contorno & Firmeza',
-    subtitle: 'Bioestimulador de Colágeno com Drenagem Facial de cortesia.',
+    title: 'Radiesse / Sculptra + Anestésico Tópico',
+    subtitle: 'Bioestimulador de alta performance para firmeza e combate da flacidez.',
     discount: 'R$ 350 OFF',
-    originalPrice: 'R$ 1.950',
-    promoPrice: 'R$ 1.600',
-    couponCode: 'FIRM2026',
+    originalPrice: 'R$ 2.300',
+    promoPrice: 'R$ 1.950',
+    couponCode: 'COLAGENO2026',
     expiresInDays: 8,
-    treatmentId: 'bioestimulador',
+    treatmentId: 'radiesse-sculptra',
     active: true,
   },
   {
     id: 'promo-3',
-    badge: 'RENOVAÇÃO FACIAL EXPRESS',
-    title: 'Limpeza de Pele HD + LED',
-    subtitle: 'Limpeza profunda com hidratação e fototerapia anti-inflamatória.',
+    badge: 'PELE DE PORCELANA',
+    title: 'Laser Lavieén (Efeito BB Laser)',
+    subtitle: 'Pele iluminada, fechamento de poros e clareamento de manchas.',
     discount: '25% OFF',
-    originalPrice: 'R$ 280',
-    promoPrice: 'R$ 210',
-    couponCode: 'PELEPERFEITA',
+    originalPrice: 'R$ 1.100',
+    promoPrice: 'R$ 850',
+    couponCode: 'LAVIEENGLOW',
     expiresInDays: 3,
-    treatmentId: 'limpeza-de-pele',
+    treatmentId: 'laser-lavieen',
     active: true,
   },
 ];

@@ -29,7 +29,9 @@ import {
   Users,
   Stethoscope,
   Settings,
-  Lock
+  Lock,
+  Scissors,
+  Zap
 } from 'lucide-react';
 import { FAQS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
@@ -550,7 +552,7 @@ export default function App() {
                           Renovação
                         </span>
                         <h3 className="font-serif text-2xl font-bold mb-1">Estética Facial</h3>
-                        <p className="text-white/80 text-xs mb-4">Limpeza de pele, Botox, Microagulhamento e Harmonização.</p>
+                        <p className="text-white/80 text-xs mb-4">Botox & Dysport, Radiesse & Sculptra, Laser Lavieén e Ultraformer.</p>
                         <span className="inline-flex items-center gap-2 font-bold text-xs uppercase tracking-wider hover:translate-x-2 transition-transform">
                           Ver Detalhes <ArrowRight className="h-4 w-4" />
                         </span>
@@ -574,7 +576,7 @@ export default function App() {
                           Modelagem
                         </span>
                         <h3 className="font-serif text-2xl font-bold mb-1">Estética Corporal</h3>
-                        <p className="text-white/80 text-xs mb-4">Velashape, Criofrequência, Enzimas e Redução de Medidas.</p>
+                        <p className="text-white/80 text-xs mb-4">Secagem de Vasinhos, Glúteo Max, Gordura Localizada, Flacidez e Emagrecimento.</p>
                         <span className="inline-flex items-center gap-2 font-bold text-xs uppercase tracking-wider hover:translate-x-2 transition-transform">
                           Ver Detalhes <ArrowRight className="h-4 w-4" />
                         </span>
@@ -765,7 +767,7 @@ export default function App() {
                 <div className="flex justify-center gap-4 mb-16 overflow-x-auto pb-2 scrollbar-hide">
                   <a
                     href="#facial"
-                    className="flex flex-col items-center gap-2 group shrink-0 min-w-[100px]"
+                    className="flex flex-col items-center gap-2 group shrink-0 min-w-[90px]"
                     onClick={(e) => {
                       e.preventDefault();
                       document.getElementById('facial')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -779,7 +781,7 @@ export default function App() {
 
                   <a
                     href="#corporal"
-                    className="flex flex-col items-center gap-2 group shrink-0 min-w-[100px]"
+                    className="flex flex-col items-center gap-2 group shrink-0 min-w-[90px]"
                     onClick={(e) => {
                       e.preventDefault();
                       document.getElementById('corporal')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -792,8 +794,22 @@ export default function App() {
                   </a>
 
                   <a
+                    href="#capilar"
+                    className="flex flex-col items-center gap-2 group shrink-0 min-w-[90px]"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('capilar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                  >
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white shadow-sm border border-outline-variant/20 group-hover:border-primary group-hover:bg-primary/5 transition-all duration-300">
+                      <Scissors className="h-7 w-7 text-primary" />
+                    </div>
+                    <span className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors">Capilar</span>
+                  </a>
+
+                  <a
                     href="#bem-estar"
-                    className="flex flex-col items-center gap-2 group shrink-0 min-w-[100px]"
+                    className="flex flex-col items-center gap-2 group shrink-0 min-w-[90px]"
                     onClick={(e) => {
                       e.preventDefault();
                       document.getElementById('bem-estar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -837,27 +853,32 @@ export default function App() {
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Estética Corporal</h2>
                     <div className="h-[1px] flex-grow bg-outline-variant/20" />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {treatments.filter((t) => t.category === 'corporal').map((t) => (
-                      <React.Fragment key={t.id}>
-                        {t.highlight ? (
-                          <div className="md:col-span-2 col-span-1 flex flex-col h-full">
-                            <TreatmentCard
-                              treatment={t}
-                              onSelect={(id) => triggerBooking(id)}
-                              onViewDetails={(treatment) => setSelectedTreatmentForDetail(treatment)}
-                            />
-                          </div>
-                        ) : (
-                          <div className="md:col-span-1 col-span-1 flex flex-col h-full">
-                            <TreatmentCard
-                              treatment={t}
-                              onSelect={(id) => triggerBooking(id)}
-                              onViewDetails={(treatment) => setSelectedTreatmentForDetail(treatment)}
-                            />
-                          </div>
-                        )}
-                      </React.Fragment>
+                      <TreatmentCard
+                        key={t.id}
+                        treatment={t}
+                        onSelect={(id) => triggerBooking(id)}
+                        onViewDetails={(treatment) => setSelectedTreatmentForDetail(treatment)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Capilar section */}
+                <div id="capilar" className="pt-20 scroll-mt-24">
+                  <div className="flex items-center gap-4 mb-8">
+                    <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Terapia &amp; Saúde Capilar</h2>
+                    <div className="h-[1px] flex-grow bg-outline-variant/20" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {treatments.filter((t) => t.category === 'capilar').map((t) => (
+                      <TreatmentCard
+                        key={t.id}
+                        treatment={t}
+                        onSelect={(id) => triggerBooking(id)}
+                        onViewDetails={(treatment) => setSelectedTreatmentForDetail(treatment)}
+                      />
                     ))}
                   </div>
                 </div>

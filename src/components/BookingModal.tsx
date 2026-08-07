@@ -148,6 +148,13 @@ export default function BookingModal({
                           </option>
                         ))}
                       </optgroup>
+                      <optgroup label="Terapia Capilar">
+                        {TREATMENTS.filter((t) => t.category === 'capilar').map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name}
+                          </option>
+                        ))}
+                      </optgroup>
                       <optgroup label="Bem-estar & Relaxamento">
                         {TREATMENTS.filter((t) => t.category === 'bem-estar').map((t) => (
                           <option key={t.id} value={t.id}>

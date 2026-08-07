@@ -160,6 +160,18 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
     notify('Tratamento/Serviço removido com sucesso.');
   };
 
+  const handleTogglePopular = (id: string) => {
+    const updated = treatments.map((t) => (t.id === id ? { ...t, popular: !t.popular } : t));
+    onSaveTreatments(updated);
+    notify('Status de "Mais Procurado" (Popular) alterado!');
+  };
+
+  const handleToggleHighlight = (id: string) => {
+    const updated = treatments.map((t) => (t.id === id ? { ...t, highlight: !t.highlight } : t));
+    onSaveTreatments(updated);
+    notify('Status de Destaque na grade alterado!');
+  };
+
   // --- PROMOTIONS HANDLERS ---
   const handleSavePromoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -566,6 +578,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       >
                         <option value="facial">Facial</option>
                         <option value="corporal">Corporal</option>
+                        <option value="capilar">Terapia Capilar</option>
                         <option value="bem-estar">Bem-Estar</option>
                       </select>
                     </div>
@@ -627,6 +640,28 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
                         placeholder="Ex: Rejuvenescimento, Estímulo de colágeno, Sem tempo de repouso"
                       />
+                    </div>
+
+                    {/* Toggles de Destaque e Popularidade */}
+                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-rose-100/50 dark:bg-stone-800/80 rounded-xl border border-rose-200 dark:border-stone-700">
+                      <label className="flex items-center gap-2 text-xs font-bold text-stone-800 dark:text-stone-200 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingTreatment.popular || false}
+                          onChange={(e) => setEditingTreatment({ ...editingTreatment, popular: e.target.checked })}
+                          className="w-4 h-4 rounded accent-rose-600"
+                        />
+                        <span>🔥 Marcar como "Mais Procurado" (Selo Popular)</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs font-bold text-stone-800 dark:text-stone-200 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingTreatment.highlight || false}
+                          onChange={(e) => setEditingTreatment({ ...editingTreatment, highlight: e.target.checked })}
+                          className="w-4 h-4 rounded accent-rose-600"
+                        />
+                        <span>⭐ Destaque Duplo / Banner Especial na Grade</span>
+                      </label>
                     </div>
 
                     {/* Vídeo do Procedimento */}
@@ -733,6 +768,22 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                             }
                             className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
                             placeholder="Ex: Em 3 a 7 dias"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold mb-1">Sessões Recomendadas</label>
+                          <input
+                            type="text"
+                            value={editingTreatment.technicalSpecs?.sessionsRequired || ''}
+                            onChange={(e) =>
+                              setEditingTreatment({
+                                ...editingTreatment,
+                                technicalSpecs: { ...(editingTreatment.technicalSpecs || {}), sessionsRequired: e.target.value },
+                              })
+                            }
+                            className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                            placeholder="Ex: 3 a 5 sessões"
                           />
                         </div>
 
@@ -870,33 +921,95 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                 {treatments.map((t) => (
                   <div
                     key={t.id}
-                    className="p-4 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col justify-between"
+                    className="p-4 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col justify-between gap-3"
                   >
-                    <div className="flex gap-3">
-                      <img src={t.image} alt={t.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md">
-                          {t.category}
-                        </span>
-                        <h4 className="font-bold text-sm line-clamp-1">{t.name}</h4>
-                        <p className="text-xs text-rose-600 font-extrabold">{t.price || 'Sob Consulta'}</p>
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <img src={t.image} alt={t.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md">
+                              {t.category}
+                            </span>
+                            {t.popular && (
+                              <span className="text-[10px] font-bold bg-amber-400 text-stone-900 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                🔥 Popular
+                              </span>
+                            )}
+                            {t.highlight && (
+                              <span className="text-[10px] font-bold bg-purple-600 text-white px-1.5 py-0.5 rounded-md">
+                                ⭐ Destaque
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="font-bold text-sm line-clamp-1">{t.name}</h4>
+                          <p className="text-xs text-rose-600 font-extrabold">{t.price || 'Sob Consulta'}</p>
+                        </div>
+                      </div>
+
+                      {/* Display Badges of Extra Options */}
+                      <div className="flex flex-wrap gap-1 text-[10px]">
+                        {t.videoUrl && (
+                          <span className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 px-2 py-0.5 rounded-md font-medium">
+                            🎥 Com Vídeo
+                          </span>
+                        )}
+                        {t.beforeAfterImages && t.beforeAfterImages.length > 0 && t.beforeAfterImages[0]?.before && (
+                          <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium">
+                            📷 Antes e Depois
+                          </span>
+                        )}
+                        {t.technicalSpecs && Object.keys(t.technicalSpecs).length > 0 && (
+                          <span className="bg-stone-200 text-stone-700 dark:bg-stone-700 dark:text-stone-300 px-2 py-0.5 rounded-md font-medium">
+                            🩺 Ficha Técnica
+                          </span>
+                        )}
+                        {t.specialist?.name && (
+                          <span className="bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 px-2 py-0.5 rounded-md font-medium">
+                            👤 {t.specialist.name}
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-700 flex justify-between items-center text-xs">
-                      <span className="text-stone-400">{t.duration}</span>
-                      <div className="flex gap-1">
+                    <div className="pt-3 border-t border-stone-200 dark:border-stone-700 flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleTogglePopular(t.id)}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                            t.popular
+                              ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-950 dark:border-amber-700 dark:text-amber-200'
+                              : 'bg-stone-100 border-stone-200 text-stone-400 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700'
+                          }`}
+                          title="Alternar Destaque Popular"
+                        >
+                          {t.popular ? '🔥 Popular: Sim' : '+ Popular'}
+                        </button>
+                        <button
+                          onClick={() => handleToggleHighlight(t.id)}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                            t.highlight
+                              ? 'bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-950 dark:border-purple-700 dark:text-purple-200'
+                              : 'bg-stone-100 border-stone-200 text-stone-400 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700'
+                          }`}
+                          title="Alternar Destaque Duplo"
+                        >
+                          {t.highlight ? '⭐ Destaque: Sim' : '+ Destaque'}
+                        </button>
+                      </div>
+
+                      <div className="flex gap-1 shrink-0">
                         <button
                           onClick={() => setEditingTreatment(t)}
                           className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-lg transition-colors cursor-pointer"
-                          title="Editar"
+                          title="Editar Tratamento"
                         >
                           <Edit className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteTreatment(t.id)}
                           className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-lg transition-colors cursor-pointer"
-                          title="Remover"
+                          title="Remover Tratamento"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -1246,6 +1359,21 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       />
                     </div>
 
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Avaliação (Estrelas)</label>
+                      <select
+                        value={editingTestimonial.stars || 5}
+                        onChange={(e) => setEditingTestimonial({ ...editingTestimonial, stars: parseInt(e.target.value) || 5 })}
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-bold text-amber-500"
+                      >
+                        <option value={5}>★★★★★ (5 Estrelas)</option>
+                        <option value={4}>★★★★☆ (4 Estrelas)</option>
+                        <option value={3}>★★★☆☆ (3 Estrelas)</option>
+                        <option value={2}>★★☆☆☆ (2 Estrelas)</option>
+                        <option value={1}>★☆☆☆☆ (1 Estrela)</option>
+                      </select>
+                    </div>
+
                     <div className="md:col-span-2">
                       <label className="block text-xs font-bold mb-1">Relato / Comentário</label>
                       <textarea
@@ -1378,6 +1506,28 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         type="text"
                         value={editingPost.author || ''}
                         onChange={(e) => setEditingPost({ ...editingPost, author: e.target.value })}
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Data de Publicação</label>
+                      <input
+                        type="text"
+                        value={editingPost.date || ''}
+                        onChange={(e) => setEditingPost({ ...editingPost, date: e.target.value })}
+                        placeholder="Ex: 15 de Outubro, 2025"
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold mb-1">Tempo de Leitura</label>
+                      <input
+                        type="text"
+                        value={editingPost.readTime || ''}
+                        onChange={(e) => setEditingPost({ ...editingPost, readTime: e.target.value })}
+                        placeholder="Ex: 4 min de leitura"
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
                       />
                     </div>

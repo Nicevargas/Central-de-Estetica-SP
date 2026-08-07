@@ -26,65 +26,96 @@ export default function TreatmentCard({ treatment, onSelect, onViewDetails }: Tr
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         onClick={handleOpenDetails}
-        className="md:col-span-2 bg-white rounded-2xl p-8 shadow-premium border border-outline-variant/10 flex flex-col justify-between overflow-hidden relative group cursor-pointer"
+        className="col-span-1 md:col-span-2 bg-white rounded-3xl overflow-hidden shadow-premium border border-outline-variant/10 group cursor-pointer hover:shadow-2xl transition-all duration-300"
       >
-        <div className="relative z-10 flex flex-col h-full justify-between">
-          <div>
-            <span className="inline-block px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-bold mb-4">
-              Destaque Corporal
-            </span>
-            <h3 className="font-serif text-2xl lg:text-3xl font-semibold mb-3 text-primary group-hover:text-rose-600 transition-colors">
-              {treatment.name}
-            </h3>
-            <p className="text-on-surface-variant text-sm md:text-base mb-6 max-w-md leading-relaxed">
-              {treatment.description}
-            </p>
-          </div>
+        <div className="flex flex-col lg:flex-row min-h-[300px]">
+          {/* Content side */}
+          <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between z-10">
+            <div>
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <span className="px-3 py-1 bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 rounded-full text-xs font-bold flex items-center gap-1 shadow-xs">
+                  ⭐ Destaque Especial
+                </span>
+                {treatment.popular && (
+                  <span className="px-3 py-1 bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 rounded-full text-xs font-bold">
+                    🔥 Mais Procurado
+                  </span>
+                )}
+                <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+                  {treatment.category === 'facial' ? 'Estética Facial' : treatment.category === 'corporal' ? 'Estética Corporal' : 'Terapia Capilar'}
+                </span>
+              </div>
 
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-x-6 gap-y-2 mb-6">
-              {treatment.benefits.map((benefit, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-                  <CheckCircle2 className="h-4.5 w-4.5 text-primary" />
-                  <span>{benefit}</span>
-                </div>
-              ))}
+              <h3 className="font-serif text-2xl lg:text-3xl font-bold text-primary group-hover:text-rose-600 transition-colors mb-3">
+                {treatment.name}
+              </h3>
+
+              <p className="text-on-surface-variant text-sm md:text-base mb-6 leading-relaxed">
+                {treatment.description}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
+                {treatment.benefits.map((benefit, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-xs md:text-sm text-on-surface-variant font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    <span>{benefit}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              {onViewDetails && (
+            <div className="pt-4 border-t border-outline-variant/10 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {treatment.price && (
+                  <div>
+                    <span className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider block">Investimento</span>
+                    <span className="font-bold text-primary text-base sm:text-lg">{treatment.price}</span>
+                  </div>
+                )}
+                {treatment.duration && (
+                  <div className="hidden sm:flex text-xs font-semibold text-stone-600 bg-stone-100 px-3 py-1 rounded-full items-center gap-1">
+                    <Clock className="h-3.5 w-3.5 text-stone-500" />
+                    <span>{treatment.duration}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {onViewDetails && (
+                  <button
+                    onClick={handleOpenDetails}
+                    className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-full font-semibold text-xs transition-all cursor-pointer"
+                  >
+                    Ver Página &amp; Fotos
+                  </button>
+                )}
                 <button
-                  onClick={handleOpenDetails}
-                  className="px-6 py-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-full font-semibold text-sm transition-all cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(treatment.id);
+                  }}
+                  className="primary-gradient text-white px-6 py-2.5 rounded-full font-semibold text-xs inline-flex items-center gap-2 shadow-premium hover:scale-105 transition-all cursor-pointer"
                 >
-                  Ver Página & Fotos
+                  Agendar Agora
+                  <ArrowRight className="h-4 w-4" />
                 </button>
-              )}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelect(treatment.id);
-                }}
-                className="primary-gradient cursor-pointer text-white px-8 py-3 rounded-full font-semibold text-sm inline-flex items-center gap-2 group/btn shadow-premium transition-all hover:scale-105 active:scale-95"
-              >
-                Agendar Agora
-                <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-              </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Decorative background image */}
-        <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-15 md:opacity-100 md:block hidden">
-          <img
-            src={treatment.image}
-            alt={treatment.name}
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
-            }}
-            className="w-full h-full object-cover rounded-l-3xl group-hover:scale-105 transition-transform duration-700"
-          />
+          {/* Image side */}
+          <div className="lg:w-2/5 h-64 lg:h-auto relative overflow-hidden shrink-0">
+            <img
+              src={treatment.image}
+              alt={treatment.name}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+              }}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent lg:hidden" />
+          </div>
         </div>
       </motion.div>
     );
