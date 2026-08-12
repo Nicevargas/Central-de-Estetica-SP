@@ -35,7 +35,8 @@ import {
   Trophy,
   Medal,
   BadgeCheck,
-  GraduationCap
+  GraduationCap,
+  ChevronUp
 } from 'lucide-react';
 import { FAQS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
@@ -87,6 +88,28 @@ export default function App() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [showStory, setShowStory] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Monitor scroll position to toggle 'Voltar ao topo' button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   // Dynamic state backed by localStorage & Supabase
   const [treatments, setTreatments] = useState<Treatment[]>(getStoredTreatments);
@@ -531,81 +554,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Certificações e Reconhecimentos Section */}
-              <section className="bg-stone-50/80 border-b border-outline-variant/15 py-12">
-                <div className="max-w-7xl mx-auto px-6">
-                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-2">
-                        <Award className="h-3.5 w-3.5" />
-                        Garantia de Excelência &amp; Segurança
-                      </div>
-                      <h3 className="font-serif text-2xl sm:text-3xl font-bold text-primary">
-                        Certificações &amp; Reconhecimentos do Setor
-                      </h3>
-                    </div>
-                    <p className="text-on-surface-variant text-xs sm:text-sm max-w-md">
-                      Compromisso rigoroso com os mais altos padrões de biossegurança, chancela dos conselhos federais de saúde e tecnologias premiadas mundialmente.
-                    </p>
-                  </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
-                    {/* Badge 1: ANVISA */}
-                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3 shrink-0">
-                        <ShieldCheck className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-bold text-xs text-primary mb-1">Registro ANVISA</h4>
-                      <p className="text-[10px] text-stone-500 font-medium leading-tight">100% dos equipamentos e injetáveis homologados</p>
-                    </div>
-
-                    {/* Badge 2: Prêmio Excelência */}
-                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
-                      <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3 shrink-0">
-                        <Trophy className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-bold text-xs text-primary mb-1">Prêmio Destaque 2025</h4>
-                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Clínica Referência em Harmonização &amp; Laser</p>
-                    </div>
-
-                    {/* Badge 3: Conselhos de Saúde */}
-                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
-                      <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center mb-3 shrink-0">
-                        <BadgeCheck className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-bold text-xs text-primary mb-1">Habilitação Federal</h4>
-                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Profissionais com registro ativo CRBM e CRM</p>
-                    </div>
-
-                    {/* Badge 4: Selo de Biossegurança */}
-                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
-                      <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center mb-3 shrink-0">
-                        <CheckCircle2 className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-bold text-xs text-primary mb-1">Selo de Biossegurança</h4>
-                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Protocolos esterilizados de nível hospitalar</p>
-                    </div>
-
-                    {/* Badge 5: Centro Autorizado Ultraformer & Lavieen */}
-                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
-                      <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center mb-3 shrink-0">
-                        <Medal className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-bold text-xs text-primary mb-1">Centro Autorizado</h4>
-                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Tecnologias originais MPT &amp; Lavieén de fábrica</p>
-                    </div>
-
-                    {/* Badge 6: Educação Contínua */}
-                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
-                      <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-3 shrink-0">
-                        <GraduationCap className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-bold text-xs text-primary mb-1">Educação Contínua</h4>
-                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Atualizações internacionais anuais da equipe</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
 
               {/* Specialties Bento Grid Section */}
               <section className="py-20 bg-white">
@@ -1272,6 +1221,24 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Scroll To Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.2 }}
+            onClick={scrollToTop}
+            aria-label="Voltar ao topo"
+            className="fixed bottom-6 left-6 z-40 flex items-center gap-2 bg-stone-900/90 hover:bg-stone-900 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl backdrop-blur-md border border-stone-700/60 hover:scale-110 active:scale-95 transition-all duration-300 group cursor-pointer"
+          >
+            <ChevronUp className="h-5 w-5 text-rose-400 group-hover:-translate-y-0.5 transition-transform" />
+            <span className="font-bold text-xs hidden sm:inline text-stone-200">Voltar ao topo</span>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Floating WhatsApp Action FAB Button */}
       <a
