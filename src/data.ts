@@ -16,18 +16,18 @@ export const TREATMENTS: Treatment[] = [
   {
     id: 'secagem-vasinhos',
     name: 'Secagem de Vasinhos (Laser & PEIM Injetável)',
-    description: 'O nosso protocolo exclusivo associa laser específico para vasos e aplicações injetáveis (PEIM) para a desobstrução, esclerose e cauterização efetiva de vasos e microvarizes.',
+    description: 'Pacote promocional: sessões a laser + aplicações injetáveis a partir de R$ 289,00. Nosso protocolo exclusivo associa laser específico para vasos e aplicações injetáveis (PEIM) para a desobstrução e cauterização efetiva de vasos e microvarizes.',
     category: 'corporal',
     popular: true,
     highlight: true,
     benefits: [
-      'Procedimento campeão de atração e satisfação dos clientes',
-      'Associação de Laser vascular de alta precisão e aplicação injetável (PEIM)',
+      'Pacote promocional: laser + aplicações injetáveis (PEIM)',
       'Desobstrução, cauterização e clareamento rápido dos vasinhos nas pernas',
+      'Atração e satisfação garantida com técnica combinada',
       'Resultados visíveis sem necessidade de repouso ou cirurgia'
     ],
     image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=800&q=80',
-    price: 'A partir de R$ 380,00',
+    price: 'A partir de R$ 289,00',
     duration: '45 min',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     beforeAfterImages: [
@@ -61,18 +61,18 @@ export const TREATMENTS: Treatment[] = [
   },
   {
     id: 'botox-dysport',
-    name: 'Botox & Dysport (Toxina Botulínica)',
-    description: 'Prevenção e suavização de linhas de expressão na testa, pés de galinha, glabela e arquear das sobrancelhas com Dysport e Botox de extrema pureza e acabamento natural.',
+    name: 'Botox & Dysport (3 Regiões com Retoque)',
+    description: 'No mês de agosto: de R$ 1.290,00 por R$ 899,00! Aplicação estratégica em 3 regiões (testa, glabela e pés de galinha) com retoque incluso para prevenção e suavização de linhas de expressão.',
     category: 'facial',
     popular: true,
     benefits: [
-      'Toxina Botulínica de alta precisão (Dysport / Botox)',
-      'Prevenção de rugas profundas e alívio do aspecto cansado',
-      'Elevação harmônica do olhar sem efeito congelado',
-      'Procedimento rápido de 30 minutos sem afastamento'
+      'Oferta Especial de Agosto: De R$ 1.290,00 por R$ 899,00',
+      'Aplicação estratégica em 3 regiões do rosto com retoque incluso',
+      'Toxina Botulínica de alta pureza (Dysport / Botox)',
+      'Elevação harmônica do olhar e término do aspecto cansado'
     ],
     image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
-    price: 'A partir de R$ 980,00',
+    price: 'De R$ 1.290,00 por R$ 899,00',
     duration: '30 min',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     technicalSpecs: {
@@ -81,7 +81,7 @@ export const TREATMENTS: Treatment[] = [
       recovery: 'Imediata (sem tempo de repouso)',
       indicatedFor: 'Rugas dinâmicas na testa, glabela, pés de galinha e arquear do olhar',
       resultsIn: 'Início de ação em 3 a 5 dias, pico aos 14 dias',
-      sessionsRequired: '1 aplicação a cada 4 a 6 meses'
+      sessionsRequired: '1 aplicação + retoque entre 15 e 21 dias'
     },
     postCareTips: [
       'Não deitar ou abaixar a cabeça por 4 horas após a aplicação.',
@@ -98,24 +98,24 @@ export const TREATMENTS: Treatment[] = [
   },
   {
     id: 'radiesse-sculptra',
-    name: 'Radiesse & Sculptra (Bioestimuladores Injetáveis de Alta Performance)',
-    description: 'Bioestimuladores de colágeno à base de Hidroxiapatita de Cálcio (Radiesse) e Ácido Poli-L-Láctico (Sculptra) para firmeza, densidade e sustentação profunda da pele.',
+    name: 'Bioestimulador Radiesse ou Sculptra',
+    description: 'De R$ 2.390,00 por 6x de R$ 365,00! Bioestimuladores de colágeno à base de Hidroxiapatita de Cálcio (Radiesse) e Ácido Poli-L-Láctico (Sculptra) para firmeza, sustentação e densidade da pele.',
     category: 'facial',
     highlight: true,
     benefits: [
-      'Estímulo contínuo de colágeno pelo próprio organismo',
-      'Combate efetivo da flacidez facial, pescoço e corporal',
-      'Efeito firmeza e melhora da qualidade da pele por até 2 anos',
-      'Bioestruturação sem alterar os traços originais da face'
+      'Condição Especial: De R$ 2.390,00 por 6x de R$ 365,00',
+      'Estímulo potente e contínuo de colágeno pelo próprio organismo',
+      'Combate efetivo da flacidez facial e sustentação dos tecidos',
+      'Resultados duradouros e progressivos por até 2 anos'
     ],
     image: 'https://images.unsplash.com/photo-1512290900676-26c2a48f4134?auto=format&fit=crop&w=800&q=80',
-    price: 'A partir de R$ 1.950,00',
+    price: 'De R$ 2.390,00 por 6x de R$ 365,00',
     duration: '45 min',
     technicalSpecs: {
       duration: '45 a 60 minutos',
       anesthesia: 'Anestésico local com lidocaína integrada',
       recovery: 'Tranquila (pequenos pontos de aplicação)',
-      indicatedFor: 'Flacidez facial, perda de firmeza no pescoço, colo, braços e glúteos',
+      indicatedFor: 'Flacidez facial, perda de firmeza no pescoço, colo e braços',
       resultsIn: 'Aparecimento progressivo a partir de 30 dias (pico aos 90 dias)',
       sessionsRequired: '1 a 3 sessões (conforme grau de flacidez)'
     },
@@ -134,30 +134,30 @@ export const TREATMENTS: Treatment[] = [
   },
   {
     id: 'laser-lavieen',
-    name: 'Laser Lavieén (Tecnologia BB Laser)',
-    description: 'Tecnologia de Laser Thulium não ablativo que proporciona o famoso "Efeito BB Cream": clareamento de manchas, viço extremo, uniformização de tom e fechamento de poros.',
+    name: 'Laser Lavieén (Pacote 03 Sessões + Ativos)',
+    description: 'Pacote promocional com 03 sessões de Laser Lavieén + ativos para melasma: de R$ 1.900,00 por 6x de R$ 233,00. Proporciona o famoso "Efeito BB Laser" com clareamento de manchas, viço extremo e poros fechados.',
     category: 'facial',
     popular: true,
     benefits: [
+      'Pacote Promocional: 03 sessões + ativos específicos para melasma',
+      'Valores especiais: De R$ 1.900,00 por 6x de R$ 233,00',
       'Pele de porcelana com efeito iluminação e viço instantâneo',
-      'Clareamento de melasma, sardas e manchas de acne',
-      'Tratamento de poros dilatados e linhas finas',
-      'Baixo downtime (retorno rápido à rotina de maquiagem)'
+      'Tratamento de poros dilatados, manchas e uniformização de tom'
     ],
     image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 850,00 por sessão',
+    price: 'De R$ 1.900,00 por 6x de R$ 233,00',
     duration: '45 min',
     technicalSpecs: {
-      duration: '45 minutos',
+      duration: '45 minutos por sessão',
       anesthesia: 'Anestésico tópico prévio',
-      recovery: '1 a 3 dias (leve sensação de pele aveludada/areia)',
+      recovery: '1 a 3 dias (leve sensação de pele aveludada)',
       indicatedFor: 'Manchas, melasma, poros abertos, rugas finas e falta de brilho',
       resultsIn: 'Primeiros efeitos de brilho em 3 a 7 dias',
-      sessionsRequired: '1 a 3 sessões mensais'
+      sessionsRequired: 'Pacote de 3 sessões inclusas'
     },
     postCareTips: [
       'Uso rigoroso de protetor solar FPS 50+ com cor.',
-      'Caprichar na hidratação com regeneradores labiais/cutâneos.',
+      'Caprichar na hidratação com regeneradores cutâneos.',
       'Evitar exposição ao sol direto nos primeiros 10 dias.'
     ],
     specialist: {
@@ -169,19 +169,56 @@ export const TREATMENTS: Treatment[] = [
     }
   },
   {
+    id: 'co2-hibrido',
+    name: 'CO2 Híbrido - Full Face (02 Sessões)',
+    description: 'Tratamento de alta precisão para renovação facial completa: 02 sessões de R$ 3.800,00 por 6x de R$ 366,00. Atua na reestruturação celular profunda, atenuação de cicatrizes de acne e rugas.',
+    category: 'facial',
+    popular: true,
+    highlight: true,
+    benefits: [
+      'Pacote 02 Sessões Full Face: De R$ 3.800,00 por 6x de R$ 366,00',
+      'Tecnologia de Laser CO2 Híbrido para rejuvenescimento profundo',
+      'Refinamento intenso de textura, cicatrizes e rugas',
+      'Estímulo vigoroso de colágeno e retração do tecido'
+    ],
+    image: 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?auto=format&fit=crop&w=800&q=80',
+    price: 'De R$ 3.800,00 por 6x de R$ 366,00',
+    duration: '60 min',
+    technicalSpecs: {
+      duration: '60 minutos',
+      anesthesia: 'Anestésico tópico potente e resfriamento',
+      recovery: '3 a 5 dias de regeneração',
+      indicatedFor: 'Rejuvenescimento global facial, cicatrizes de acne, poros e rugas profundas',
+      resultsIn: 'Renovação visível a partir do 7º dia',
+      sessionsRequired: '2 sessões (inclusas no pacote)'
+    },
+    postCareTips: [
+      'Usar regenerador labial/cutâneo recomendado.',
+      'Não arrancar casquinhas em hipótese alguma.',
+      'Evitar sol e aplicar filtro solar rigorosamente.'
+    ],
+    specialist: {
+      name: 'Dra. Amanda Rodrigues',
+      role: 'Biomédica Esteta',
+      registration: 'CRBM 34.892-SP',
+      bio: 'Especialista em tecnologias a laser de alta potência e rejuvenescimento avançado.',
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80'
+    }
+  },
+  {
     id: 'ultraformer',
-    name: 'Ultraformer (Ultrassom Micro e Macrofocado)',
-    description: 'Lifting facial e corporal sem cortes. Atua no SMAS (camada muscular) para estímulo de colágeno profundo, ancoragem da pele e redução seletiva de gordura da papada.',
+    name: 'Ultraformer MPT (Ultrassom Micro e Macrofocado)',
+    description: 'Lifting facial e corporal sem cortes a partir de R$ 499,00! A revolucionária tecnologia Ultraformer MPT atua no SMAS para estímulo de colágeno profundo, ancoragem da pele e afinamento de papada.',
     category: 'facial',
     popular: true,
     benefits: [
-      'Efeito lifting natural sem necessidade de cirurgia',
+      'Tecnologia Ultraformer MPT com valores a partir de R$ 499,00',
+      'Efeito lifting natural sem necessidade de cirurgia ou agulhas',
       'Definição do contorno da mandíbula e afinamento de papada',
-      'Combate rigoroso à flacidez do pescoço e pálpebras',
       'Resultados que evoluem continuamente por até 3 meses'
     ],
     image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=800&q=80',
-    price: 'A partir de R$ 1.500,00',
+    price: 'A partir de R$ 499,00',
     duration: '50 min',
     technicalSpecs: {
       duration: '45 a 60 minutos',
@@ -205,73 +242,39 @@ export const TREATMENTS: Treatment[] = [
     }
   },
   {
-    id: 'emagrecimento',
-    name: 'Protocolo de Emagrecimento Consciente & Alta Performance',
-    description: 'Abordagem integrada para redução de peso e gordura visceral combinando enzimas metabólicas, aceleradores lipolíticos e acompanhamento estratégico da silhueta.',
+    id: 'gordura-localizada',
+    name: 'Gordura Localizada (10 Sessões de Enzimas)',
+    description: 'Protocolo especial de 10 sessões de enzimas: de R$ 2.500,00 por 6x de R$ 350,00. Aplicação de mesclas lipolíticas concentradas que destroem as células de gordura no abdômen, flancos, culotes e braços.',
     category: 'corporal',
+    highlight: true,
     benefits: [
-      'Aceleração do metabolismo e estimulação do gasto calórico',
-      'Mesclas injetáveis metabólicas e desintoxicantes seguras',
-      'Preservação de massa magra e redução seletiva de gordura',
-      'Protocolo individualizado com acompanhamento contínuo'
+      'Pacote Especial de 10 Sessões de Enzimas Lipolíticas',
+      'Super Condição: De R$ 2.500,00 por 6x de R$ 350,00',
+      'Redução perceptível de medidas e afinamento acelerado da silhueta',
+      'Combinação personalizada de enzimas queimadoras de gordura'
     ],
-    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
-    price: 'A partir de R$ 450,00',
-    duration: '45 min',
+    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
+    price: 'De R$ 2.500,00 por 6x de R$ 350,00',
+    duration: '30 min',
     technicalSpecs: {
-      duration: '45 minutos por sessão',
-      anesthesia: 'Não necessária',
-      recovery: 'Imediata',
-      indicatedFor: 'Perda de peso, redução de gordura corporal global e otimização metabólica',
-      resultsIn: 'Perceptível desde a 2ª semana de acompanhamento',
-      sessionsRequired: 'Programa de 4 a 8 sessões semanais'
+      duration: '30 a 40 minutos por sessão',
+      anesthesia: 'Anestésico local integrado',
+      recovery: 'Retorno imediato às atividades normais',
+      indicatedFor: 'Gordura acumulada no abdômen, flancos, papada, culotes e dobras do sutiã',
+      resultsIn: 'A partir da 2ª ou 3ª sessão do pacote',
+      sessionsRequired: '10 sessões inclusas no tratamento'
     },
     postCareTips: [
-      'Aumentar o consumo de água para pelo menos 2,5L diários.',
-      'Manter alimentação balanceada orientada no protocolo.',
-      'Praticar exercícios físicos regulares.'
+      'Beber 2 a 3 litros de água diariamente para eliminar gordura metabolizada.',
+      'Praticar atividade física moderada após a sessão.',
+      'Evitar bebidas alcoólicas por 48 horas.'
     ],
     specialist: {
       name: 'Dr. Lucas Mendes',
       role: 'Farmacêutico Esteta',
       registration: 'CRF 58.102-SP',
-      bio: 'Especialista em modulação metabólica e bioativos para perda de peso.',
+      bio: 'Especialista em mesoterapia lipolítica e redução de medidas.',
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80'
-    }
-  },
-  {
-    id: 'terapia-capilar',
-    name: 'Tratamento para Queda de Cabelo (Com Ativos & Tecnologia Associada)',
-    description: 'Protocolo especializado contra calvície e queda capilar acentuada. Associa microagulhamento com ativos fatores de crescimento, intradermoterapia e LEDterapia para estancar a queda e estimular novos fios.',
-    category: 'capilar',
-    benefits: [
-      'Interrupção da queda acentuada de cabelos (eflúvio e alopecia)',
-      'Estimulação direta de novos fios e engrossamento capilar',
-      'Aplicação de ativos fatores de crescimento e intradermoterapia',
-      'Fotobiomodulação por LED para ativar a circulação no couro cabeludo'
-    ],
-    image: 'https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 380,00 por sessão',
-    duration: '45 min',
-    technicalSpecs: {
-      duration: '45 a 60 minutos',
-      anesthesia: 'Anestésico tópico leve no couro cabeludo',
-      recovery: 'Retorno imediato às atividades',
-      indicatedFor: 'Eflúvio telógeno, calvície masculina e feminina, queda pós-dengue/estresse e fios finos',
-      resultsIn: 'Redução da queda em 3 a 4 semanas; novos fios em 60 a 90 dias',
-      sessionsRequired: 'Protocolo de 5 a 10 sessões quinzenais'
-    },
-    postCareTips: [
-      'Não lavar os cabelos por 12 horas após a sessão para melhor absorção dos ativos.',
-      'Evitar exposição ao sol direto no couro cabeludo no dia da aplicação.',
-      'Usar o tônico/medicação homecare prescrito pela especialista.'
-    ],
-    specialist: {
-      name: 'Carla Silveira',
-      role: 'Especialista em Terapia Capilar & Tricologia',
-      registration: 'EST-SP 12.450',
-      bio: 'Especialista em patologias do couro cabeludo e protocolos de fortalecimento capilar.',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
     }
   },
   {
@@ -311,6 +314,41 @@ export const TREATMENTS: Treatment[] = [
     }
   },
   {
+    id: 'terapia-capilar',
+    name: 'Tratamento para Queda de Cabelo (Com Ativos & Tecnologia Associada)',
+    description: 'Protocolo especializado contra calvície e queda capilar acentuada. Associa microagulhamento com ativos fatores de crescimento, intradermoterapia e LEDterapia para estancar a queda e estimular novos fios.',
+    category: 'capilar',
+    benefits: [
+      'Interrupção da queda acentuada de cabelos (eflúvio e alopecia)',
+      'Estimulação direta de novos fios e engrossamento capilar',
+      'Aplicação de ativos fatores de crescimento e intradermoterapia',
+      'Fotobiomodulação por LED para ativar a circulação no couro cabeludo'
+    ],
+    image: 'https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?auto=format&fit=crop&w=800&q=80',
+    price: 'R$ 380,00 por sessão',
+    duration: '45 min',
+    technicalSpecs: {
+      duration: '45 a 60 minutos',
+      anesthesia: 'Anestésico tópico leve no couro cabeludo',
+      recovery: 'Retorno imediato às atividades',
+      indicatedFor: 'Eflúvio telógeno, calvície masculina e feminina, queda pós-dengue/estresse e fios finos',
+      resultsIn: 'Redução da queda em 3 a 4 semanas; novos fios em 60 a 90 dias',
+      sessionsRequired: 'Protocolo de 5 a 10 sessões quinzenais'
+    },
+    postCareTips: [
+      'Não lavar os cabelos por 12 horas após a sessão para melhor absorção dos ativos.',
+      'Evitar exposição ao sol direto no couro cabeludo no dia da aplicação.',
+      'Usar o tônico/medicação homecare prescrito pela especialista.'
+    ],
+    specialist: {
+      name: 'Carla Silveira',
+      role: 'Especialista em Terapia Capilar & Tricologia',
+      registration: 'EST-SP 12.450',
+      bio: 'Especialista em patologias do couro cabeludo e protocolos de fortalecimento capilar.',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
+    }
+  },
+  {
     id: 'massagens',
     name: 'Massagens (Drenagem Linfática, Relaxante e Modeladora)',
     description: 'Menu completo de massagens manuais adaptadas ao seu objetivo: Drenagem Linfática para edemas/retenção, Massagem Relaxante com aromaterapia e Massagem Modeladora Redutora.',
@@ -343,77 +381,6 @@ export const TREATMENTS: Treatment[] = [
       registration: 'CRTH 8.910',
       bio: 'Especialista em técnicas de drenagem linfática e massoterapia integrativa.',
       avatar: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&w=300&q=80'
-    }
-  },
-  {
-    id: 'gordura-localizada',
-    name: 'Gordura Localizada (Lipo Enzimática)',
-    description: 'Combate focado às gordurinhas difíceis do abdômen, flancos, culotes, papada e braços com aplicação de enzimas lipolíticas concentradas que destroem as células de gordura.',
-    category: 'corporal',
-    highlight: true,
-    benefits: [
-      'Ação direta no tecido adiposo sem necessidade de cortes',
-      'Redução perceptível de medidas e afinamento da silhueta',
-      'Combinação personalizada de enzimas queimadoras de gordura',
-      'Aplicação rápida e segura com retorno imediato à rotina'
-    ],
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 350,00 por sessão',
-    duration: '30 min',
-    technicalSpecs: {
-      duration: '30 a 40 minutos',
-      anesthesia: 'Anestésico local integrado',
-      recovery: 'Retorno imediato às atividades normais',
-      indicatedFor: 'Gordura acumulada no abdômen, flancos, papada, culotes e dobras do sutiã',
-      resultsIn: 'A partir da 2ª ou 3ª sessão',
-      sessionsRequired: 'Protocolo recomendado de 4 a 6 sessões'
-    },
-    postCareTips: [
-      'Beber 2 a 3 litros de água diariamente para eliminar gordura metabolizada.',
-      'Praticar atividade física moderada após a sessão.',
-      'Evitar bebidas alcoólicas por 48 horas.'
-    ],
-    specialist: {
-      name: 'Dr. Lucas Mendes',
-      role: 'Farmacêutico Esteta',
-      registration: 'CRF 58.102-SP',
-      bio: 'Especialista em mesoterapia lipolítica e redução de medidas.',
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80'
-    }
-  },
-  {
-    id: 'flacidez',
-    name: 'Flacidez (Criofrequência & Bioestimulação)',
-    description: 'Combinação potente do choque térmico da Criofrequência com tecnologia multipolar para contração imediata das fibras e remodelação profunda do colágeno corporal e facial.',
-    category: 'corporal',
-    benefits: [
-      'Efeito tensor imediato e pele visivelmente mais firme',
-      'Estímulo intenso e duradouro de novas fibras de colágeno e elastina',
-      'Tratamento indolor e confortável com resfriamento a -10°C',
-      'Excelente para flacidez do abdômen pós-parto, pernas, braços e papada'
-    ],
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
-    price: 'R$ 290,00 por sessão',
-    duration: '40 min',
-    technicalSpecs: {
-      duration: '40 a 50 minutos',
-      anesthesia: 'Não necessária (cabeçote gelado a -10°C)',
-      recovery: 'Imediata',
-      indicatedFor: 'Flacidez tissular corporal e facial, umbigo triste, celulite e perda de tônus',
-      resultsIn: 'Lifting perceptível na 1ª sessão com evolução quinzenal',
-      sessionsRequired: '6 a 8 sessões quinzenais'
-    },
-    postCareTips: [
-      'Beba bastante água.',
-      'Evite o uso de cosméticos congelantes logo após a sessão.',
-      'Manter alimentação rica em proteínas e vitamina C.'
-    ],
-    specialist: {
-      name: 'Carla Silveira',
-      role: 'Esteticista Cosmetóloga Sênior',
-      registration: 'EST-SP 12.450',
-      bio: 'Especialista em tecnologia médica para firmeza cutânea e eletroterapia.',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
     }
   }
 ];
@@ -466,41 +433,67 @@ export const FAQS: FAQ[] = [
 export const INITIAL_PROMOTIONS: Promotion[] = [
   {
     id: 'promo-1',
-    badge: 'OFERTA CAMPEÃ DE ATRAÇÃO',
-    title: 'Protocolo Secagem de Vasinhos (Laser + Injetável)',
-    subtitle: 'Ação rápida contra vasinhos e microvarizes com laser vascular de alta precisão e PEIM.',
-    discount: '30% OFF',
-    originalPrice: 'R$ 550',
-    promoPrice: 'R$ 380',
-    couponCode: 'PERNASLINDAS',
+    badge: 'PACOTE PROMOCIONAL',
+    title: 'Secagem de Vasinhos (Laser + PEIM Injetável)',
+    subtitle: 'Sessões a laser vascular + aplicações injetáveis a partir de R$ 289,00.',
+    discount: 'OFERTA',
+    originalPrice: 'R$ 450',
+    promoPrice: 'A partir de R$ 289',
+    couponCode: 'VASINHOS289',
     expiresInDays: 5,
     treatmentId: 'secagem-vasinhos',
     active: true,
   },
   {
     id: 'promo-2',
+    badge: 'OFERTA MÊS DE AGOSTO',
+    title: 'Botox Dysport (3 Regiões) com Retoque',
+    subtitle: 'Aplicação em 3 regiões do rosto com retoque incluso.',
+    discount: '30% OFF',
+    originalPrice: 'R$ 1.290',
+    promoPrice: 'R$ 899',
+    couponCode: 'BOTOXAGOSTO',
+    expiresInDays: 7,
+    treatmentId: 'botox-dysport',
+    active: true,
+  },
+  {
+    id: 'promo-3',
     badge: 'ESTÍMULO DE COLÁGENO',
-    title: 'Radiesse / Sculptra + Anestésico Tópico',
-    subtitle: 'Bioestimulador de alta performance para firmeza e combate da flacidez.',
-    discount: 'R$ 350 OFF',
-    originalPrice: 'R$ 2.300',
-    promoPrice: 'R$ 1.950',
-    couponCode: 'COLAGENO2026',
+    title: 'Bioestimulador Radiesse ou Sculptra',
+    subtitle: 'Firmeza e combate da flacidez facial e corporal.',
+    discount: 'PARCELADO',
+    originalPrice: 'R$ 2.390',
+    promoPrice: '6x de R$ 365',
+    couponCode: 'RADIESSE6X',
     expiresInDays: 8,
     treatmentId: 'radiesse-sculptra',
     active: true,
   },
   {
-    id: 'promo-3',
-    badge: 'PELE DE PORCELANA',
-    title: 'Laser Lavieén (Efeito BB Laser)',
-    subtitle: 'Pele iluminada, fechamento de poros e clareamento de manchas.',
-    discount: '25% OFF',
-    originalPrice: 'R$ 1.100',
-    promoPrice: 'R$ 850',
-    couponCode: 'LAVIEENGLOW',
-    expiresInDays: 3,
+    id: 'promo-4',
+    badge: 'EFEITO BB LASER',
+    title: 'Laser Lavieén (Pacote 03 Sessões + Ativos)',
+    subtitle: '03 sessões de Lavieén + ativos específicos para melasma.',
+    discount: 'SUPER PACOTE',
+    originalPrice: 'R$ 1.900',
+    promoPrice: '6x de R$ 233',
+    couponCode: 'LAVIEEN3X',
+    expiresInDays: 4,
     treatmentId: 'laser-lavieen',
+    active: true,
+  },
+  {
+    id: 'promo-5',
+    badge: 'RENOVADOR FACIAL',
+    title: 'CO2 Híbrido - Full Face (02 Sessões)',
+    subtitle: '02 sessões completas para rejuvenescimento e textura.',
+    discount: 'PROMO FULL',
+    originalPrice: 'R$ 3.800',
+    promoPrice: '6x de R$ 366',
+    couponCode: 'CO2FULLFACE',
+    expiresInDays: 6,
+    treatmentId: 'co2-hibrido',
     active: true,
   },
 ];

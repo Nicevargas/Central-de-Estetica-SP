@@ -68,7 +68,13 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   onSaveContactInfo,
   onClose,
 }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('admin_session_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -114,9 +120,14 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
       (cleanPass === 'admin123' || cleanPass === '1234' || cleanPass === '123456' || cleanPass === 'admin')
     ) {
       setIsAuthenticated(true);
+      try {
+        localStorage.setItem('admin_session_auth', 'true');
+      } catch (e) {
+        console.error(e);
+      }
       setLoginError(null);
     } else {
-      setLoginError('Usuário ou senha incorretos. Verifique os dados padrão abaixo.');
+      setLoginError('Usuário ou senha incorretos.');
     }
   };
 
@@ -368,22 +379,6 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
               </div>
             )}
 
-            {/* Default Credentials Helper Card */}
-            <div className="p-3 bg-stone-50 dark:bg-stone-800/60 rounded-xl border border-stone-200 dark:border-stone-700 text-xs text-stone-600 dark:text-stone-300 space-y-1">
-              <div className="flex items-center justify-between font-bold text-stone-800 dark:text-stone-200">
-                <span>🔑 Acesso Padrão:</span>
-                <button
-                  type="button"
-                  onClick={fillDefaultCredentials}
-                  className="text-rose-600 dark:text-rose-400 hover:underline text-[11px] font-semibold cursor-pointer"
-                >
-                  Preencher automático
-                </button>
-              </div>
-              <p><strong>Usuário:</strong> <code className="bg-stone-200 dark:bg-stone-700 px-1 py-0.5 rounded">admin</code></p>
-              <p><strong>Senha:</strong> <code className="bg-stone-200 dark:bg-stone-700 px-1 py-0.5 rounded">admin123</code></p>
-            </div>
-
             <div className="flex gap-2 pt-2">
               <button
                 type="submit"
@@ -428,7 +423,14 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
               </span>
             )}
             <button
-              onClick={() => setIsAuthenticated(false)}
+              onClick={() => {
+                setIsAuthenticated(false);
+                try {
+                  localStorage.removeItem('admin_session_auth');
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
               className="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-rose-400 hover:text-rose-300 transition-colors cursor-pointer text-xs font-bold flex items-center gap-1.5 border border-stone-700"
               title="Sair do Painel"
             >

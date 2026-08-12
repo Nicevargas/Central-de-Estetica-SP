@@ -1,47 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Tag, Clock, ChevronLeft, ChevronRight, Copy, Check, ArrowRight, ShieldCheck } from 'lucide-react';
-import promoBannerImg from '../assets/images/promo_hero_banner_1785344438660.jpg';
+import { Sparkles, Tag, Clock, ChevronLeft, ChevronRight, Copy, Check, ArrowRight } from 'lucide-react';
 import { Promotion } from '../types';
 
 const FALLBACK_PROMOTIONS: Promotion[] = [
   {
     id: 'promo-1',
-    badge: 'OFERTA DESTAQUE DO MÊS',
-    title: 'Combo Brilho & Rejuvenescimento',
-    subtitle: 'Botox 3 áreas + Peeling de Diamante para uma pele renovada e radiante.',
-    discount: '30% OFF',
-    originalPrice: 'R$ 1.200',
-    promoPrice: 'R$ 840',
-    couponCode: 'ESTETICA30',
+    badge: 'PACOTE PROMOCIONAL',
+    title: 'Secagem de Vasinhos (Laser + PEIM Injetável)',
+    subtitle: 'Sessões a laser vascular + aplicações injetáveis a partir de R$ 289,00.',
+    discount: 'OFERTA',
+    originalPrice: 'R$ 450',
+    promoPrice: 'A partir de R$ 289',
+    couponCode: 'VASINHOS289',
     expiresInDays: 5,
-    treatmentId: 'botox',
+    treatmentId: 'secagem-vasinhos',
     active: true,
   },
   {
     id: 'promo-2',
-    badge: 'ESTÍMULO DE COLÁGENO',
-    title: 'Protocolo Contorno & Firmeza',
-    subtitle: 'Bioestimulador de Colágeno com Drenagem Facial de cortesia.',
-    discount: 'R$ 350 OFF',
-    originalPrice: 'R$ 1.950',
-    promoPrice: 'R$ 1.600',
-    couponCode: 'FIRM2026',
-    expiresInDays: 8,
-    treatmentId: 'bioestimulador',
+    badge: 'OFERTA MÊS DE AGOSTO',
+    title: 'Botox Dysport (3 Regiões) com Retoque',
+    subtitle: 'Aplicação em 3 regiões do rosto com retoque incluso.',
+    discount: '30% OFF',
+    originalPrice: 'R$ 1.290',
+    promoPrice: 'R$ 899',
+    couponCode: 'BOTOXAGOSTO',
+    expiresInDays: 7,
+    treatmentId: 'botox-dysport',
     active: true,
   },
   {
     id: 'promo-3',
-    badge: 'RENOVAÇÃO FACIAL EXPRESS',
-    title: 'Limpeza de Pele HD + LED',
-    subtitle: 'Limpeza profunda com hidratação e fototerapia anti-inflamatória.',
-    discount: '25% OFF',
-    originalPrice: 'R$ 280',
-    promoPrice: 'R$ 210',
-    couponCode: 'PELEPERFEITA',
-    expiresInDays: 3,
-    treatmentId: 'limpeza-de-pele',
+    badge: 'ESTÍMULO DE COLÁGENO',
+    title: 'Bioestimulador Radiesse ou Sculptra',
+    subtitle: 'Firmeza e combate da flacidez facial e corporal.',
+    discount: 'PARCELADO',
+    originalPrice: 'R$ 2.390',
+    promoPrice: '6x de R$ 365',
+    couponCode: 'RADIESSE6X',
+    expiresInDays: 8,
+    treatmentId: 'radiesse-sculptra',
+    active: true,
+  },
+  {
+    id: 'promo-4',
+    badge: 'EFEITO BB LASER',
+    title: 'Laser Lavieén (Pacote 03 Sessões + Ativos)',
+    subtitle: '03 sessões de Lavieén + ativos específicos para melasma.',
+    discount: 'SUPER PACOTE',
+    originalPrice: 'R$ 1.900',
+    promoPrice: '6x de R$ 233',
+    couponCode: 'LAVIEEN3X',
+    expiresInDays: 4,
+    treatmentId: 'laser-lavieen',
+    active: true,
+  },
+  {
+    id: 'promo-5',
+    badge: 'RENOVADOR FACIAL',
+    title: 'CO2 Híbrido - Full Face (02 Sessões)',
+    subtitle: '02 sessões completas para rejuvenescimento e textura.',
+    discount: 'PROMO FULL',
+    originalPrice: 'R$ 3.800',
+    promoPrice: '6x de R$ 366',
+    couponCode: 'CO2FULLFACE',
+    expiresInDays: 6,
+    treatmentId: 'co2-hibrido',
     active: true,
   },
 ];
@@ -69,6 +94,8 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_
   }, [isPaused, displayPromos.length]);
 
   const currentPromo = displayPromos[currentIndex] || displayPromos[0];
+
+  const promoImage = 'https://centraldaestetica.com.br/liveen.png';
 
   const handleCopyCoupon = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -198,25 +225,30 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_
             </div>
           </div>
 
-          {/* Right Image Showcase Column */}
+          {/* Right Image Showcase Column (Clean Aesthetic Treatment Photo) */}
           <div className="lg:col-span-5 relative min-h-[160px] lg:min-h-full overflow-hidden hidden sm:block">
-            <img
-              src={promoBannerImg}
-              alt="Estética Avançada"
-              className="w-full h-full object-cover object-center transform scale-100 transition-transform duration-700 hover:scale-105"
-            />
-            {/* Soft subtle gradient transition to match left light theme */}
-            <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-rose-50/90 via-rose-50/20 to-transparent" />
-
-            {/* Floating Discount Tag */}
-            <div className="absolute top-4 right-4 bg-rose-600/95 text-white font-extrabold px-3 py-1.5 rounded-xl shadow-md border border-white/40 text-xs sm:text-sm">
-              {currentPromo.discount}
-            </div>
-
-            <div className="absolute bottom-4 right-4 text-[10px] text-stone-700 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-md border border-stone-200/80 flex items-center gap-1 shadow-sm">
-              <ShieldCheck className="h-3 w-3 text-emerald-600" />
-              <span>Sua avaliação sem custo</span>
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPromo.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full h-full relative"
+              >
+                <img
+                  src={promoImage}
+                  alt={currentPromo.title}
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+                  }}
+                  className="w-full h-full object-cover object-center transform transition-transform duration-700 hover:scale-105"
+                />
+                {/* Soft subtle gradient transition to blend cleanly with left light theme */}
+                <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-rose-50/90 via-rose-50/15 to-transparent pointer-events-none" />
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </div>

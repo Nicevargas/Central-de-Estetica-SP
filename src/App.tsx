@@ -31,7 +31,11 @@ import {
   Settings,
   Lock,
   Scissors,
-  Zap
+  Zap,
+  Trophy,
+  Medal,
+  BadgeCheck,
+  GraduationCap
 } from 'lucide-react';
 import { FAQS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
@@ -430,7 +434,7 @@ export default function App() {
                   <div className="space-y-6">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-wider">
                       <Sparkles className="h-4 w-4 text-primary" />
-                      12 Anos de Excelência no Jardim Paulista
+                      20 Anos de Excelência no Jardim Paulista
                     </div>
                     <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-on-surface leading-tight">
                       Sua melhor versão, com o <span className="gradient-text">cuidado</span> que você merece
@@ -460,9 +464,12 @@ export default function App() {
                     <div className="w-full aspect-[4/3] sm:aspect-[16/11] lg:h-[480px] rounded-[40px] overflow-hidden shadow-2xl relative">
                       <img
                         className="w-full h-full object-cover"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZO37IGhwP5FFzMDc9vMCFDN1WSuB7x9YaUardfp4LRJ9lcf4ZBjoSoORRaujD3f2_WIk_U-2WwSy8rIyfp8LrISTLfCzJNRToZmYrbQ47M9C6TYwk6lAVBK54rc8epP2muwWL7N8hWtHnHCns-reg5R74JWfXb_0pH-6hGxR3TkF3-lu28LIgi_tZnwLDMKz2Bv5_EWcyT7zZLTE0O71Op1g91nwI-HTEqDVrH4oUnBBQs9CKa5SMmw"
-                        alt="Interior luxuoso da clínica com esteticista e paciente"
+                        src="https://centraldaestetica.com.br/banner.png"
+                        alt="Tratamento de estética e cuidados com a pele de alta performance"
                         referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+                        }}
                       />
                       {/* Floating Badge */}
                       <div className="absolute bottom-6 left-6 glass-card p-4 rounded-2xl flex items-center gap-3 animate-bounce-slow shadow-lg">
@@ -524,6 +531,82 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Certificações e Reconhecimentos Section */}
+              <section className="bg-stone-50/80 border-b border-outline-variant/15 py-12">
+                <div className="max-w-7xl mx-auto px-6">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+                        <Award className="h-3.5 w-3.5" />
+                        Garantia de Excelência &amp; Segurança
+                      </div>
+                      <h3 className="font-serif text-2xl sm:text-3xl font-bold text-primary">
+                        Certificações &amp; Reconhecimentos do Setor
+                      </h3>
+                    </div>
+                    <p className="text-on-surface-variant text-xs sm:text-sm max-w-md">
+                      Compromisso rigoroso com os mais altos padrões de biossegurança, chancela dos conselhos federais de saúde e tecnologias premiadas mundialmente.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+                    {/* Badge 1: ANVISA */}
+                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3 shrink-0">
+                        <ShieldCheck className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-bold text-xs text-primary mb-1">Registro ANVISA</h4>
+                      <p className="text-[10px] text-stone-500 font-medium leading-tight">100% dos equipamentos e injetáveis homologados</p>
+                    </div>
+
+                    {/* Badge 2: Prêmio Excelência */}
+                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
+                      <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3 shrink-0">
+                        <Trophy className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-bold text-xs text-primary mb-1">Prêmio Destaque 2025</h4>
+                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Clínica Referência em Harmonização &amp; Laser</p>
+                    </div>
+
+                    {/* Badge 3: Conselhos de Saúde */}
+                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
+                      <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center mb-3 shrink-0">
+                        <BadgeCheck className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-bold text-xs text-primary mb-1">Habilitação Federal</h4>
+                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Profissionais com registro ativo CRBM e CRM</p>
+                    </div>
+
+                    {/* Badge 4: Selo de Biossegurança */}
+                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
+                      <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center mb-3 shrink-0">
+                        <CheckCircle2 className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-bold text-xs text-primary mb-1">Selo de Biossegurança</h4>
+                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Protocolos esterilizados de nível hospitalar</p>
+                    </div>
+
+                    {/* Badge 5: Centro Autorizado Ultraformer & Lavieen */}
+                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
+                      <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center mb-3 shrink-0">
+                        <Medal className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-bold text-xs text-primary mb-1">Centro Autorizado</h4>
+                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Tecnologias originais MPT &amp; Lavieén de fábrica</p>
+                    </div>
+
+                    {/* Badge 6: Educação Contínua */}
+                    <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs flex flex-col items-center text-center hover:shadow-md transition-all hover:-translate-y-1">
+                      <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-3 shrink-0">
+                        <GraduationCap className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-bold text-xs text-primary mb-1">Educação Contínua</h4>
+                      <p className="text-[10px] text-stone-500 font-medium leading-tight">Atualizações internacionais anuais da equipe</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               {/* Specialties Bento Grid Section */}
               <section className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-6">
@@ -542,7 +625,7 @@ export default function App() {
                     >
                       <img
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDP4m6144rNpH3MR3Yd2x65vOZV-K6_zu4pMfn85JHgeuYwzx-k33u-oPr_qsUuNYfdjwEAlC5aVYdAtJWWSGuKOi4Z8Jehfyip7u9zml0VrJ5RcJFL-IJh0EpGv2sHK_25IVngs7AzF607z0ywj2k6z2NLl9qWh8HET3S1KQxUW6vfT8_72Ina_9j3Ewjv_jl183Dxc3OIhnAXtIxdvagDS-gyziVeVDIbz-SCYQRFtRaYDRxBNHQCHg"
+                        src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80"
                         alt="Estética Facial"
                         referrerPolicy="no-referrer"
                       />
@@ -566,7 +649,7 @@ export default function App() {
                     >
                       <img
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdALPIr_mYm1IpZ7vCO9l1Ig0tpHhxV3V-0HKjFn9mecvFZyxFIyylHXBV5Cz0TWimfvBzTHZ0nmbiEBz5JkCoWJbCOkasFfIIzfs_541sZQS0n7fk332hqrrCuGN0lJei0Iwcvd2sWoE8c1vOUEAAJ655BarsW0f5bgvY0okJpDpZJ0MUvVr8rCak0xGAH6SF1ciLhUB1P9MeTgbUQPRQbVAEqtDa6c_6Y2OGYVmXLqBBfjkNEIrQRw"
+                        src="https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=800&q=80"
                         alt="Estética Corporal"
                         referrerPolicy="no-referrer"
                       />
@@ -590,7 +673,7 @@ export default function App() {
                     >
                       <img
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlNRER5pcRT8jVZDUAsbU1dE5aj8KHV8-5n7nCvRpJ-Xo-nvz1YbcCyZSvENgxp0MwwwfAcgU1OqcRNLHxzj90fvm5tAX6VoX3QbVBouAmeseo4JB3o2ORLuLwKSxW2pxkluXBBT-hUBeRNTOjEb_17q3h1QK0iGn6p4SQOtxx3pwoHSB8LwyenAIUwgE2qDCpe8i0d9UaMhT67lCPIDZnn73SweBwDlOaYAv0apsiIObncjLC4yUlgw"
+                        src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80"
                         alt="Bem-estar e Relaxamento"
                         referrerPolicy="no-referrer"
                       />
@@ -617,16 +700,19 @@ export default function App() {
                     <div className="absolute -top-10 -left-10 w-40 h-40 bg-secondary/5 rounded-full blur-3xl" />
                     <img
                       className="w-full h-[500px] object-cover rounded-3xl relative z-10 shadow-lg border border-outline-variant/10"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPkP79yfHeUo-2aSlqT3E85RxxjYwPMgle6gcABtq5r-jaLCAoJJRakALwaVp6GnfiOZnRP-ItrW3RuChGKaQQWkbewhX7Wlm2Ri230qovFwpUOm4mY9zbEEwVVV1e1litAmfcdiy1HHQAACfYh2fMjg5ECW8dZ-fLlHnCZyGHtVMLtczNadKzTqDr9x1kVXhVom4Yxvz6oyZK14lRnXZ0kHoRt6xEmo3GfSfBeM_674NTuR_ynyQhIQ"
-                      alt="Headshot profissional da esteticista no ambiente clínico"
+                      src="https://centraldaestetica.com.br/esteticista.png"
+                      alt="Esteticista da Central da Estética"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+                      }}
                     />
                     {/* Floating badge */}
                     <div className="absolute -bottom-6 -right-6 glass-card p-6 rounded-2xl z-20 max-w-xs shadow-xl">
-                      <div className="font-serif text-primary text-5xl font-bold mb-1">12</div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-on-surface">Anos de Mercado</div>
-                      <p className="text-xs text-on-surface-variant mt-2 font-medium">
-                        Referência consolidada em atendimento estético humanizado em São Paulo.
+                      <div className="font-serif text-primary text-5xl font-bold mb-1">20+</div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-on-surface mb-1">Anos de Tradição</div>
+                      <p className="text-xs text-on-surface-variant font-medium leading-relaxed">
+                        Clínica de saúde, beleza e bem-estar há mais de 20 anos no Mercado com uma carteira sólida de clientes.
                       </p>
                     </div>
                   </div>
@@ -679,7 +765,7 @@ export default function App() {
                           className="bg-white rounded-2xl p-6 border border-outline-variant/15 text-sm text-on-surface-variant space-y-3 leading-relaxed mt-4"
                         >
                           <p>
-                            Fundada em 2014, a Central da Estética iniciou com o objetivo de democratizar o acesso à estética de alta qualidade no Jardim Paulista. Acreditamos que a beleza é a expressão exterior de uma saúde equilibrada e do bem-estar mental.
+                            Com mais de 20 anos de atuação no mercado, a Central da Estética se consolidou como referência em saúde, beleza e bem-estar no Jardim Paulista, contando com uma carteira sólida de clientes satisfeitos. Acreditamos que a beleza é a expressão exterior de uma saúde equilibrada.
                           </p>
                           <p>
                             Nossos profissionais realizam constantes especializações internacionais para trazer as técnicas de rejuvenescimento facial e remodelagem corporal mais modernas do mundo, garantindo segurança clínica absoluta.

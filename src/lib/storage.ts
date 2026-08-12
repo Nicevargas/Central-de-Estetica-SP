@@ -23,8 +23,8 @@ import {
 } from './supabase';
 
 const STORAGE_KEYS = {
-  TREATMENTS: 'estetica_treatments_v3',
-  PROMOTIONS: 'estetica_promotions_v2',
+  TREATMENTS: 'estetica_treatments_v5',
+  PROMOTIONS: 'estetica_promotions_v3',
   TESTIMONIALS: 'estetica_testimonials_v1',
   BLOG_POSTS: 'estetica_blog_posts_v1',
   BOOKINGS: 'estetica_bookings_v1',
