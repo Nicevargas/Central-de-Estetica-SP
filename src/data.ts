@@ -108,7 +108,7 @@ export const TREATMENTS: Treatment[] = [
       'Combate efetivo da flacidez facial e sustentação dos tecidos',
       'Resultados duradouros e progressivos por até 2 anos'
     ],
-    image: 'https://images.unsplash.com/photo-1512290900676-26c2a48f4134?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
     price: 'De R$ 2.390,00 por 6x de R$ 365,00',
     duration: '45 min',
     technicalSpecs: {

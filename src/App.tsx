@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Star,
@@ -81,7 +81,6 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
-  const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(null);
 
   const [preSelectedTreatment, setPreSelectedTreatment] = useState<string>('');
   const [openFaqId, setOpenFaqId] = useState<string | null>('faq-1');
@@ -109,6 +108,29 @@ export default function App() {
       top: 0,
       behavior: 'smooth',
     });
+  };
+  // Helper to find treatment by ID, slug or name
+  const findMatchingTreatment = (param: string, list: Treatment[]): Treatment | null => {
+    if (!param) return null;
+    const cleanParam = decodeURIComponent(param).trim().toLowerCase();
+    if (!cleanParam) return null;
+
+    // 1. Exact or case-insensitive ID match
+    let match = list.find((t) => t.id.toLowerCase() === cleanParam);
+    if (match) return match;
+
+    // 2. ID contains or is contained in param
+    match = list.find((t) => t.id.toLowerCase().includes(cleanParam) || cleanParam.includes(t.id.toLowerCase()));
+    if (match) return match;
+
+    // 3. Normalized name matching
+    match = list.find((t) => {
+      const normName = t.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const normParam = cleanParam.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return normName.includes(normParam) || normParam.includes(normName);
+    });
+
+    return match || null;
   };
 
   // Dynamic state backed by localStorage & Supabase
@@ -143,20 +165,44 @@ export default function App() {
     initSupabaseData();
   }, []);
 
-  // Check URL parameter for direct treatment sharing (e.g. ?treatment=botox)
+  // Selected treatment for full detail modal view - initialized from URL search param if present
+  const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    const param = params.get('treatment');
+    if (!param) return null;
+    const initialList = getStoredTreatments();
+    return findMatchingTreatment(param, initialList);
+  });
+
+  const isFirstRender = useRef(true);
+
+  // Sync address bar URL search parameter when treatment detail modal is opened or closed
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const treatmentParam = params.get('treatment');
-    if (treatmentParam && treatments.length > 0) {
-      const match = treatments.find(
-        (t) => t.id === treatmentParam || t.id.toLowerCase() === treatmentParam.toLowerCase()
-      );
-      if (match) {
-        setSelectedTreatmentForDetail(match);
+
+    // On first mount, if URL had a parameter but wasn't matched initially, try matching again with loaded treatments
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      const params = new URLSearchParams(window.location.search);
+      const param = params.get('treatment');
+      if (param && !selectedTreatmentForDetail && treatments.length > 0) {
+        const match = findMatchingTreatment(param, treatments);
+        if (match) {
+          setSelectedTreatmentForDetail(match);
+        }
       }
+      return;
     }
-  }, [treatments]);
+
+    const url = new URL(window.location.href);
+    if (selectedTreatmentForDetail) {
+      url.searchParams.set('treatment', selectedTreatmentForDetail.id);
+    } else {
+      url.searchParams.delete('treatment');
+    }
+    window.history.replaceState(null, '', url.toString());
+  }, [selectedTreatmentForDetail, treatments]);
 
   // Save Handlers
   const handleSaveTreatments = (data: Treatment[]) => {
