@@ -219,13 +219,14 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
         id: `promo-${Date.now()}`,
         badge: editingPromo.badge || 'PROMOÇÃO ESPECIAL',
         title: editingPromo.title.trim(),
-        subtitle: editingPromo.subtitle || 'Descrição da oferta especial.',
-        discount: editingPromo.discount || '20% OFF',
-        originalPrice: editingPromo.originalPrice || 'R$ 500',
-        promoPrice: editingPromo.promoPrice || 'R$ 400',
-        couponCode: editingPromo.couponCode || 'PROMO2026',
+        subtitle: editingPromo.subtitle || '',
+        discount: editingPromo.discount || '',
+        originalPrice: editingPromo.originalPrice || '',
+        promoPrice: editingPromo.promoPrice || '',
+        couponCode: editingPromo.couponCode || '',
         expiresInDays: editingPromo.expiresInDays || 7,
-        treatmentId: editingPromo.treatmentId || (treatments.length > 0 ? treatments[0].id : 'botox'),
+        treatmentId: editingPromo.treatmentId || '',
+        image: editingPromo.image || undefined,
         active: editingPromo.active !== false,
       };
       onSavePromotions([newPromo, ...promotions]);
@@ -1122,7 +1123,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <label className="block text-xs font-bold mb-1">Selo / Badge (Ex: OFERTA DO MÊS)</label>
                       <input
                         type="text"
-                        required
+                        placeholder="Ex: PROMOÇÃO ESPECIAL"
                         value={editingPromo.badge || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, badge: e.target.value })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-medium"
@@ -1133,8 +1134,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <label className="block text-xs font-bold mb-1">Desconto em Destaque</label>
                       <input
                         type="text"
-                        required
-                        placeholder="Ex: 30% OFF ou R$ 300 OFF"
+                        placeholder="Ex: 30% OFF ou R$ 300 OFF (Opcional)"
                         value={editingPromo.discount || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, discount: e.target.value })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-medium"

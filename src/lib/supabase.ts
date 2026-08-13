@@ -145,7 +145,7 @@ export async function updateTreatmentInSupabase(id: string, updates: Partial<Tre
 export async function saveTreatmentToSupabase(treatment: Treatment): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const dbRow = {
+    const dbRow: Record<string, any> = {
       id: treatment.id,
       name: treatment.name,
       description: treatment.description,
@@ -164,9 +164,17 @@ export async function saveTreatmentToSupabase(treatment: Treatment): Promise<boo
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase
+    let { error } = await supabase
       .from('treatments')
       .upsert(dbRow, { onConflict: 'id' });
+
+    if (error && error.message?.toLowerCase().includes('updated_at')) {
+      delete dbRow.updated_at;
+      const retry = await supabase
+        .from('treatments')
+        .upsert(dbRow, { onConflict: 'id' });
+      error = retry.error;
+    }
 
     if (error) {
       console.warn('Notice: Error saving/upserting treatment in Supabase:', error.message);
@@ -232,25 +240,33 @@ export async function fetchPromotionsFromSupabase(): Promise<Promotion[] | null>
 export async function savePromotionToSupabase(promo: Promotion): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const dbRow = {
+    const dbRow: Record<string, any> = {
       id: promo.id,
-      badge: promo.badge,
-      title: promo.title,
-      subtitle: promo.subtitle,
-      discount: promo.discount,
-      original_price: promo.originalPrice,
-      promo_price: promo.promoPrice,
-      coupon_code: promo.couponCode,
-      expires_in_days: promo.expiresInDays,
+      badge: promo.badge ?? 'PROMOÇÃO ESPECIAL',
+      title: promo.title ?? '',
+      subtitle: promo.subtitle ?? '',
+      discount: promo.discount ?? '',
+      original_price: promo.originalPrice ?? null,
+      promo_price: promo.promoPrice ?? null,
+      coupon_code: promo.couponCode ?? '',
+      expires_in_days: promo.expiresInDays ?? 7,
       treatment_id: promo.treatmentId || null,
       image: promo.image || null,
       active: promo.active !== false,
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase
+    let { error } = await supabase
       .from('promotions')
       .upsert(dbRow, { onConflict: 'id' });
+
+    if (error && error.message?.toLowerCase().includes('updated_at')) {
+      delete dbRow.updated_at;
+      const retry = await supabase
+        .from('promotions')
+        .upsert(dbRow, { onConflict: 'id' });
+      error = retry.error;
+    }
 
     if (error) {
       console.warn('Notice: Error saving promotion to Supabase:', error.message);
@@ -372,7 +388,7 @@ export async function fetchTestimonialsFromSupabase(): Promise<Testimonial[] | n
 export async function saveTestimonialToSupabase(t: Testimonial): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const dbRow = {
+    const dbRow: Record<string, any> = {
       id: t.id,
       name: t.name,
       role: t.role,
@@ -381,9 +397,16 @@ export async function saveTestimonialToSupabase(t: Testimonial): Promise<boolean
       avatar_bg: t.avatarBg,
       updated_at: new Date().toISOString(),
     };
-    const { error } = await supabase
+    let { error } = await supabase
       .from('testimonials')
       .upsert(dbRow, { onConflict: 'id' });
+    if (error && error.message?.toLowerCase().includes('updated_at')) {
+      delete dbRow.updated_at;
+      const retry = await supabase
+        .from('testimonials')
+        .upsert(dbRow, { onConflict: 'id' });
+      error = retry.error;
+    }
     if (error) {
       console.warn('Notice: Error saving testimonial to Supabase:', error.message);
       return false;
@@ -493,7 +516,7 @@ export async function fetchBlogPostsFromSupabase(): Promise<BlogPost[] | null> {
 export async function saveBlogPostToSupabase(post: BlogPost): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const dbRow = {
+    const dbRow: Record<string, any> = {
       id: post.id,
       title: post.title,
       slug: post.slug,
@@ -507,9 +530,16 @@ export async function saveBlogPostToSupabase(post: BlogPost): Promise<boolean> {
       content: post.content,
       updated_at: new Date().toISOString(),
     };
-    const { error } = await supabase
+    let { error } = await supabase
       .from('blog_posts')
       .upsert(dbRow, { onConflict: 'id' });
+    if (error && error.message?.toLowerCase().includes('updated_at')) {
+      delete dbRow.updated_at;
+      const retry = await supabase
+        .from('blog_posts')
+        .upsert(dbRow, { onConflict: 'id' });
+      error = retry.error;
+    }
     if (error) {
       console.warn('Notice: Error saving blog post to Supabase:', error.message);
       return false;
@@ -633,7 +663,7 @@ export async function fetchBookingsFromSupabase(): Promise<BookingRequest[] | nu
 export async function saveBookingToSupabase(booking: BookingRequest): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const dbRow = {
+    const dbRow: Record<string, any> = {
       id: booking.id,
       name: booking.name,
       email: booking.email,
@@ -645,9 +675,16 @@ export async function saveBookingToSupabase(booking: BookingRequest): Promise<bo
       status: booking.status || 'pending',
       updated_at: new Date().toISOString(),
     };
-    const { error } = await supabase
+    let { error } = await supabase
       .from('bookings')
       .upsert(dbRow, { onConflict: 'id' });
+    if (error && error.message?.toLowerCase().includes('updated_at')) {
+      delete dbRow.updated_at;
+      const retry = await supabase
+        .from('bookings')
+        .upsert(dbRow, { onConflict: 'id' });
+      error = retry.error;
+    }
     if (error) {
       console.warn('Notice: Error saving booking to Supabase:', error.message);
       return false;
@@ -764,7 +801,7 @@ export async function fetchContactInfoFromSupabase(): Promise<ContactInfo | null
 export async function saveContactInfoToSupabase(info: ContactInfo): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const dbRow = {
+    const dbRow: Record<string, any> = {
       id: 'default',
       phone_primary: info.phonePrimary,
       whatsapp_number: info.whatsappNumber,
@@ -777,9 +814,17 @@ export async function saveContactInfoToSupabase(info: ContactInfo): Promise<bool
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase
+    let { error } = await supabase
       .from('site_settings')
       .upsert(dbRow, { onConflict: 'id' });
+
+    if (error && error.message?.toLowerCase().includes('updated_at')) {
+      delete dbRow.updated_at;
+      const retry = await supabase
+        .from('site_settings')
+        .upsert(dbRow, { onConflict: 'id' });
+      error = retry.error;
+    }
 
     if (error) {
       console.warn('Notice: Could not save site_settings to Supabase:', error.message);

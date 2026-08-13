@@ -81,21 +81,20 @@ export function getStoredTreatments(): Treatment[] {
 export function saveStoredTreatments(treatments: Treatment[]): void {
   saveToStorage(STORAGE_KEYS.TREATMENTS, treatments);
   if (isSupabaseConfigured()) {
-    fetchTreatmentsFromSupabase().then((remote) => {
+    (async () => {
+      for (const t of treatments) {
+        await saveTreatmentToSupabase(t);
+      }
+      const remote = await fetchTreatmentsFromSupabase();
       if (remote) {
         const currentIds = new Set(treatments.map((t) => t.id));
-        remote.forEach((oldT) => {
+        for (const oldT of remote) {
           if (!currentIds.has(oldT.id)) {
-            deleteTreatmentInSupabase(oldT.id);
+            await deleteTreatmentInSupabase(oldT.id);
           }
-        });
+        }
       }
-      treatments.forEach((t) => {
-        saveTreatmentToSupabase(t).catch((err) =>
-          console.warn('Notice: Sync treatment to Supabase failed:', err)
-        );
-      });
-    });
+    })();
   }
 }
 
@@ -132,21 +131,20 @@ export function getStoredPromotions(): Promotion[] {
 export function saveStoredPromotions(promotions: Promotion[]): void {
   saveToStorage(STORAGE_KEYS.PROMOTIONS, promotions);
   if (isSupabaseConfigured()) {
-    fetchPromotionsFromSupabase().then((remote) => {
+    (async () => {
+      for (const p of promotions) {
+        await savePromotionToSupabase(p);
+      }
+      const remote = await fetchPromotionsFromSupabase();
       if (remote) {
         const currentIds = new Set(promotions.map((p) => p.id));
-        remote.forEach((oldP) => {
+        for (const oldP of remote) {
           if (!currentIds.has(oldP.id)) {
-            deletePromotionInSupabase(oldP.id);
+            await deletePromotionInSupabase(oldP.id);
           }
-        });
+        }
       }
-      promotions.forEach((p) => {
-        savePromotionToSupabase(p).catch((err) =>
-          console.warn('Notice: Sync promotion to Supabase failed:', err)
-        );
-      });
-    });
+    })();
   }
 }
 
@@ -183,21 +181,20 @@ export function getStoredTestimonials(): Testimonial[] {
 export function saveStoredTestimonials(testimonials: Testimonial[]): void {
   saveToStorage(STORAGE_KEYS.TESTIMONIALS, testimonials);
   if (isSupabaseConfigured()) {
-    fetchTestimonialsFromSupabase().then((remote) => {
+    (async () => {
+      for (const t of testimonials) {
+        await saveTestimonialToSupabase(t);
+      }
+      const remote = await fetchTestimonialsFromSupabase();
       if (remote) {
         const currentIds = new Set(testimonials.map((t) => t.id));
-        remote.forEach((old) => {
+        for (const old of remote) {
           if (!currentIds.has(old.id)) {
-            deleteTestimonialInSupabase(old.id);
+            await deleteTestimonialInSupabase(old.id);
           }
-        });
+        }
       }
-      testimonials.forEach((t) => {
-        saveTestimonialToSupabase(t).catch((err) =>
-          console.warn('Notice: Sync testimonial to Supabase failed:', err)
-        );
-      });
-    });
+    })();
   }
 }
 
@@ -234,21 +231,20 @@ export function getStoredBlogPosts(): BlogPost[] {
 export function saveStoredBlogPosts(posts: BlogPost[]): void {
   saveToStorage(STORAGE_KEYS.BLOG_POSTS, posts);
   if (isSupabaseConfigured()) {
-    fetchBlogPostsFromSupabase().then((remote) => {
+    (async () => {
+      for (const p of posts) {
+        await saveBlogPostToSupabase(p);
+      }
+      const remote = await fetchBlogPostsFromSupabase();
       if (remote) {
         const currentIds = new Set(posts.map((p) => p.id));
-        remote.forEach((old) => {
+        for (const old of remote) {
           if (!currentIds.has(old.id)) {
-            deleteBlogPostInSupabase(old.id);
+            await deleteBlogPostInSupabase(old.id);
           }
-        });
+        }
       }
-      posts.forEach((p) => {
-        saveBlogPostToSupabase(p).catch((err) =>
-          console.warn('Notice: Sync blog post to Supabase failed:', err)
-        );
-      });
-    });
+    })();
   }
 }
 
@@ -285,21 +281,20 @@ export function getStoredBookings(): BookingRequest[] {
 export function saveStoredBookings(bookings: BookingRequest[]): void {
   saveToStorage(STORAGE_KEYS.BOOKINGS, bookings);
   if (isSupabaseConfigured()) {
-    fetchBookingsFromSupabase().then((remote) => {
+    (async () => {
+      for (const b of bookings) {
+        await saveBookingToSupabase(b);
+      }
+      const remote = await fetchBookingsFromSupabase();
       if (remote) {
         const currentIds = new Set(bookings.map((b) => b.id));
-        remote.forEach((old) => {
+        for (const old of remote) {
           if (!currentIds.has(old.id)) {
-            deleteBookingInSupabase(old.id);
+            await deleteBookingInSupabase(old.id);
           }
-        });
+        }
       }
-      bookings.forEach((b) => {
-        saveBookingToSupabase(b).catch((err) =>
-          console.warn('Notice: Sync booking to Supabase failed:', err)
-        );
-      });
-    });
+    })();
   }
 }
 
