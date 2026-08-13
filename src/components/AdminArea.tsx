@@ -51,6 +51,10 @@ interface AdminAreaProps {
   onSaveContactInfo: (data: ContactInfo) => void;
 
   onClose: () => void;
+  /** Chamado logo após um login bem-sucedido no admin. Deve repuxar os dados
+   * mais recentes do Supabase, pra nunca editar/salvar um estado local
+   * desatualizado por cima de mudanças feitas direto no banco. */
+  onAdminLogin?: () => void;
 }
 
 export const AdminArea: React.FC<AdminAreaProps> = ({
@@ -67,6 +71,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   contactInfo,
   onSaveContactInfo,
   onClose,
+  onAdminLogin,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     try {
@@ -88,9 +93,20 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const [editingPromo, setEditingPromo] = useState<Partial<Promotion> | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
+  const [treatmentImageStatus, setTreatmentImageStatus] = useState<'idle' | 'ok' | 'error'>('idle');
 
   // Contact Info Form State
   const [contactForm, setContactForm] = useState<ContactInfo>(contactInfo);
+
+  // Se o admin já estava logado de uma sessão anterior (persistida no
+  // localStorage), atualiza a partir do Supabase ao abrir também, não só no login.
+  useEffect(() => {
+    if (isAuthenticated) {
+      onAdminLogin?.();
+    }
+    // Só roda uma vez, quando o painel abre.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (contactInfo) {
@@ -126,6 +142,9 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
         console.error(e);
       }
       setLoginError(null);
+      // Puxa os dados mais recentes do Supabase agora, pra nenhuma edição
+      // feita direto no banco ser sobrescrita por uma cópia local desatualizada.
+      onAdminLogin?.();
     } else {
       setLoginError('Usuário ou senha incorretos.');
     }
@@ -612,9 +631,35 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <input
                         type="text"
                         value={editingTreatment.image || ''}
-                        onChange={(e) => setEditingTreatment({ ...editingTreatment, image: e.target.value })}
+                        onChange={(e) => {
+                          setEditingTreatment({ ...editingTreatment, image: e.target.value });
+                          setTreatmentImageStatus('idle');
+                        }}
+                        placeholder="https://exemplo.com/foto.jpg (link direto, terminando em .jpg/.jpeg/.png/.webp)"
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
                       />
+                      {editingTreatment.image && (
+                        <div className="mt-2 flex items-center gap-3">
+                          <img
+                            key={editingTreatment.image}
+                            src={editingTreatment.image}
+                            alt="Pré-visualização"
+                            className="h-16 w-16 object-cover rounded-lg border border-stone-200 dark:border-stone-700"
+                            onLoad={() => setTreatmentImageStatus('ok')}
+                            onError={() => setTreatmentImageStatus('error')}
+                          />
+                          {treatmentImageStatus === 'ok' && (
+                            <span className="text-xs font-semibold text-emerald-600">Link carregado com sucesso.</span>
+                          )}
+                          {treatmentImageStatus === 'error' && (
+                            <span className="text-xs font-semibold text-red-600">
+                              Este link não carrega uma imagem diretamente (comum em links do Google Drive, Google Fotos,
+                              Instagram ou Canva). Use um link direto de imagem ou envie o arquivo para um serviço de
+                              hospedagem de imagens, senão o site vai mostrar a foto padrão no lugar dela.
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="md:col-span-2">

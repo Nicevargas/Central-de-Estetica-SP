@@ -142,27 +142,28 @@ export default function App() {
   const [contactInfo, setContactInfo] = useState<ContactInfo>(getStoredContactInfo);
 
   // Sync with Supabase remote database on mount if configured
+  const refreshAllFromSupabase = async () => {
+    const syncedTreatments = await syncTreatments();
+    if (syncedTreatments) setTreatments(syncedTreatments);
+
+    const syncedPromos = await syncPromotions();
+    if (syncedPromos) setPromotions(syncedPromos);
+
+    const syncedTestimonials = await syncTestimonials();
+    if (syncedTestimonials) setTestimonials(syncedTestimonials);
+
+    const syncedPosts = await syncBlogPosts();
+    if (syncedPosts) setBlogPosts(syncedPosts);
+
+    const syncedBookings = await syncBookings();
+    if (syncedBookings) setBookings(syncedBookings);
+
+    const syncedContact = await syncContactInfo();
+    if (syncedContact) setContactInfo(syncedContact);
+  };
+
   useEffect(() => {
-    async function initSupabaseData() {
-      const syncedTreatments = await syncTreatments();
-      if (syncedTreatments) setTreatments(syncedTreatments);
-
-      const syncedPromos = await syncPromotions();
-      if (syncedPromos) setPromotions(syncedPromos);
-
-      const syncedTestimonials = await syncTestimonials();
-      if (syncedTestimonials) setTestimonials(syncedTestimonials);
-
-      const syncedPosts = await syncBlogPosts();
-      if (syncedPosts) setBlogPosts(syncedPosts);
-
-      const syncedBookings = await syncBookings();
-      if (syncedBookings) setBookings(syncedBookings);
-
-      const syncedContact = await syncContactInfo();
-      if (syncedContact) setContactInfo(syncedContact);
-    }
-    initSupabaseData();
+    refreshAllFromSupabase();
   }, []);
 
   // Selected treatment for full detail modal view - initialized from URL search param if present
@@ -1344,6 +1345,7 @@ export default function App() {
           onSaveBookings={handleSaveBookings}
           contactInfo={contactInfo}
           onSaveContactInfo={handleSaveContactInfo}
+          onAdminLogin={refreshAllFromSupabase}
           onClose={() => setIsAdminOpen(false)}
         />
       )}
