@@ -62,7 +62,9 @@ import {
   saveStoredContactInfo,
   syncContactInfo,
   addOrUpdateContactInfo,
+  clearAllLocalCache,
 } from './lib/storage';
+import { isSupabaseConfigured } from './lib/supabase';
 import BookingModal from './components/BookingModal';
 import TreatmentCard from './components/TreatmentCard';
 import ActiveBookingsList from './components/ActiveBookingsList';
@@ -143,23 +145,27 @@ export default function App() {
 
   // Sync with Supabase remote database on mount if configured
   const refreshAllFromSupabase = async () => {
+    if (isSupabaseConfigured()) {
+      clearAllLocalCache();
+    }
+
     const syncedTreatments = await syncTreatments();
-    if (syncedTreatments) setTreatments(syncedTreatments);
+    if (syncedTreatments !== null) setTreatments(syncedTreatments);
 
     const syncedPromos = await syncPromotions();
-    if (syncedPromos) setPromotions(syncedPromos);
+    if (syncedPromos !== null) setPromotions(syncedPromos);
 
     const syncedTestimonials = await syncTestimonials();
-    if (syncedTestimonials) setTestimonials(syncedTestimonials);
+    if (syncedTestimonials !== null) setTestimonials(syncedTestimonials);
 
     const syncedPosts = await syncBlogPosts();
-    if (syncedPosts) setBlogPosts(syncedPosts);
+    if (syncedPosts !== null) setBlogPosts(syncedPosts);
 
     const syncedBookings = await syncBookings();
-    if (syncedBookings) setBookings(syncedBookings);
+    if (syncedBookings !== null) setBookings(syncedBookings);
 
     const syncedContact = await syncContactInfo();
-    if (syncedContact) setContactInfo(syncedContact);
+    if (syncedContact !== null) setContactInfo(syncedContact);
   };
 
   useEffect(() => {

@@ -369,6 +369,32 @@ export async function fetchTestimonialsFromSupabase(): Promise<Testimonial[] | n
   }));
 }
 
+export async function saveTestimonialToSupabase(t: Testimonial): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const dbRow = {
+      id: t.id,
+      name: t.name,
+      role: t.role,
+      text: t.text,
+      stars: t.stars,
+      avatar_bg: t.avatarBg,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase
+      .from('testimonials')
+      .upsert(dbRow, { onConflict: 'id' });
+    if (error) {
+      console.warn('Notice: Error saving testimonial to Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception saving testimonial to Supabase:', err);
+    return false;
+  }
+}
+
 export async function createTestimonialInSupabase(t: Testimonial): Promise<Testimonial | null> {
   if (!supabase) return null;
   const dbRow = {
@@ -462,6 +488,37 @@ export async function fetchBlogPostsFromSupabase(): Promise<BlogPost[] | null> {
     excerpt: row.excerpt,
     content: row.content,
   }));
+}
+
+export async function saveBlogPostToSupabase(post: BlogPost): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const dbRow = {
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      category: post.category,
+      author: post.author,
+      date: post.date,
+      read_time: post.readTime,
+      featured: post.featured,
+      image: post.image,
+      excerpt: post.excerpt,
+      content: post.content,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase
+      .from('blog_posts')
+      .upsert(dbRow, { onConflict: 'id' });
+    if (error) {
+      console.warn('Notice: Error saving blog post to Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception saving blog post to Supabase:', err);
+    return false;
+  }
 }
 
 export async function createBlogPostInSupabase(post: BlogPost): Promise<BlogPost | null> {
@@ -571,6 +628,35 @@ export async function fetchBookingsFromSupabase(): Promise<BookingRequest[] | nu
     notes: row.notes || '',
     status: row.status === 'confirmed' ? 'confirmed' : 'pending',
   }));
+}
+
+export async function saveBookingToSupabase(booking: BookingRequest): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const dbRow = {
+      id: booking.id,
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone,
+      treatment_id: booking.treatmentId || null,
+      date: booking.date,
+      time: booking.time,
+      notes: booking.notes || '',
+      status: booking.status || 'pending',
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase
+      .from('bookings')
+      .upsert(dbRow, { onConflict: 'id' });
+    if (error) {
+      console.warn('Notice: Error saving booking to Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception saving booking to Supabase:', err);
+    return false;
+  }
 }
 
 export async function createBookingInSupabase(booking: BookingRequest): Promise<BookingRequest | null> {

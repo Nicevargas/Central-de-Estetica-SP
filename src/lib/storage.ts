@@ -12,12 +12,15 @@ import {
   deletePromotionInSupabase,
   fetchTestimonialsFromSupabase,
   createTestimonialInSupabase,
+  saveTestimonialToSupabase,
   deleteTestimonialInSupabase,
   fetchBlogPostsFromSupabase,
   createBlogPostInSupabase,
+  saveBlogPostToSupabase,
   deleteBlogPostInSupabase,
   fetchBookingsFromSupabase,
   createBookingInSupabase,
+  saveBookingToSupabase,
   deleteBookingInSupabase,
   fetchContactInfoFromSupabase,
   saveContactInfoToSupabase,
@@ -31,6 +34,17 @@ const STORAGE_KEYS = {
   BOOKINGS: 'estetica_bookings_v1',
   CONTACT_INFO: 'estetica_contact_info_v1',
 };
+
+export function clearAllLocalCache(): void {
+  try {
+    Object.values(STORAGE_KEYS).forEach((key) => {
+      localStorage.removeItem(key);
+    });
+    console.log('Local storage cache purged successfully.');
+  } catch (err) {
+    console.warn('Error purging local storage cache:', err);
+  }
+}
 
 // Safe localStorage access
 function loadFromStorage<T>(key: string, defaultValue: T): T {
@@ -67,10 +81,20 @@ export function getStoredTreatments(): Treatment[] {
 export function saveStoredTreatments(treatments: Treatment[]): void {
   saveToStorage(STORAGE_KEYS.TREATMENTS, treatments);
   if (isSupabaseConfigured()) {
-    treatments.forEach((t) => {
-      saveTreatmentToSupabase(t).catch((err) =>
-        console.warn('Notice: Sync treatment to Supabase failed:', err)
-      );
+    fetchTreatmentsFromSupabase().then((remote) => {
+      if (remote) {
+        const currentIds = new Set(treatments.map((t) => t.id));
+        remote.forEach((oldT) => {
+          if (!currentIds.has(oldT.id)) {
+            deleteTreatmentInSupabase(oldT.id);
+          }
+        });
+      }
+      treatments.forEach((t) => {
+        saveTreatmentToSupabase(t).catch((err) =>
+          console.warn('Notice: Sync treatment to Supabase failed:', err)
+        );
+      });
     });
   }
 }
@@ -78,7 +102,7 @@ export function saveStoredTreatments(treatments: Treatment[]): void {
 export async function syncTreatments(): Promise<Treatment[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchTreatmentsFromSupabase();
-    if (remote && remote.length > 0) {
+    if (remote !== null) {
       saveToStorage(STORAGE_KEYS.TREATMENTS, remote);
       return remote;
     }
@@ -108,10 +132,20 @@ export function getStoredPromotions(): Promotion[] {
 export function saveStoredPromotions(promotions: Promotion[]): void {
   saveToStorage(STORAGE_KEYS.PROMOTIONS, promotions);
   if (isSupabaseConfigured()) {
-    promotions.forEach((p) => {
-      savePromotionToSupabase(p).catch((err) =>
-        console.warn('Notice: Sync promotion to Supabase failed:', err)
-      );
+    fetchPromotionsFromSupabase().then((remote) => {
+      if (remote) {
+        const currentIds = new Set(promotions.map((p) => p.id));
+        remote.forEach((oldP) => {
+          if (!currentIds.has(oldP.id)) {
+            deletePromotionInSupabase(oldP.id);
+          }
+        });
+      }
+      promotions.forEach((p) => {
+        savePromotionToSupabase(p).catch((err) =>
+          console.warn('Notice: Sync promotion to Supabase failed:', err)
+        );
+      });
     });
   }
 }
@@ -119,7 +153,7 @@ export function saveStoredPromotions(promotions: Promotion[]): void {
 export async function syncPromotions(): Promise<Promotion[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchPromotionsFromSupabase();
-    if (remote && remote.length > 0) {
+    if (remote !== null) {
       saveToStorage(STORAGE_KEYS.PROMOTIONS, remote);
       return remote;
     }
@@ -148,12 +182,29 @@ export function getStoredTestimonials(): Testimonial[] {
 
 export function saveStoredTestimonials(testimonials: Testimonial[]): void {
   saveToStorage(STORAGE_KEYS.TESTIMONIALS, testimonials);
+  if (isSupabaseConfigured()) {
+    fetchTestimonialsFromSupabase().then((remote) => {
+      if (remote) {
+        const currentIds = new Set(testimonials.map((t) => t.id));
+        remote.forEach((old) => {
+          if (!currentIds.has(old.id)) {
+            deleteTestimonialInSupabase(old.id);
+          }
+        });
+      }
+      testimonials.forEach((t) => {
+        saveTestimonialToSupabase(t).catch((err) =>
+          console.warn('Notice: Sync testimonial to Supabase failed:', err)
+        );
+      });
+    });
+  }
 }
 
 export async function syncTestimonials(): Promise<Testimonial[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchTestimonialsFromSupabase();
-    if (remote && remote.length > 0) {
+    if (remote !== null) {
       saveStoredTestimonials(remote);
       return remote;
     }
@@ -182,12 +233,29 @@ export function getStoredBlogPosts(): BlogPost[] {
 
 export function saveStoredBlogPosts(posts: BlogPost[]): void {
   saveToStorage(STORAGE_KEYS.BLOG_POSTS, posts);
+  if (isSupabaseConfigured()) {
+    fetchBlogPostsFromSupabase().then((remote) => {
+      if (remote) {
+        const currentIds = new Set(posts.map((p) => p.id));
+        remote.forEach((old) => {
+          if (!currentIds.has(old.id)) {
+            deleteBlogPostInSupabase(old.id);
+          }
+        });
+      }
+      posts.forEach((p) => {
+        saveBlogPostToSupabase(p).catch((err) =>
+          console.warn('Notice: Sync blog post to Supabase failed:', err)
+        );
+      });
+    });
+  }
 }
 
 export async function syncBlogPosts(): Promise<BlogPost[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchBlogPostsFromSupabase();
-    if (remote && remote.length > 0) {
+    if (remote !== null) {
       saveStoredBlogPosts(remote);
       return remote;
     }
@@ -216,12 +284,29 @@ export function getStoredBookings(): BookingRequest[] {
 
 export function saveStoredBookings(bookings: BookingRequest[]): void {
   saveToStorage(STORAGE_KEYS.BOOKINGS, bookings);
+  if (isSupabaseConfigured()) {
+    fetchBookingsFromSupabase().then((remote) => {
+      if (remote) {
+        const currentIds = new Set(bookings.map((b) => b.id));
+        remote.forEach((old) => {
+          if (!currentIds.has(old.id)) {
+            deleteBookingInSupabase(old.id);
+          }
+        });
+      }
+      bookings.forEach((b) => {
+        saveBookingToSupabase(b).catch((err) =>
+          console.warn('Notice: Sync booking to Supabase failed:', err)
+        );
+      });
+    });
+  }
 }
 
 export async function syncBookings(): Promise<BookingRequest[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchBookingsFromSupabase();
-    if (remote) {
+    if (remote !== null) {
       saveStoredBookings(remote);
       return remote;
     }
@@ -261,12 +346,17 @@ export function getStoredContactInfo(): ContactInfo {
 
 export function saveStoredContactInfo(info: ContactInfo): void {
   saveToStorage(STORAGE_KEYS.CONTACT_INFO, info);
+  if (isSupabaseConfigured()) {
+    saveContactInfoToSupabase(info).catch((err) =>
+      console.warn('Notice: Sync contact info to Supabase failed:', err)
+    );
+  }
 }
 
 export async function syncContactInfo(): Promise<ContactInfo> {
   if (isSupabaseConfigured()) {
     const remote = await fetchContactInfoFromSupabase();
-    if (remote) {
+    if (remote !== null) {
       if (
         remote.whatsappNumber === '551130512433' ||
         remote.phonePrimary?.includes('3051-2433') ||
@@ -286,8 +376,4 @@ export async function syncContactInfo(): Promise<ContactInfo> {
 
 export async function addOrUpdateContactInfo(info: ContactInfo): Promise<void> {
   saveStoredContactInfo(info);
-  if (isSupabaseConfigured()) {
-    await saveContactInfoToSupabase(info);
-  }
 }
-

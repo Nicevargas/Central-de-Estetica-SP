@@ -1165,10 +1165,10 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1">Preço Original (De)</label>
+                      <label className="block text-xs font-bold mb-1">Preço Original (De) - Opcional</label>
                       <input
                         type="text"
-                        placeholder="Ex: R$ 1.200"
+                        placeholder="Ex: R$ 450 (ou deixe em branco se não houver)"
                         value={editingPromo.originalPrice || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, originalPrice: e.target.value })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
@@ -1176,10 +1176,10 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1">Preço Promocional (Por)</label>
+                      <label className="block text-xs font-bold mb-1">Preço / Valor Promocional (Por)</label>
                       <input
                         type="text"
-                        placeholder="Ex: R$ 840"
+                        placeholder="Ex: R$ 289, De R$ 450 por R$ 289, 6x de R$ 49, A partir de R$ 199, etc."
                         value={editingPromo.promoPrice || ''}
                         onChange={(e) => setEditingPromo({ ...editingPromo, promoPrice: e.target.value })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl font-bold text-rose-600"
@@ -1269,8 +1269,12 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                         <p className="text-xs text-stone-600">{editingPromo.subtitle || 'Subtítulo da oferta'}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="line-through text-xs text-stone-400 block">{editingPromo.originalPrice || 'R$ 0'}</span>
-                        <span className="font-extrabold text-sm text-rose-600">{editingPromo.promoPrice || 'R$ 0'}</span>
+                        {editingPromo.originalPrice && (
+                          <span className="line-through text-xs text-stone-400 block">{editingPromo.originalPrice}</span>
+                        )}
+                        {editingPromo.promoPrice && (
+                          <span className="font-extrabold text-sm text-rose-600">{editingPromo.promoPrice}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1326,8 +1330,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <h4 className="font-bold text-base text-stone-900 dark:text-stone-100">{p.title}</h4>
                       <p className="text-xs text-stone-500">{p.subtitle}</p>
                       <div className="text-xs space-x-2 pt-1">
-                        <span className="line-through text-stone-400">{p.originalPrice}</span>
-                        <span className="text-rose-600 font-bold">{p.promoPrice}</span>
+                        {p.originalPrice && <span className="line-through text-stone-400">{p.originalPrice}</span>}
+                        {p.promoPrice && <span className="text-rose-600 font-bold">{p.promoPrice}</span>}
                         <span className="text-stone-400 font-medium">({p.expiresInDays} dias de validade)</span>
                       </div>
                     </div>

@@ -77,9 +77,9 @@ interface PromoBannerProps {
   onSelectPromo: (treatmentId?: string, couponCode?: string) => void;
 }
 
-export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_PROMOTIONS, treatments, onSelectPromo }) => {
-  const activePromos = promotions.filter(p => p.active !== false);
-  const displayPromos = activePromos.length > 0 ? activePromos : FALLBACK_PROMOTIONS;
+export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments, onSelectPromo }) => {
+  const promoList = promotions !== undefined ? promotions : FALLBACK_PROMOTIONS;
+  const displayPromos = promoList.filter(p => p.active !== false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -95,6 +95,8 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_
   }, [isPaused, displayPromos.length]);
 
   const currentPromo = displayPromos[currentIndex] || displayPromos[0];
+
+  if (!currentPromo) return null;
 
   // Resolve procedure photo dynamically per slide
   const matchedTreatment = currentPromo.treatmentId && treatments
@@ -160,17 +162,20 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_
                   </p>
 
                   {/* Price Section */}
-                  <div className="flex items-baseline gap-2 sm:gap-3 pt-1.5 sm:pt-3 flex-wrap">
-                    <span className="text-stone-400 line-through text-xs sm:text-sm">
-                      {currentPromo.originalPrice}
-                    </span>
-                    <span className="text-rose-600 font-extrabold text-xl sm:text-2xl lg:text-3xl tracking-tight">
-                      {currentPromo.promoPrice}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] text-stone-600 bg-rose-100/80 px-2 py-0.5 rounded border border-rose-200/60 font-medium">
-                      Parcele em até 6x
-                    </span>
-                  </div>
+                  {(currentPromo.originalPrice || currentPromo.promoPrice) && (
+                    <div className="flex items-baseline gap-2 sm:gap-3 pt-1.5 sm:pt-3 flex-wrap">
+                      {currentPromo.originalPrice && (
+                        <span className="text-stone-400 line-through text-xs sm:text-sm">
+                          {currentPromo.originalPrice}
+                        </span>
+                      )}
+                      {currentPromo.promoPrice && (
+                        <span className="text-rose-600 font-extrabold text-xl sm:text-2xl lg:text-3xl tracking-tight">
+                          {currentPromo.promoPrice}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -186,21 +191,23 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_
                   <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
 
-                <button
-                  onClick={(e) => handleCopyCoupon(currentPromo.couponCode, e)}
-                  className="relative inline-flex items-center gap-1 bg-white hover:bg-stone-50 text-stone-700 font-medium text-xs px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl transition-all border border-stone-200/90 shadow-2xs cursor-pointer active:scale-95"
-                >
-                  <Tag className="h-3.5 w-3.5 text-rose-500" />
-                  <span className="font-mono font-semibold">{currentPromo.couponCode}</span>
-                  {copiedCode === currentPromo.couponCode ? (
-                    <span className="flex items-center gap-0.5 text-emerald-600 font-bold ml-1">
-                      <Check className="h-3.5 w-3.5" />
-                      Copiado!
-                    </span>
-                  ) : (
-                    <Copy className="h-3.5 w-3.5 text-stone-400 ml-0.5" />
-                  )}
-                </button>
+                {currentPromo.couponCode && (
+                  <button
+                    onClick={(e) => handleCopyCoupon(currentPromo.couponCode, e)}
+                    className="relative inline-flex items-center gap-1 bg-white hover:bg-stone-50 text-stone-700 font-medium text-xs px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl transition-all border border-stone-200/90 shadow-2xs cursor-pointer active:scale-95"
+                  >
+                    <Tag className="h-3.5 w-3.5 text-rose-500" />
+                    <span className="font-mono font-semibold">{currentPromo.couponCode}</span>
+                    {copiedCode === currentPromo.couponCode ? (
+                      <span className="flex items-center gap-0.5 text-emerald-600 font-bold ml-1">
+                        <Check className="h-3.5 w-3.5" />
+                        Copiado!
+                      </span>
+                    ) : (
+                      <Copy className="h-3.5 w-3.5 text-stone-400 ml-0.5" />
+                    )}
+                  </button>
+                )}
               </div>
 
               {/* Navigation Arrows & Dots */}
