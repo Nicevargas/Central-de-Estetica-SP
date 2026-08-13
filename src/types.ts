@@ -83,6 +83,7 @@ export interface Promotion {
   couponCode: string;
   expiresInDays: number;
   treatmentId?: string;
+  image?: string;
   active?: boolean;
 }
 

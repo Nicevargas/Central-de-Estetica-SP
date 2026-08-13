@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Tag, Clock, ChevronLeft, ChevronRight, Copy, Check, ArrowRight } from 'lucide-react';
-import { Promotion } from '../types';
+import { Promotion, Treatment } from '../types';
 
 const FALLBACK_PROMOTIONS: Promotion[] = [
   {
@@ -73,10 +73,11 @@ const FALLBACK_PROMOTIONS: Promotion[] = [
 
 interface PromoBannerProps {
   promotions?: Promotion[];
+  treatments?: Treatment[];
   onSelectPromo: (treatmentId?: string, couponCode?: string) => void;
 }
 
-export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_PROMOTIONS, onSelectPromo }) => {
+export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_PROMOTIONS, treatments, onSelectPromo }) => {
   const activePromos = promotions.filter(p => p.active !== false);
   const displayPromos = activePromos.length > 0 ? activePromos : FALLBACK_PROMOTIONS;
 
@@ -95,7 +96,19 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions = FALLBACK_
 
   const currentPromo = displayPromos[currentIndex] || displayPromos[0];
 
-  const promoImage = 'https://centraldaestetica.com.br/liveen.png';
+  // Resolve procedure photo dynamically per slide
+  const matchedTreatment = currentPromo.treatmentId && treatments
+    ? treatments.find((t) => t.id === currentPromo.treatmentId)
+    : treatments?.find((t) => {
+        const tName = t.name.toLowerCase();
+        const pTitle = currentPromo.title.toLowerCase();
+        return tName.includes(pTitle) || pTitle.includes(tName);
+      });
+
+  const promoImage =
+    currentPromo.image ||
+    matchedTreatment?.image ||
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
 
   const handleCopyCoupon = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();

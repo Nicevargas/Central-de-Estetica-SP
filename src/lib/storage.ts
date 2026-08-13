@@ -8,6 +8,7 @@ import {
   deleteTreatmentInSupabase,
   fetchPromotionsFromSupabase,
   createPromotionInSupabase,
+  savePromotionToSupabase,
   deletePromotionInSupabase,
   fetchTestimonialsFromSupabase,
   createTestimonialInSupabase,
@@ -56,9 +57,8 @@ function saveToStorage<T>(key: string, value: T): void {
 // =============================
 export function getStoredTreatments(): Treatment[] {
   const stored = loadFromStorage<Treatment[]>(STORAGE_KEYS.TREATMENTS, TREATMENTS);
-  const oldIds = ['limpeza-de-pele', 'ultraformer-iii', 'lipo-enzimatica', 'criofrequencia', 'velashape', 'massagem-relaxante', 'massagem-modeladora', 'botox'];
-  if (!stored || stored.length === 0 || !stored.some((t) => t.id === 'secagem-vasinhos') || stored.some((t) => oldIds.includes(t.id))) {
-    saveStoredTreatments(TREATMENTS);
+  if (!stored || stored.length === 0) {
+    saveToStorage(STORAGE_KEYS.TREATMENTS, TREATMENTS);
     return TREATMENTS;
   }
   return stored;
@@ -79,7 +79,7 @@ export async function syncTreatments(): Promise<Treatment[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchTreatmentsFromSupabase();
     if (remote && remote.length > 0) {
-      saveStoredTreatments(remote);
+      saveToStorage(STORAGE_KEYS.TREATMENTS, remote);
       return remote;
     }
   }
@@ -107,13 +107,20 @@ export function getStoredPromotions(): Promotion[] {
 
 export function saveStoredPromotions(promotions: Promotion[]): void {
   saveToStorage(STORAGE_KEYS.PROMOTIONS, promotions);
+  if (isSupabaseConfigured()) {
+    promotions.forEach((p) => {
+      savePromotionToSupabase(p).catch((err) =>
+        console.warn('Notice: Sync promotion to Supabase failed:', err)
+      );
+    });
+  }
 }
 
 export async function syncPromotions(): Promise<Promotion[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchPromotionsFromSupabase();
     if (remote && remote.length > 0) {
-      saveStoredPromotions(remote);
+      saveToStorage(STORAGE_KEYS.PROMOTIONS, remote);
       return remote;
     }
   }

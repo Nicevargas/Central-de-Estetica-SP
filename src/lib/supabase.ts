@@ -219,12 +219,48 @@ export async function fetchPromotionsFromSupabase(): Promise<Promotion[] | null>
     title: row.title,
     subtitle: row.subtitle,
     discount: row.discount,
-    originalPrice: row.original_price,
-    promoPrice: row.promo_price,
-    couponCode: row.coupon_code,
-    expiresInDays: row.expires_in_days,
-    treatmentId: row.treatment_id,
+    originalPrice: row.original_price || row.originalPrice,
+    promoPrice: row.promo_price || row.promoPrice,
+    couponCode: row.coupon_code || row.couponCode,
+    expiresInDays: row.expires_in_days || row.expiresInDays,
+    treatmentId: row.treatment_id || row.treatmentId,
+    image: row.image || undefined,
+    active: row.active ?? true,
   }));
+}
+
+export async function savePromotionToSupabase(promo: Promotion): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const dbRow = {
+      id: promo.id,
+      badge: promo.badge,
+      title: promo.title,
+      subtitle: promo.subtitle,
+      discount: promo.discount,
+      original_price: promo.originalPrice,
+      promo_price: promo.promoPrice,
+      coupon_code: promo.couponCode,
+      expires_in_days: promo.expiresInDays,
+      treatment_id: promo.treatmentId || null,
+      image: promo.image || null,
+      active: promo.active !== false,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from('promotions')
+      .upsert(dbRow, { onConflict: 'id' });
+
+    if (error) {
+      console.warn('Notice: Error saving promotion to Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Notice: Exception saving promotion to Supabase:', err);
+    return false;
+  }
 }
 
 export async function createPromotionInSupabase(promo: Promotion): Promise<Promotion | null> {
@@ -240,6 +276,8 @@ export async function createPromotionInSupabase(promo: Promotion): Promise<Promo
     coupon_code: promo.couponCode,
     expires_in_days: promo.expiresInDays,
     treatment_id: promo.treatmentId,
+    image: promo.image || null,
+    active: promo.active !== false,
   };
   
   const { data, error } = await supabase
@@ -264,6 +302,8 @@ export async function createPromotionInSupabase(promo: Promotion): Promise<Promo
     couponCode: data.coupon_code,
     expiresInDays: data.expires_in_days,
     treatmentId: data.treatment_id,
+    image: data.image || undefined,
+    active: data.active ?? true,
   };
 }
 

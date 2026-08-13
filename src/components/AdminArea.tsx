@@ -1180,6 +1180,19 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       </select>
                     </div>
 
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold mb-1">
+                        URL da Imagem do Banner (Opcional - por padrão utiliza a imagem do tratamento vinculado)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="https://... (Deixe em branco para usar a foto do procedimento)"
+                        value={editingPromo.image || ''}
+                        onChange={(e) => setEditingPromo({ ...editingPromo, image: e.target.value })}
+                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                      />
+                    </div>
+
                     <div className="flex items-center gap-3 pt-4">
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input

@@ -497,7 +497,7 @@ export default function App() {
               {/* Hero Section */}
               <section className="relative overflow-hidden pt-2 sm:pt-3 pb-12 md:pb-16">
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 mb-8">
-                  <PromoBanner promotions={promotions} onSelectPromo={(treatmentId) => triggerBooking(treatmentId)} />
+                  <PromoBanner promotions={promotions} treatments={treatments} onSelectPromo={(treatmentId) => triggerBooking(treatmentId)} />
                 </div>
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className="space-y-6">
