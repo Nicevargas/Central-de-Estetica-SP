@@ -27,9 +27,21 @@ import {
   Facebook,
   MessageCircle,
   Globe,
-  Share2
+  Share2,
+  Database,
+  Copy,
+  ExternalLink,
+  ShieldCheck,
+  Server,
+  Terminal,
 } from 'lucide-react';
 import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
+import {
+  isSupabaseConfigured,
+  testSupabaseDatabaseTables,
+  TableDiagnosticResult,
+  SUPABASE_FULL_MIGRATION_SQL,
+} from '../lib/supabase';
 
 interface AdminAreaProps {
   treatments: Treatment[];
@@ -85,8 +97,13 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'treatments' | 'promotions' | 'testimonials' | 'blog' | 'bookings' | 'contact'>('treatments');
+  const [activeTab, setActiveTab] = useState<'treatments' | 'promotions' | 'testimonials' | 'blog' | 'bookings' | 'contact' | 'database'>('treatments');
   const [notification, setNotification] = useState<string | null>(null);
+
+  // Database Diagnostic States
+  const [dbDiagnostics, setDbDiagnostics] = useState<TableDiagnosticResult[] | null>(null);
+  const [isTestingDb, setIsTestingDb] = useState<boolean>(false);
+  const [sqlCopied, setSqlCopied] = useState<boolean>(false);
 
   // Form Editing States
   const [editingTreatment, setEditingTreatment] = useState<Partial<Treatment> | null>(null);
@@ -246,6 +263,37 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const handleDeletePromo = (id: string) => {
     onSavePromotions(promotions.filter((p) => p.id !== id));
     notify('Banner promocional removido com sucesso.');
+  };
+
+  // --- DATABASE DIAGNOSTIC HANDLERS ---
+  const handleTestDatabase = async () => {
+    setIsTestingDb(true);
+    try {
+      const results = await testSupabaseDatabaseTables();
+      setDbDiagnostics(results);
+      const hasErrors = results.some((r) => r.status === 'error');
+      if (hasErrors) {
+        notify('Atenção: Verifique as mensagens de diagnóstico do Supabase abaixo.');
+      } else {
+        notify('Conexão e tabelas do Supabase verificadas com sucesso!');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Erro ao testar conexão com o banco.');
+    } finally {
+      setIsTestingDb(false);
+    }
+  };
+
+  const handleCopySqlScript = () => {
+    try {
+      navigator.clipboard.writeText(SUPABASE_FULL_MIGRATION_SQL);
+      setSqlCopied(true);
+      notify('Script SQL copiado com sucesso! Cole no SQL Editor do Supabase.');
+      setTimeout(() => setSqlCopied(false), 4000);
+    } catch (err) {
+      notify('Erro ao copiar. Selecione o código manualmente abaixo.');
+    }
   };
 
   // --- TESTIMONIALS HANDLERS ---
@@ -539,6 +587,18 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
           >
             <Phone className="h-4 w-4" />
             <span>Contatos & Redes Sociais</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('database')}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'database'
+                ? 'bg-rose-600 text-white shadow-sm'
+                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700'
+            }`}
+          >
+            <Database className="h-4 w-4" />
+            <span>Banco de Dados (Supabase)</span>
           </button>
         </div>
 
@@ -1072,31 +1132,57 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
           {/* ================= PROMOTIONS TAB ================= */}
           {activeTab === 'promotions' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-serif text-xl font-bold">Banners de Promoção (Carrossel Hero)</h3>
-                  <p className="text-xs text-stone-500">Altere ofertas, cupons de desconto, vinculação a tratamentos e visibilidade no site</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif text-xl font-bold">Banners de Promoção (Carrossel Hero)</h3>
+                    {isSupabaseConfigured() ? (
+                      <button
+                        onClick={() => setActiveTab('database')}
+                        className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800 cursor-pointer hover:bg-emerald-200 transition-colors"
+                        title="Verificar configuração do banco de dados Supabase"
+                      >
+                        <Database className="h-3 w-3" />
+                        <span>Supabase Conectado</span>
+                      </button>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
+                        <span>Armazenamento Local</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-stone-500">Altere ofertas, cupons de desconto, valores abertos (inteiros ou de/por), vinculação a tratamentos e visibilidade no site</p>
                 </div>
-                <button
-                  onClick={() =>
-                    setEditingPromo({
-                      badge: 'OFERTA DESTAQUE DO MÊS',
-                      title: 'Nova Promoção de Estética',
-                      subtitle: 'Agende hoje mesmo e garanta descontos exclusivos em nossa clínica.',
-                      discount: '25% OFF',
-                      originalPrice: 'R$ 800',
-                      promoPrice: 'R$ 600',
-                      couponCode: 'ESTETICA25',
-                      expiresInDays: 7,
-                      treatmentId: treatments.length > 0 ? treatments[0].id : 'botox',
-                      active: true,
-                    })
-                  }
-                  className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Novo Banner</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('database')}
+                    className="px-3 py-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-stone-300 dark:border-stone-700"
+                  >
+                    <Database className="h-3.5 w-3.5 text-rose-500" />
+                    <span>Ver Banco / SQL</span>
+                  </button>
+                  <button
+                    onClick={() =>
+                      setEditingPromo({
+                        badge: 'OFERTA DESTAQUE DO MÊS',
+                        title: 'Nova Promoção de Estética',
+                        subtitle: 'Agende hoje mesmo e garanta descontos exclusivos em nossa clínica.',
+                        discount: '25% OFF',
+                        originalPrice: 'R$ 800',
+                        promoPrice: 'R$ 600',
+                        couponCode: 'ESTETICA25',
+                        expiresInDays: 7,
+                        treatmentId: treatments.length > 0 ? treatments[0].id : '',
+                        active: true,
+                      })
+                    }
+                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Novo Banner</span>
+                  </button>
+                </div>
               </div>
 
               {editingPromo && (
@@ -1257,18 +1343,35 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                   {/* Card Preview */}
                   <div className="pt-2 border-t border-rose-200 dark:border-stone-700">
                     <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-2">Pré-visualização do Banner:</span>
-                    <div className="p-4 bg-gradient-to-r from-rose-100/80 via-amber-50 to-white rounded-2xl border border-rose-300/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                            {editingPromo.badge || 'PROMOÇÃO'}
-                          </span>
-                          <span className="text-xs font-extrabold text-rose-700">{editingPromo.discount || '20% OFF'}</span>
+                    <div className="p-4 bg-gradient-to-r from-rose-100/80 via-amber-50 to-white rounded-2xl border border-rose-300/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="w-20 h-16 sm:w-24 sm:h-20 rounded-xl overflow-hidden bg-stone-200 shrink-0 border border-stone-300 shadow-2xs">
+                          <img
+                            src={
+                              editingPromo.image ||
+                              treatments.find((t) => t.id === editingPromo.treatmentId)?.image ||
+                              'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80'
+                            }
+                            alt="Prévia da foto do banner"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+                            }}
+                            className="w-full h-full object-cover object-center"
+                          />
                         </div>
-                        <h5 className="font-bold text-sm text-stone-900">{editingPromo.title || 'Título da Promoção'}</h5>
-                        <p className="text-xs text-stone-600">{editingPromo.subtitle || 'Subtítulo da oferta'}</p>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                              {editingPromo.badge || 'PROMOÇÃO'}
+                            </span>
+                            <span className="text-xs font-extrabold text-rose-700">{editingPromo.discount || '20% OFF'}</span>
+                          </div>
+                          <h5 className="font-bold text-sm text-stone-900">{editingPromo.title || 'Título da Promoção'}</h5>
+                          <p className="text-xs text-stone-600">{editingPromo.subtitle || 'Subtítulo da oferta'}</p>
+                        </div>
                       </div>
-                      <div className="text-right shrink-0">
+                      <div className="text-right shrink-0 self-end sm:self-center">
                         {editingPromo.originalPrice && (
                           <span className="line-through text-xs text-stone-400 block">{editingPromo.originalPrice}</span>
                         )}
@@ -1299,44 +1402,64 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
               )}
 
               <div className="space-y-4">
-                {promotions.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`p-5 rounded-2xl border transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
-                      p.active !== false
-                        ? 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700'
-                        : 'bg-stone-100/50 dark:bg-stone-900/40 border-stone-200/50 dark:border-stone-800 opacity-60'
-                    }`}
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-stone-900 px-2 py-0.5 rounded-md">
-                          {p.badge}
-                        </span>
-                        <span className="text-xs font-extrabold text-rose-600">{p.discount}</span>
-                        <span className="text-xs text-stone-500 font-mono bg-stone-200 dark:bg-stone-700 px-2 py-0.5 rounded">
-                          Cupom: {p.couponCode}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            p.active !== false
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                              : 'bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-300'
-                          }`}
-                        >
-                          {p.active !== false ? 'Ativo no Site' : 'Oculto'}
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-base text-stone-900 dark:text-stone-100">{p.title}</h4>
-                      <p className="text-xs text-stone-500">{p.subtitle}</p>
-                      <div className="text-xs space-x-2 pt-1">
-                        {p.originalPrice && <span className="line-through text-stone-400">{p.originalPrice}</span>}
-                        {p.promoPrice && <span className="text-rose-600 font-bold">{p.promoPrice}</span>}
-                        <span className="text-stone-400 font-medium">({p.expiresInDays} dias de validade)</span>
-                      </div>
-                    </div>
+                {promotions.map((p) => {
+                  const pImg =
+                    p.image ||
+                    treatments.find((t) => t.id === p.treatmentId)?.image ||
+                    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
 
-                    <div className="flex items-center gap-2 shrink-0">
+                  return (
+                    <div
+                      key={p.id}
+                      className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+                        p.active !== false
+                          ? 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700'
+                          : 'bg-stone-100/50 dark:bg-stone-900/40 border-stone-200/50 dark:border-stone-800 opacity-60'
+                      }`}
+                    >
+                      <div className="flex items-start sm:items-center gap-3.5 w-full md:w-auto">
+                        <div className="w-20 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden bg-stone-200 dark:bg-stone-700 shrink-0 border border-stone-200 dark:border-stone-600 shadow-2xs">
+                          <img
+                            src={pImg}
+                            alt={p.title}
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
+                            }}
+                            className="w-full h-full object-cover object-center select-none"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-stone-900 px-2 py-0.5 rounded-md">
+                              {p.badge}
+                            </span>
+                            <span className="text-xs font-extrabold text-rose-600">{p.discount}</span>
+                            <span className="text-xs text-stone-500 font-mono bg-stone-200 dark:bg-stone-700 px-2 py-0.5 rounded">
+                              Cupom: {p.couponCode}
+                            </span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                p.active !== false
+                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                  : 'bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-300'
+                              }`}
+                            >
+                              {p.active !== false ? 'Ativo no Site' : 'Oculto'}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-base text-stone-900 dark:text-stone-100">{p.title}</h4>
+                          <p className="text-xs text-stone-500 line-clamp-1">{p.subtitle}</p>
+                          <div className="text-xs space-x-2 pt-0.5">
+                            {p.originalPrice && <span className="line-through text-stone-400">{p.originalPrice}</span>}
+                            {p.promoPrice && <span className="text-rose-600 font-bold">{p.promoPrice}</span>}
+                            <span className="text-stone-400 font-medium">({p.expiresInDays} dias de validade)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
                       <button
                         onClick={() => handleTogglePromoActive(p.id)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${
@@ -1364,7 +1487,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       </button>
                     </div>
                   </div>
-                ))}
+                );
+              })}
               </div>
             </div>
           )}
@@ -2004,6 +2128,192 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                   </div>
                 </div>
               </form>
+            </div>
+          )}
+
+          {/* ================= DATABASE (SUPABASE) TAB ================= */}
+          {activeTab === 'database' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-serif text-xl font-bold flex items-center gap-2">
+                    <Database className="h-5 w-5 text-rose-600" />
+                    <span>Conexão e Estrutura do Banco de Dados (Supabase)</span>
+                  </h3>
+                  <p className="text-xs text-stone-500">
+                    Verifique o status em tempo real da conexão com o Supabase e configure as tabelas e permissões.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleTestDatabase}
+                    disabled={isTestingDb}
+                    className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isTestingDb ? 'animate-spin' : ''}`} />
+                    <span>{isTestingDb ? 'Testando...' : 'Testar Conexão em Tempo Real'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCopySqlScript}
+                    className="px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer border border-stone-700 shadow-md"
+                  >
+                    <Copy className="h-4 w-4 text-rose-400" />
+                    <span>{sqlCopied ? 'SQL Copiado!' : 'Copiar Script SQL Completo'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Status Geral</span>
+                    {isSupabaseConfigured() ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/80 dark:text-emerald-300 px-2 py-0.5 rounded-full">
+                        <Check className="h-3 w-3" /> Configurado
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-100 dark:bg-amber-950/80 dark:text-amber-300 px-2 py-0.5 rounded-full">
+                        <AlertCircle className="h-3 w-3" /> Modo Local (Offline)
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-stone-600 dark:text-stone-300 pt-1">
+                    {isSupabaseConfigured()
+                      ? 'Variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY detectadas.'
+                      : 'Nenhuma credencial do Supabase detectada no ambiente.'}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Persistência Banners</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 bg-rose-100 dark:bg-rose-950/80 dark:text-rose-300 px-2 py-0.5 rounded-full">
+                      <ShieldCheck className="h-3 w-3" /> Local + Cloud Sync
+                    </span>
+                  </div>
+                  <p className="text-xs text-stone-600 dark:text-stone-300 pt-1">
+                    {promotions.length} banners ativos em memória e sincronizados com a tabela <code>promotions</code>.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Permissões RLS</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 bg-purple-100 dark:bg-purple-950/80 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                      <Server className="h-3 w-3" /> Leitura & Gravação
+                    </span>
+                  </div>
+                  <p className="text-xs text-stone-600 dark:text-stone-300 pt-1">
+                    Políticas configuradas para salvar banners, serviços e formulários via chave pública.
+                  </p>
+                </div>
+              </div>
+
+              {/* Diagnostic Test Output */}
+              {dbDiagnostics && (
+                <div className="p-5 bg-stone-900 text-stone-100 rounded-2xl border border-stone-800 space-y-3 shadow-lg animate-fade-in">
+                  <div className="flex items-center justify-between border-b border-stone-800 pb-2">
+                    <h4 className="font-bold text-sm flex items-center gap-2 text-rose-400">
+                      <Terminal className="h-4 w-4" />
+                      Resultado dos Testes de Conexão das Tabelas
+                    </h4>
+                    <span className="text-[11px] text-stone-400">
+                      {dbDiagnostics.filter((d) => d.status === 'ok').length} de {dbDiagnostics.length} tabelas OK
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    {dbDiagnostics.map((diag) => (
+                      <div
+                        key={diag.table}
+                        className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                          diag.status === 'ok'
+                            ? 'bg-emerald-950/30 border-emerald-800/60 text-emerald-200'
+                            : 'bg-rose-950/30 border-rose-800/60 text-rose-200'
+                        }`}
+                      >
+                        {diag.status === 'ok' ? (
+                          <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                        )}
+                        <div className="space-y-0.5">
+                          <p className="font-bold">{diag.label}</p>
+                          <p className="text-[11px] opacity-80">{diag.message}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Instructions on running the SQL script */}
+              <div className="p-6 bg-rose-50/60 dark:bg-stone-800/60 rounded-3xl border border-rose-200 dark:border-stone-700 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-serif font-bold text-base text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-rose-600" />
+                    Como sincronizar e corrigir todas as tabelas no Supabase (Passo a Passo)
+                  </h4>
+                  <button
+                    onClick={handleCopySqlScript}
+                    className="text-xs font-bold text-rose-600 hover:text-rose-700 underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    Copiar Script SQL
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-stone-700 dark:text-stone-300">
+                  <div className="p-4 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-2 shadow-sm">
+                    <span className="w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+                    <h5 className="font-bold text-stone-900 dark:text-stone-100">Abra o SQL Editor</h5>
+                    <p className="text-stone-500">
+                      Acesse o painel do seu projeto no Supabase (<strong>app.supabase.com</strong>) e clique em <strong>SQL Editor</strong> no menu lateral.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-2 shadow-sm">
+                    <span className="w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+                    <h5 className="font-bold text-stone-900 dark:text-stone-100">Cole o Script SQL</h5>
+                    <p className="text-stone-500">
+                      Clique no botão <strong>"Copiar Script SQL Completo"</strong> acima, crie uma nova query (New Query) no Supabase e cole todo o conteúdo.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-2 shadow-sm">
+                    <span className="w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+                    <h5 className="font-bold text-stone-900 dark:text-stone-100">Clique em RUN</h5>
+                    <p className="text-stone-500">
+                      Clique no botão verde <strong>Run</strong>. O script criará ou atualizará automaticamente as tabelas (incluindo imagens dos banners) e liberará as permissões RLS.
+                    </p>
+                  </div>
+                </div>
+
+                {/* SQL Code Preview Container */}
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-stone-600 dark:text-stone-300">
+                    <span>Prévia do Script SQL de Migração (Pronto para Execução):</span>
+                    <span className="text-[11px] text-stone-400 font-mono">20260813_fix_all_tables.sql</span>
+                  </div>
+                  <div className="relative">
+                    <pre className="p-4 bg-stone-950 text-stone-300 rounded-2xl text-[11px] font-mono overflow-x-auto max-h-64 border border-stone-800 leading-relaxed scrollbar-thin">
+                      {SUPABASE_FULL_MIGRATION_SQL}
+                    </pre>
+                    <button
+                      onClick={handleCopySqlScript}
+                      className="absolute top-3 right-3 px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 text-white text-xs font-bold rounded-lg border border-stone-700 flex items-center gap-1.5 transition-all cursor-pointer shadow"
+                    >
+                      <Copy className="h-3.5 w-3.5 text-rose-400" />
+                      <span>{sqlCopied ? 'Copiado!' : 'Copiar'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

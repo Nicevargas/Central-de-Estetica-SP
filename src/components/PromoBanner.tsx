@@ -123,23 +123,23 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
     <div className="w-full">
       {/* Main Light & Elegant Banner Container */}
       <div
-        className="relative overflow-hidden rounded-xl sm:rounded-3xl bg-gradient-to-br from-rose-50/90 via-amber-50/30 to-stone-50 text-stone-900 shadow-md border border-rose-200/70"
+        className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-rose-50/90 via-amber-50/30 to-stone-50 text-stone-900 shadow-md border border-rose-200/70 flex flex-col lg:flex-row"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-0 lg:min-h-[260px]">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 min-h-[320px] sm:min-h-[300px] lg:min-h-[320px]">
           {/* Left Text / Info Area */}
-          <div className="lg:col-span-7 p-3.5 sm:p-6 lg:p-8 flex flex-col justify-between z-10 relative bg-gradient-to-r from-rose-50/95 via-rose-50/80 to-stone-50/60">
-            <div>
+          <div className="lg:col-span-7 p-4 sm:p-6 lg:p-8 flex flex-col justify-between z-10 relative bg-gradient-to-r from-rose-50/95 via-rose-50/80 to-stone-50/60 order-2 lg:order-1">
+            <div className="space-y-2 sm:space-y-3">
               {/* Badge & Expiration */}
-              <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-4 flex-wrap">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wider uppercase bg-rose-100 text-rose-700 border border-rose-200/80">
-                  <Sparkles className="h-3 w-3 text-rose-500" />
+                  <Sparkles className="h-3 w-3 text-rose-500 shrink-0" />
                   {currentPromo.badge}
                 </span>
 
                 <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] text-stone-600 bg-white/80 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-stone-200 shadow-2xs">
-                  <Clock className="h-3 w-3 text-amber-500" />
+                  <Clock className="h-3 w-3 text-amber-500 shrink-0" />
                   Resta(m) {currentPromo.expiresInDays} dias
                 </span>
               </div>
@@ -152,18 +152,18 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-1 sm:space-y-2"
+                  className="space-y-1.5 sm:space-y-2.5"
                 >
                   <h3 className="font-serif text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-stone-900 leading-snug sm:leading-tight">
                     {currentPromo.title}
                   </h3>
-                  <p className="text-stone-600 text-xs sm:text-sm max-w-lg leading-relaxed line-clamp-2 sm:line-clamp-none">
+                  <p className="text-stone-600 text-xs sm:text-sm max-w-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
                     {currentPromo.subtitle}
                   </p>
 
                   {/* Price Section */}
                   {(currentPromo.originalPrice || currentPromo.promoPrice) && (
-                    <div className="flex items-baseline gap-2 sm:gap-3 pt-1.5 sm:pt-3 flex-wrap">
+                    <div className="flex items-baseline gap-2 sm:gap-3 pt-1 sm:pt-2 flex-wrap">
                       {currentPromo.originalPrice && (
                         <span className="text-stone-400 line-through text-xs sm:text-sm">
                           {currentPromo.originalPrice}
@@ -181,7 +181,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
             </div>
 
             {/* Actions & Pagination Controls */}
-            <div className="pt-3 sm:pt-4 mt-2 sm:mt-4 border-t border-rose-200/60 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+            <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-rose-200/60 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onSelectPromo(currentPromo.treatmentId, currentPromo.couponCode)}
@@ -245,8 +245,8 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
             </div>
           </div>
 
-          {/* Right Image Showcase Column (Clean Aesthetic Treatment Photo) */}
-          <div className="lg:col-span-5 relative min-h-[160px] lg:min-h-full overflow-hidden hidden sm:block">
+          {/* Right Image Showcase Column (Exact Proportional Standard Frame with Zero Distortion) */}
+          <div className="lg:col-span-5 relative w-full h-48 sm:h-56 lg:h-full min-h-[190px] sm:min-h-[220px] lg:min-h-[320px] overflow-hidden order-1 lg:order-2 bg-stone-100">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPromo.id}
@@ -254,7 +254,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-full h-full relative"
+                className="w-full h-full absolute inset-0"
               >
                 <img
                   src={promoImage}
@@ -263,10 +263,10 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
                   }}
-                  className="w-full h-full object-cover object-center transform transition-transform duration-700 hover:scale-105"
+                  className="w-full h-full object-cover object-center select-none transform transition-transform duration-700 hover:scale-105"
                 />
                 {/* Soft subtle gradient transition to blend cleanly with left light theme */}
-                <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-rose-50/90 via-rose-50/15 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-rose-50/90 via-rose-50/20 to-transparent pointer-events-none" />
               </motion.div>
             </AnimatePresence>
           </div>
