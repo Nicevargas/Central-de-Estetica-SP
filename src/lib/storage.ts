@@ -1,5 +1,6 @@
 import { Treatment, Testimonial, Promotion, BlogPost, BookingRequest, ContactInfo } from '../types';
 import { TREATMENTS, TESTIMONIALS, INITIAL_PROMOTIONS, INITIAL_BLOG_POSTS, DEFAULT_CONTACT_INFO } from '../data';
+import { sanitizeTreatmentObject } from './treatmentUtils';
 import {
   isSupabaseConfigured,
   fetchTreatmentsFromSupabase,
@@ -72,22 +73,24 @@ function saveToStorage<T>(key: string, value: T): void {
 export function getStoredTreatments(): Treatment[] {
   const stored = loadFromStorage<Treatment[]>(STORAGE_KEYS.TREATMENTS, TREATMENTS);
   if (!stored || stored.length === 0) {
-    saveToStorage(STORAGE_KEYS.TREATMENTS, TREATMENTS);
-    return TREATMENTS;
+    const sanitizedInit = TREATMENTS.map(sanitizeTreatmentObject);
+    saveToStorage(STORAGE_KEYS.TREATMENTS, sanitizedInit);
+    return sanitizedInit;
   }
-  return stored;
+  return stored.map(sanitizeTreatmentObject);
 }
 
 export function saveStoredTreatments(treatments: Treatment[]): void {
-  saveToStorage(STORAGE_KEYS.TREATMENTS, treatments);
+  const cleanTreatments = treatments.map(sanitizeTreatmentObject);
+  saveToStorage(STORAGE_KEYS.TREATMENTS, cleanTreatments);
   if (isSupabaseConfigured()) {
     (async () => {
-      for (const t of treatments) {
+      for (const t of cleanTreatments) {
         await saveTreatmentToSupabase(t);
       }
       const remote = await fetchTreatmentsFromSupabase();
       if (remote) {
-        const currentIds = new Set(treatments.map((t) => t.id));
+        const currentIds = new Set(cleanTreatments.map((t) => t.id));
         for (const oldT of remote) {
           if (!currentIds.has(oldT.id)) {
             await deleteTreatmentInSupabase(oldT.id);
@@ -102,8 +105,9 @@ export async function syncTreatments(): Promise<Treatment[]> {
   if (isSupabaseConfigured()) {
     const remote = await fetchTreatmentsFromSupabase();
     if (remote !== null) {
-      saveToStorage(STORAGE_KEYS.TREATMENTS, remote);
-      return remote;
+      const sanitizedRemote = remote.map(sanitizeTreatmentObject);
+      saveToStorage(STORAGE_KEYS.TREATMENTS, sanitizedRemote);
+      return sanitizedRemote;
     }
   }
   return getStoredTreatments();

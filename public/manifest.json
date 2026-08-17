@@ -1,0 +1,23 @@
+{
+  "short_name": "Central da Estética",
+  "name": "Central da Estética - Clínica de Estética em São Paulo",
+  "description": "Clínica de Estética Especializada em Secagem de Vasinhos, Botox, Ultraformer MPT, Laser Lavieén e Bioestimuladores no Jardim Paulista, São Paulo - SP.",
+  "icons": [
+    {
+      "src": "https://qzcrregtdhjumvfigwxj.supabase.co/storage/v1/object/public/imagens/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://qzcrregtdhjumvfigwxj.supabase.co/storage/v1/object/public/imagens/favicon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#e11d48",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "pt-BR"
+}

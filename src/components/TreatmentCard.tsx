@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, ArrowRight, Clock } from 'lucide-react';
 import { Treatment } from '../types';
+import { getSanitizedTreatmentDisplay } from '../lib/treatmentUtils';
 
 interface TreatmentCardProps {
   treatment: Treatment;
@@ -11,6 +12,7 @@ interface TreatmentCardProps {
 
 export default function TreatmentCard({ treatment, onSelect, onViewDetails }: TreatmentCardProps) {
   const isHighlight = treatment.highlight;
+  const display = getSanitizedTreatmentDisplay(treatment);
 
   const handleOpenDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -66,16 +68,16 @@ export default function TreatmentCard({ treatment, onSelect, onViewDetails }: Tr
 
             <div className="pt-4 border-t border-outline-variant/10 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                {treatment.price && (
+                {display.hasPrice && (
                   <div>
                     <span className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider block">Investimento</span>
-                    <span className="font-bold text-primary text-base sm:text-lg">{treatment.price}</span>
+                    <span className="font-bold text-primary text-base sm:text-lg">{display.price}</span>
                   </div>
                 )}
-                {treatment.duration && (
+                {display.hasDuration && (
                   <div className="hidden sm:flex text-xs font-semibold text-stone-600 bg-stone-100 px-3 py-1 rounded-full items-center gap-1">
                     <Clock className="h-3.5 w-3.5 text-stone-500" />
-                    <span>{treatment.duration}</span>
+                    <span>{display.duration}</span>
                   </div>
                 )}
               </div>
@@ -146,10 +148,10 @@ export default function TreatmentCard({ treatment, onSelect, onViewDetails }: Tr
             </span>
           </div>
         )}
-        {treatment.duration && (
+        {display.hasDuration && (
           <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 text-white text-xs font-semibold">
             <Clock className="h-3 w-3" />
-            <span>{treatment.duration}</span>
+            <span>{display.duration}</span>
           </div>
         )}
       </div>
@@ -177,10 +179,10 @@ export default function TreatmentCard({ treatment, onSelect, onViewDetails }: Tr
         </div>
 
         <div className="pt-3 border-t border-outline-variant/10 flex items-center justify-between gap-2">
-          {treatment.price && (
+          {display.hasPrice && (
             <div>
               <span className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider block">Valor</span>
-              <span className="font-bold text-primary text-sm">{treatment.price}</span>
+              <span className="font-bold text-primary text-sm">{display.price}</span>
             </div>
           )}
           

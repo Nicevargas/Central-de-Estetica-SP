@@ -15,6 +15,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { Treatment } from '../types';
+import { getSanitizedTreatmentDisplay } from '../lib/treatmentUtils';
 
 interface TreatmentDetailModalProps {
   treatment: Treatment | null;
@@ -45,6 +46,7 @@ export default function TreatmentDetailModal({
 
   if (!treatment) return null;
 
+  const display = getSanitizedTreatmentDisplay(treatment);
   const fallbackImage = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
 
   // Prepare Share URLs specific to this treatment
@@ -52,7 +54,7 @@ export default function TreatmentDetailModal({
     ? `${window.location.origin}${window.location.pathname}`
     : '';
   const treatmentShareUrl = `${baseUrl}?treatment=${encodeURIComponent(treatment.id)}`;
-  const shareText = `Confira este procedimento de ${treatment.name} na Central da Estética! ${treatment.price ? `Por ${treatment.price}` : ''}`;
+  const shareText = `Confira este procedimento de ${treatment.name} na Central da Estética! ${display.hasPrice ? `Por ${display.price}` : ''}`;
   const rawWhatsappNum = whatsappNumber.replace(/\D/g, '') || '551194683765';
   const whatsappShareUrl = `https://wa.me/${rawWhatsappNum}?text=${encodeURIComponent(`${shareText}\n${treatmentShareUrl}`)}`;
   const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(treatmentShareUrl)}`;
@@ -183,15 +185,15 @@ export default function TreatmentDetailModal({
                 {treatment.name}
               </h1>
               <div className="flex flex-wrap items-center gap-3">
-                {treatment.price && (
+                {display.hasPrice && (
                   <div className="px-4 py-1.5 bg-rose-600/90 backdrop-blur-md text-white font-extrabold text-sm sm:text-base rounded-full shadow-lg border border-rose-400/30">
-                    {treatment.price}
+                    {display.price}
                   </div>
                 )}
-                {treatment.duration && (
+                {display.hasDuration && (
                   <div className="px-4 py-1.5 bg-black/50 backdrop-blur-md text-stone-200 font-semibold text-xs sm:text-sm rounded-full border border-white/20 flex items-center gap-1.5">
                     <Clock className="h-4 w-4 text-rose-400" />
-                    <span>Duração: {treatment.duration}</span>
+                    <span>Duração: {display.duration}</span>
                   </div>
                 )}
               </div>
@@ -342,7 +344,7 @@ export default function TreatmentDetailModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="p-4 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700/60">
                   <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block mb-1">Duração da Sessão</span>
-                  <span className="text-sm sm:text-base font-bold text-stone-900 dark:text-stone-100">{treatment.technicalSpecs.duration || treatment.duration}</span>
+                  <span className="text-sm sm:text-base font-bold text-stone-900 dark:text-stone-100">{treatment.technicalSpecs.duration || display.duration || '45 min'}</span>
                 </div>
                 <div className="p-4 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700/60">
                   <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block mb-1">Anestesia</span>
@@ -447,7 +449,7 @@ export default function TreatmentDetailModal({
           <div className="text-center sm:text-left hidden sm:block">
             <span className="text-xs font-medium text-stone-500 block">Pronta para transformar seu bem-estar?</span>
             <span className="text-sm sm:text-base font-bold text-stone-900 dark:text-stone-100 truncate max-w-md block">
-              {treatment.name} {treatment.price ? `— ${treatment.price}` : ''}
+              {treatment.name} {display.hasPrice ? `— ${display.price}` : ''}
             </span>
           </div>
 

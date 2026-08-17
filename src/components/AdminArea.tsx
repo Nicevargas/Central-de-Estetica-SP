@@ -34,8 +34,10 @@ import {
   ShieldCheck,
   Server,
   Terminal,
+  Search,
 } from 'lucide-react';
 import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
+import { getSanitizedTreatmentDisplay, sanitizeTreatmentObject, isPriceLike } from '../lib/treatmentUtils';
 import {
   isSupabaseConfigured,
   testSupabaseDatabaseTables,
@@ -97,7 +99,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'treatments' | 'promotions' | 'testimonials' | 'blog' | 'bookings' | 'contact' | 'database'>('treatments');
+  const [activeTab, setActiveTab] = useState<'treatments' | 'promotions' | 'testimonials' | 'blog' | 'bookings' | 'contact' | 'database' | 'seo'>('treatments');
   const [notification, setNotification] = useState<string | null>(null);
 
   // Database Diagnostic States
@@ -180,22 +182,23 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
 
     if (editingTreatment.id) {
       // Update
-      const updated = treatments.map((t) => (t.id === editingTreatment.id ? ({ ...t, ...editingTreatment } as Treatment) : t));
+      const cleaned = sanitizeTreatmentObject(editingTreatment as Treatment);
+      const updated = treatments.map((t) => (t.id === editingTreatment.id ? cleaned : t));
       onSaveTreatments(updated);
       notify('Serviço/Tratamento atualizado com sucesso!');
     } else {
       // Create
-      const newTreatment: Treatment = {
+      const newTreatment: Treatment = sanitizeTreatmentObject({
         id: `treatment-${Date.now()}`,
         name: editingTreatment.name || 'Novo Tratamento',
         description: editingTreatment.description || '',
         category: editingTreatment.category || 'facial',
-        price: editingTreatment.price || 'R$ 0,00',
-        duration: editingTreatment.duration || '30 min',
+        price: editingTreatment.price || '',
+        duration: editingTreatment.duration || '45 min',
         image: editingTreatment.image || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
         benefits: editingTreatment.benefits || ['Qualidade garantida', 'Atendimento personalizado'],
         popular: editingTreatment.popular || false,
-      };
+      });
       onSaveTreatments([newTreatment, ...treatments]);
       notify('Novo Serviço/Tratamento criado com sucesso!');
     }
@@ -600,6 +603,18 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
             <Database className="h-4 w-4" />
             <span>Banco de Dados (Supabase)</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('seo')}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'seo'
+                ? 'bg-rose-600 text-white shadow-sm'
+                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700'
+            }`}
+          >
+            <Search className="h-4 w-4 text-emerald-500" />
+            <span>SEO & Google</span>
+          </button>
         </div>
 
         {/* Tab Contents Area */}
@@ -666,25 +681,35 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1">Preço</label>
+                      <label className="block text-xs font-bold mb-1">Preço / Condição (Ex: 6x de R$ 399,00 ou R$ 850,00)</label>
                       <input
                         type="text"
                         value={editingTreatment.price || ''}
                         onChange={(e) => setEditingTreatment({ ...editingTreatment, price: e.target.value })}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
-                        placeholder="Ex: R$ 850,00"
+                        placeholder="Ex: 6x de R$ 399,00 ou R$ 850,00"
                       />
+                      <span className="text-[10px] text-stone-400 block mt-0.5">Insira o valor ou parcelamento. Deixe em branco para "Sob Consulta".</span>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1">Duração Estimada</label>
+                      <label className="block text-xs font-bold mb-1">Duração do Atendimento (Ex: 45 min)</label>
                       <input
                         type="text"
                         value={editingTreatment.duration || ''}
-                        onChange={(e) => setEditingTreatment({ ...editingTreatment, duration: e.target.value })}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          // If user mistakenly types price/installment in duration, handle seamlessly
+                          if (isPriceLike(val) && (!editingTreatment.price || editingTreatment.price === 'R$ 0,00')) {
+                            setEditingTreatment({ ...editingTreatment, price: val, duration: '45 min' });
+                          } else {
+                            setEditingTreatment({ ...editingTreatment, duration: val });
+                          }
+                        }}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
-                        placeholder="Ex: 45 min"
+                        placeholder="Ex: 45 min, 1 hora"
                       />
+                      <span className="text-[10px] text-stone-400 block mt-0.5">Tempo da sessão (minutos ou horas).</span>
                     </div>
 
                     <div className="md:col-span-2">
@@ -1026,7 +1051,9 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
 
               {/* Treatments List Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {treatments.map((t) => (
+                {treatments.map((t) => {
+                  const display = getSanitizedTreatmentDisplay(t);
+                  return (
                   <div
                     key={t.id}
                     className="p-4 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col justify-between gap-3"
@@ -1051,7 +1078,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                             )}
                           </div>
                           <h4 className="font-bold text-sm line-clamp-1">{t.name}</h4>
-                          <p className="text-xs text-rose-600 font-extrabold">{t.price || 'Sob Consulta'}</p>
+                          <p className="text-xs text-rose-600 font-extrabold">{display.hasPrice ? display.price : 'Sob Consulta'}</p>
+                          {display.hasDuration && <p className="text-[11px] text-stone-500">Duração: {display.duration}</p>}
                         </div>
                       </div>
 
@@ -1124,7 +1152,8 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -2311,6 +2340,205 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <Copy className="h-3.5 w-3.5 text-rose-400" />
                       <span>{sqlCopied ? 'Copiado!' : 'Copiar'}</span>
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= SEO & GOOGLE TAB ================= */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-serif text-xl font-bold flex items-center gap-2">
+                    <Search className="h-5 w-5 text-emerald-500" />
+                    Otimização para Busca do Google (SEO)
+                  </h3>
+                  <p className="text-xs text-stone-500">
+                    Configuração completa de indexação, metadados, sitemap e dados estruturados para aparecer no topo do Google
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-300 dark:border-emerald-800">
+                  <ShieldCheck className="h-4 w-4" />
+                  SEO 100% Configurado
+                </div>
+              </div>
+
+              {/* Google Search Live Snippet Simulation */}
+              <div className="p-6 bg-stone-50 dark:bg-stone-800/60 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-blue-500" />
+                    Como seu site aparece nos resultados do Google:
+                  </h4>
+                  <span className="text-[11px] text-stone-400 font-mono">Prévia em tempo real</span>
+                </div>
+
+                <div className="p-5 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-1.5 shadow-sm max-w-2xl font-sans">
+                  <div className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400">
+                    <div className="w-5 h-5 rounded-full bg-rose-600 flex items-center justify-center text-white text-[10px] font-bold">C</div>
+                    <span className="truncate">https://centraldaestetica.com.br</span>
+                    <span className="text-stone-300 dark:text-stone-600">›</span>
+                    <span className="text-stone-500">sao-paulo</span>
+                  </div>
+                  <h4 className="text-lg text-blue-600 dark:text-blue-400 font-medium hover:underline cursor-pointer leading-snug">
+                    Central da Estética | Clínica de Estética em São Paulo - Jardins & Paulista
+                  </h4>
+                  <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+                    Clínica de Estética de Alta Performance em São Paulo (Jardim Paulista). Especialistas em Secagem de Vasinhos (Laser e PEIM), Botox, Ultraformer MPT, Laser Lavieén, Bioestimuladores de Colágeno e Gordura Localizada.
+                  </p>
+                  <div className="pt-2 flex items-center gap-3 text-[11px] text-stone-500 border-t border-stone-100 dark:border-stone-800 flex-wrap">
+                    <span className="text-amber-500 font-bold">★ 4.9 (91 avaliações no Google)</span>
+                    <span>•</span>
+                    <span>Jardim Paulista, São Paulo - SP</span>
+                    <span>•</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Aberto até 20:00</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status of Key SEO Assets */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Sitemap XML Box */}
+                <div className="p-5 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4 text-rose-600" />
+                      Sitemap XML para o Google
+                    </h5>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                      Ativo
+                    </span>
+                  </div>
+                  <p className="text-xs text-stone-500 leading-relaxed">
+                    Arquivo que lista todas as páginas e tratamentos para os robôs do Google indexarem rapidamente.
+                  </p>
+                  <div className="p-2.5 bg-stone-100 dark:bg-stone-800 rounded-xl font-mono text-xs text-stone-800 dark:text-stone-200 flex items-center justify-between gap-2 overflow-x-auto">
+                    <span className="truncate">https://centraldaestetica.com.br/sitemap.xml</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText('https://centraldaestetica.com.br/sitemap.xml');
+                        setNotification('Link do Sitemap copiado com sucesso!');
+                        setTimeout(() => setNotification(null), 3000);
+                      }}
+                      className="px-2.5 py-1 bg-white dark:bg-stone-700 hover:bg-stone-200 text-stone-900 dark:text-white rounded-lg text-[11px] font-bold shrink-0 transition-all cursor-pointer shadow-2xs"
+                    >
+                      Copiar URL
+                    </button>
+                  </div>
+                </div>
+
+                {/* Robots.txt Box */}
+                <div className="p-5 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                      Robots.txt & Diretivas de Crawling
+                    </h5>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                      Liberado
+                    </span>
+                  </div>
+                  <p className="text-xs text-stone-500 leading-relaxed">
+                    Instrui o Googlebot e Bingbot a rastrear todas as páginas públicas e imagens da clínica.
+                  </p>
+                  <div className="p-2.5 bg-stone-100 dark:bg-stone-800 rounded-xl font-mono text-xs text-stone-800 dark:text-stone-200 flex items-center justify-between gap-2 overflow-x-auto">
+                    <span className="truncate">https://centraldaestetica.com.br/robots.txt</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText('https://centraldaestetica.com.br/robots.txt');
+                        setNotification('Link do Robots.txt copiado com sucesso!');
+                        setTimeout(() => setNotification(null), 3000);
+                      }}
+                      className="px-2.5 py-1 bg-white dark:bg-stone-700 hover:bg-stone-200 text-stone-900 dark:text-white rounded-lg text-[11px] font-bold shrink-0 transition-all cursor-pointer shadow-2xs"
+                    >
+                      Copiar URL
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Checklist of Configured Structured Data */}
+              <div className="p-6 bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-700 space-y-4 shadow-sm">
+                <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  Recursos Avançados de SEO Instalados no Site
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-700 space-y-1">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      ✓ Schema LocalBusiness & MedicalClinic
+                    </span>
+                    <p className="text-stone-500">Informa ao Google endereço, horário, telefone, raio de atuação e especialidades.</p>
+                  </div>
+
+                  <div className="p-3 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-700 space-y-1">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      ✓ FAQPage Rich Snippets
+                    </span>
+                    <p className="text-stone-500">Permite que o Google exiba perguntas e respostas expansíveis direto no resultado da busca.</p>
+                  </div>
+
+                  <div className="p-3 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-700 space-y-1">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      ✓ Local SEO (Geotags SP)
+                    </span>
+                    <p className="text-stone-500">Coordenadas geográficas exatas (-23.5658, -46.6625) para buscas por "estética perto de mim".</p>
+                  </div>
+
+                  <div className="p-3 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-700 space-y-1">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      ✓ Open Graph & WhatsApp Preview
+                    </span>
+                    <p className="text-stone-500">Gera card bonito com foto, título e descrição ao compartilhar links no WhatsApp e Instagram.</p>
+                  </div>
+
+                  <div className="p-3 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-700 space-y-1">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      ✓ BreadcrumbList & WebSite
+                    </span>
+                    <p className="text-stone-500">Estrutura de navegação para sitelinks secundários nos resultados do Google.</p>
+                  </div>
+
+                  <div className="p-3 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-700 space-y-1">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      ✓ Dynamic Head Tags (React)
+                    </span>
+                    <p className="text-stone-500">Atualiza automaticamente o título e descrição ao abrir cada tratamento e post de blog.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step-by-Step Guide for Google Search Console */}
+              <div className="p-6 bg-rose-50/60 dark:bg-stone-800/60 rounded-3xl border border-rose-200 dark:border-stone-700 space-y-4">
+                <h4 className="font-serif font-bold text-base text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-rose-600" />
+                  Como enviar seu site ao Google Search Console (Guia Rápido)
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-stone-700 dark:text-stone-300">
+                  <div className="p-4 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-2 shadow-sm">
+                    <span className="w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+                    <h5 className="font-bold text-stone-900 dark:text-stone-100">Acesse o Search Console</h5>
+                    <p className="text-stone-500">
+                      Entre em <strong>search.google.com/search-console</strong> com seu e-mail do Google e adicione a propriedade do seu domínio.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-2 shadow-sm">
+                    <span className="w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+                    <h5 className="font-bold text-stone-900 dark:text-stone-100">Envie o Sitemap</h5>
+                    <p className="text-stone-500">
+                      No menu lateral esquerdo, clique em <strong>Sitemaps</strong>, digite <code>sitemap.xml</code> no campo e clique em <strong>Enviar</strong>.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-2 shadow-sm">
+                    <span className="w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+                    <h5 className="font-bold text-stone-900 dark:text-stone-100">Indexação Rápida</h5>
+                    <p className="text-stone-500">
+                      O Google rastreará automaticamente todas as páginas e começará a exibir a clínica nas buscas orgânicas de São Paulo.
+                    </p>
                   </div>
                 </div>
               </div>

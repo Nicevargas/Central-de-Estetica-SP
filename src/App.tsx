@@ -74,6 +74,7 @@ import { BlogPage } from './components/BlogPage';
 import { BlogDetailModal } from './components/BlogDetailModal';
 import { AdminArea } from './components/AdminArea';
 import TreatmentDetailModal from './components/TreatmentDetailModal';
+import { SEOHead } from './components/SEOHead';
 
 const logoUrl = 'https://qzcrregtdhjumvfigwxj.supabase.co/storage/v1/object/public/imagens/logo.png';
 
@@ -266,6 +267,18 @@ export default function App() {
     setIsBookingOpen(true);
   };
 
+  const handlePromoSelect = (treatmentIdentifier: string, _couponCode?: string) => {
+    // Search matching treatment by ID or name
+    const matchingTreatment = findMatchingTreatment(treatmentIdentifier, treatments);
+    if (matchingTreatment) {
+      setSelectedTreatmentForDetail(matchingTreatment);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setActiveTab('tratamentos');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newsletterEmail.trim()) {
@@ -277,6 +290,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-surface">
+      {/* Dynamic SEO Meta & Structured Data Manager */}
+      <SEOHead
+        activeTab={activeTab}
+        selectedTreatment={selectedTreatmentForDetail}
+        selectedBlogPost={selectedBlogPost}
+        contactInfo={contactInfo}
+      />
+
       {/* Navigation Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-outline-variant/10 shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -504,7 +525,7 @@ export default function App() {
               {/* Hero Section */}
               <section className="relative overflow-hidden pt-2 sm:pt-3 pb-12 md:pb-16">
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 mb-8">
-                  <PromoBanner promotions={promotions} treatments={treatments} onSelectPromo={(treatmentId) => triggerBooking(treatmentId)} />
+                  <PromoBanner promotions={promotions} treatments={treatments} onSelectPromo={handlePromoSelect} />
                 </div>
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className="space-y-6">

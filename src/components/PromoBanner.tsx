@@ -112,6 +112,8 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
     matchedTreatment?.image ||
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
 
+  const targetTreatmentId = currentPromo.treatmentId || matchedTreatment?.id || currentPromo.title || '';
+
   const handleCopyCoupon = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(code);
@@ -154,7 +156,10 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
                   transition={{ duration: 0.2 }}
                   className="space-y-1.5 sm:space-y-2.5"
                 >
-                  <h3 className="font-serif text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-stone-900 leading-snug sm:leading-tight">
+                  <h3
+                    onClick={() => onSelectPromo(targetTreatmentId, currentPromo.couponCode)}
+                    className="font-serif text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-stone-900 leading-snug sm:leading-tight cursor-pointer hover:text-rose-600 transition-colors"
+                  >
                     {currentPromo.title}
                   </h3>
                   <p className="text-stone-600 text-xs sm:text-sm max-w-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
@@ -184,7 +189,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
             <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-rose-200/60 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => onSelectPromo(currentPromo.treatmentId, currentPromo.couponCode)}
+                  onClick={() => onSelectPromo(targetTreatmentId, currentPromo.couponCode)}
                   className="bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer active:scale-95"
                 >
                   <span>Garantir Oferta</span>
@@ -246,7 +251,10 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
           </div>
 
           {/* Right Image Showcase Column (Exact Proportional Standard Frame with Zero Distortion) */}
-          <div className="lg:col-span-5 relative w-full h-48 sm:h-56 lg:h-full min-h-[190px] sm:min-h-[220px] lg:min-h-[320px] overflow-hidden order-1 lg:order-2 bg-stone-100">
+          <div
+            onClick={() => onSelectPromo(targetTreatmentId, currentPromo.couponCode)}
+            className="lg:col-span-5 relative w-full h-48 sm:h-56 lg:h-full min-h-[190px] sm:min-h-[220px] lg:min-h-[320px] overflow-hidden order-1 lg:order-2 bg-stone-100 cursor-pointer group"
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPromo.id}
@@ -263,7 +271,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
                   }}
-                  className="w-full h-full object-cover object-center select-none transform transition-transform duration-700 hover:scale-105"
+                  className="w-full h-full object-cover object-center select-none transform transition-transform duration-700 group-hover:scale-105"
                 />
                 {/* Soft subtle gradient transition to blend cleanly with left light theme */}
                 <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-rose-50/90 via-rose-50/20 to-transparent pointer-events-none" />
