@@ -75,6 +75,7 @@ import { BlogDetailModal } from './components/BlogDetailModal';
 import { AdminArea } from './components/AdminArea';
 import TreatmentDetailModal from './components/TreatmentDetailModal';
 import { SEOHead } from './components/SEOHead';
+import { formatGoogleDriveImageUrl, getGoogleDriveThumbnailUrl } from './lib/treatmentUtils';
 
 const logoUrl = 'https://qzcrregtdhjumvfigwxj.supabase.co/storage/v1/object/public/imagens/logo.png';
 
@@ -1004,12 +1005,18 @@ export default function App() {
                         key={t.id}
                         className="glass-card p-6 sm:p-10 rounded-3xl flex flex-col sm:flex-row gap-6 sm:gap-8 items-center border-white/40 shadow-sm"
                       >
-                        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shrink-0 border-4 border-white shadow-xl">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shrink-0 border-4 border-white shadow-xl bg-stone-100">
                           <img
-                            src={t.image}
+                            src={formatGoogleDriveImageUrl(t.image) || t.image}
                             alt={t.name}
                             className="w-full h-full object-cover"
                             referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const fallback = getGoogleDriveThumbnailUrl(t.image);
+                              if (fallback && (e.target as HTMLImageElement).src !== fallback) {
+                                (e.target as HTMLImageElement).src = fallback;
+                              }
+                            }}
                           />
                         </div>
                         <div className="flex-1 flex flex-col justify-between h-full text-center sm:text-left">

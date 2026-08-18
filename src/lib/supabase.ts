@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
+import { sanitizeTreatmentObject, formatGoogleDriveImageUrl, formatVideoEmbedUrl, parseBeforeAfterImages } from './treatmentUtils';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -29,23 +30,26 @@ export async function fetchTreatmentsFromSupabase(): Promise<Treatment[] | null>
     }
     if (!data) return [];
 
-    return data.map((row: any) => ({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      category: row.category,
-      popular: row.popular ?? false,
-      highlight: row.highlight ?? false,
-      duration: row.duration,
-      price: row.price,
-      image: row.image,
-      benefits: Array.isArray(row.benefits) ? row.benefits : [],
-      beforeAfterImages: row.before_after_images || row.beforeAfterImages || [],
-      videoUrl: row.video_url || row.videoUrl || '',
-      technicalSpecs: row.technical_specs || row.technicalSpecs || {},
-      postCareTips: Array.isArray(row.post_care_tips) ? row.post_care_tips : (Array.isArray(row.postCareTips) ? row.postCareTips : []),
-      specialist: row.specialist || null,
-    }));
+    return data.map((row: any) => {
+      const rawTreatment: Treatment = {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        category: row.category,
+        popular: row.popular ?? false,
+        highlight: row.highlight ?? false,
+        duration: row.duration,
+        price: row.price,
+        image: formatGoogleDriveImageUrl(row.image) || row.image || '',
+        benefits: Array.isArray(row.benefits) ? row.benefits : [],
+        beforeAfterImages: parseBeforeAfterImages(row.before_after_images || row.beforeAfterImages || row.before_image || row.after_image),
+        videoUrl: formatVideoEmbedUrl(row.video_url || row.videoUrl || ''),
+        technicalSpecs: row.technical_specs || row.technicalSpecs || {},
+        postCareTips: Array.isArray(row.post_care_tips) ? row.post_care_tips : (Array.isArray(row.postCareTips) ? row.postCareTips : []),
+        specialist: row.specialist || null,
+      };
+      return sanitizeTreatmentObject(rawTreatment);
+    });
   } catch (err) {
     console.warn('Notice: Exception fetching treatments from Supabase:', err);
     return null;

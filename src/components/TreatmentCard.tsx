@@ -2,7 +2,11 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, ArrowRight, Clock } from 'lucide-react';
 import { Treatment } from '../types';
-import { getSanitizedTreatmentDisplay } from '../lib/treatmentUtils';
+import {
+  getSanitizedTreatmentDisplay,
+  formatGoogleDriveImageUrl,
+  getGoogleDriveThumbnailUrl,
+} from '../lib/treatmentUtils';
 
 interface TreatmentCardProps {
   treatment: Treatment;
@@ -13,6 +17,7 @@ interface TreatmentCardProps {
 export default function TreatmentCard({ treatment, onSelect, onViewDetails }: TreatmentCardProps) {
   const isHighlight = treatment.highlight;
   const display = getSanitizedTreatmentDisplay(treatment);
+  const imageUrl = formatGoogleDriveImageUrl(treatment.image) || treatment.image;
 
   const handleOpenDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -106,16 +111,25 @@ export default function TreatmentCard({ treatment, onSelect, onViewDetails }: Tr
           </div>
 
           {/* Image side */}
-          <div className="lg:w-2/5 h-64 lg:h-auto relative overflow-hidden shrink-0">
-            <img
-              src={treatment.image}
-              alt={treatment.name}
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
-              }}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
+          <div className="lg:w-2/5 h-64 lg:h-auto relative overflow-hidden shrink-0 bg-stone-100">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={treatment.name}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const fallback = getGoogleDriveThumbnailUrl(treatment.image);
+                  if (fallback && (e.target as HTMLImageElement).src !== fallback) {
+                    (e.target as HTMLImageElement).src = fallback;
+                  }
+                }}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-stone-100 dark:bg-stone-800 text-stone-400">
+                <span className="text-xs font-semibold">Sem Imagem</span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent lg:hidden" />
           </div>
         </div>
@@ -131,16 +145,25 @@ export default function TreatmentCard({ treatment, onSelect, onViewDetails }: Tr
       onClick={handleOpenDetails}
       className="bg-white rounded-2xl overflow-hidden shadow-premium group hover:-translate-y-1.5 border border-outline-variant/10 transition-all duration-500 flex flex-col justify-between cursor-pointer"
     >
-      <div className="h-64 overflow-hidden relative">
-        <img
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          src={treatment.image}
-          alt={treatment.name}
-          referrerPolicy="no-referrer"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
-          }}
-        />
+      <div className="h-64 overflow-hidden relative bg-stone-100">
+        {imageUrl ? (
+          <img
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            src={imageUrl}
+            alt={treatment.name}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              const fallback = getGoogleDriveThumbnailUrl(treatment.image);
+              if (fallback && (e.target as HTMLImageElement).src !== fallback) {
+                (e.target as HTMLImageElement).src = fallback;
+              }
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-stone-100 dark:bg-stone-800 text-stone-400">
+            <span className="text-xs font-semibold">Sem Imagem</span>
+          </div>
+        )}
         {treatment.popular && (
           <div className="absolute top-4 left-4">
             <span className="bg-primary/15 text-primary px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md border border-primary/20">

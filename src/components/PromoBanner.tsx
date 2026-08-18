@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Tag, Clock, ChevronLeft, ChevronRight, Copy, Check, ArrowRight } from 'lucide-react';
 import { Promotion, Treatment } from '../types';
+import { formatGoogleDriveImageUrl } from '../lib/treatmentUtils';
 
 const FALLBACK_PROMOTIONS: Promotion[] = [
   {
@@ -108,8 +109,8 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ promotions, treatments
       });
 
   const promoImage =
-    currentPromo.image ||
-    matchedTreatment?.image ||
+    formatGoogleDriveImageUrl(currentPromo.image) ||
+    formatGoogleDriveImageUrl(matchedTreatment?.image) ||
     'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
 
   const targetTreatmentId = currentPromo.treatmentId || matchedTreatment?.id || currentPromo.title || '';

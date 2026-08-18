@@ -37,7 +37,15 @@ import {
   Search,
 } from 'lucide-react';
 import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
-import { getSanitizedTreatmentDisplay, sanitizeTreatmentObject, isPriceLike } from '../lib/treatmentUtils';
+import {
+  getSanitizedTreatmentDisplay,
+  sanitizeTreatmentObject,
+  isPriceLike,
+  formatGoogleDriveImageUrl,
+  getGoogleDriveThumbnailUrl,
+  formatVideoEmbedUrl,
+  extractGoogleDriveId,
+} from '../lib/treatmentUtils';
 import {
   isSupabaseConfigured,
   testSupabaseDatabaseTables,
@@ -712,38 +720,62 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       <span className="text-[10px] text-stone-400 block mt-0.5">Tempo da sessão (minutos ou horas).</span>
                     </div>
 
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-bold mb-1">URL da Imagem</label>
-                      <input
-                        type="text"
-                        value={editingTreatment.image || ''}
-                        onChange={(e) => {
-                          setEditingTreatment({ ...editingTreatment, image: e.target.value });
-                          setTreatmentImageStatus('idle');
-                        }}
-                        placeholder="https://exemplo.com/foto.jpg (link direto, terminando em .jpg/.jpeg/.png/.webp)"
-                        className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
-                      />
+                    <div className="md:col-span-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold">
+                          Imagem Principal do Tratamento (Google Drive ID ou Link)
+                        </label>
+                        {extractGoogleDriveId(editingTreatment.image) && (
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/50">
+                            ✓ Padrão Google Drive Ativo (ID: {extractGoogleDriveId(editingTreatment.image)})
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={editingTreatment.image || ''}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const formatted = formatGoogleDriveImageUrl(raw);
+                            setEditingTreatment({ ...editingTreatment, image: formatted });
+                            setTreatmentImageStatus('idle');
+                          }}
+                          placeholder="Cole o ID (ex: 1ABCxyz123) ou link do Google Drive / link direto de imagem"
+                          className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-900/60 p-2.5 rounded-xl border border-stone-200 dark:border-stone-800">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-rose-600">💡 Google Drive:</span>
+                          <span>Basta colar o <strong>ID</strong> ou o link de compartilhamento. Formato gerado: <code className="text-[10px] bg-white dark:bg-stone-800 px-1 py-0.5 rounded font-mono">https://drive.google.com/uc?export=view&id=ID</code></span>
+                        </div>
+                      </div>
+
                       {editingTreatment.image && (
-                        <div className="mt-2 flex items-center gap-3">
+                        <div className="mt-2 flex items-center gap-3 p-2 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700">
                           <img
                             key={editingTreatment.image}
                             src={editingTreatment.image}
                             alt="Pré-visualização"
-                            className="h-16 w-16 object-cover rounded-lg border border-stone-200 dark:border-stone-700"
+                            referrerPolicy="no-referrer"
+                            className="h-16 w-16 object-cover rounded-lg border border-stone-200 dark:border-stone-700 shadow-xs"
                             onLoad={() => setTreatmentImageStatus('ok')}
                             onError={() => setTreatmentImageStatus('error')}
                           />
-                          {treatmentImageStatus === 'ok' && (
-                            <span className="text-xs font-semibold text-emerald-600">Link carregado com sucesso.</span>
-                          )}
-                          {treatmentImageStatus === 'error' && (
-                            <span className="text-xs font-semibold text-red-600">
-                              Este link não carrega uma imagem diretamente (comum em links do Google Drive, Google Fotos,
-                              Instagram ou Canva). Use um link direto de imagem ou envie o arquivo para um serviço de
-                              hospedagem de imagens, senão o site vai mostrar a foto padrão no lugar dela.
-                            </span>
-                          )}
+                          <div className="flex-1 text-xs">
+                            {treatmentImageStatus === 'ok' && (
+                              <span className="font-semibold text-emerald-600 block">✓ Imagem carregada com sucesso.</span>
+                            )}
+                            {treatmentImageStatus === 'error' && (
+                              <span className="font-semibold text-amber-600 block">
+                                Se a foto do Google Drive não carregar, certifique-se de que o compartilhamento do arquivo está como "Qualquer pessoa com o link".
+                              </span>
+                            )}
+                            <span className="text-[10px] text-stone-400 break-all block mt-0.5">{editingTreatment.image}</span>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -798,54 +830,126 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                     </div>
 
                     {/* Vídeo do Procedimento */}
-                    <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700">
-                      <label className="block text-xs font-bold mb-1 text-rose-700 dark:text-rose-400">
-                        URL do Vídeo do Procedimento (YouTube / Vimeo / MP4)
-                      </label>
+                    <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-rose-700 dark:text-rose-400">
+                          Vídeo do Procedimento (Google Drive ID, YouTube ou Link de Vídeo)
+                        </label>
+                        {extractGoogleDriveId(editingTreatment.videoUrl) ? (
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/50">
+                            ✓ Vídeo Google Drive Ativo (ID: {extractGoogleDriveId(editingTreatment.videoUrl)})
+                          </span>
+                        ) : editingTreatment.videoUrl ? (
+                          <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded-full border border-sky-200/50">
+                            ✓ Vídeo Incorporado
+                          </span>
+                        ) : null}
+                      </div>
                       <input
                         type="text"
                         value={editingTreatment.videoUrl || ''}
-                        onChange={(e) => setEditingTreatment({ ...editingTreatment, videoUrl: e.target.value })}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const formatted = formatVideoEmbedUrl(raw);
+                          setEditingTreatment({ ...editingTreatment, videoUrl: formatted });
+                        }}
                         className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
-                        placeholder="Ex: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        placeholder="Cole o ID do Drive (ex: 1ABCxyz123) ou link do YouTube/Drive"
                       />
+                      <span className="text-[10px] text-stone-500 dark:text-stone-400 block">
+                        💡 Para vídeos do Google Drive, cole apenas o <strong>ID</strong> ou link de compartilhamento. O sistema gera automaticamente o preview compatível.
+                      </span>
                     </div>
 
                     {/* Fotos Antes e Depois */}
                     <div className="md:col-span-2 pt-2 border-t border-rose-200 dark:border-stone-700">
-                      <span className="block text-xs font-bold mb-2 text-rose-700 dark:text-rose-400">
-                        Fotos Antes e Depois (Caso de Exemplo)
-                      </span>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="block text-xs font-bold text-rose-700 dark:text-rose-400">
+                          Fotos Antes e Depois (Google Drive ID ou Link)
+                        </span>
+                        <span className="text-[10px] text-stone-400">Aceita ID do Google Drive ou link direto</span>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[11px] font-semibold mb-1">URL Imagem ANTES</label>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-[11px] font-semibold">URL / ID Imagem ANTES</label>
+                            {extractGoogleDriveId(editingTreatment.beforeAfterImages?.[0]?.before) && (
+                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <Check className="h-3 w-3" /> Drive ID detectado
+                              </span>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={editingTreatment.beforeAfterImages?.[0]?.before || ''}
                             onChange={(e) => {
                               const existing = [...(editingTreatment.beforeAfterImages || [])];
                               if (!existing[0]) existing[0] = { before: '', after: '' };
-                              existing[0].before = e.target.value;
+                              existing[0].before = formatGoogleDriveImageUrl(e.target.value);
                               setEditingTreatment({ ...editingTreatment, beforeAfterImages: existing });
                             }}
                             className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
-                            placeholder="https://..."
+                            placeholder="ID do Drive (ex: 1ABCxyz123) ou link"
                           />
+                          {editingTreatment.beforeAfterImages?.[0]?.before && (
+                            <div className="relative h-28 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 mt-1">
+                              <img
+                                src={formatGoogleDriveImageUrl(editingTreatment.beforeAfterImages[0].before)}
+                                alt="Preview Antes"
+                                referrerPolicy="no-referrer"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  const thumb = getGoogleDriveThumbnailUrl(editingTreatment.beforeAfterImages?.[0]?.before);
+                                  if (thumb && target.src !== thumb) target.src = thumb;
+                                }}
+                              />
+                              <span className="absolute bottom-1.5 left-1.5 bg-stone-900/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                ANTES (Preview)
+                              </span>
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <label className="block text-[11px] font-semibold mb-1">URL Imagem DEPOIS</label>
+
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-[11px] font-semibold">URL / ID Imagem DEPOIS</label>
+                            {extractGoogleDriveId(editingTreatment.beforeAfterImages?.[0]?.after) && (
+                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <Check className="h-3 w-3" /> Drive ID detectado
+                              </span>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={editingTreatment.beforeAfterImages?.[0]?.after || ''}
                             onChange={(e) => {
                               const existing = [...(editingTreatment.beforeAfterImages || [])];
                               if (!existing[0]) existing[0] = { before: '', after: '' };
-                              existing[0].after = e.target.value;
+                              existing[0].after = formatGoogleDriveImageUrl(e.target.value);
                               setEditingTreatment({ ...editingTreatment, beforeAfterImages: existing });
                             }}
                             className="w-full p-2.5 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl"
-                            placeholder="https://..."
+                            placeholder="ID do Drive (ex: 1ABCxyz123) ou link"
                           />
+                          {editingTreatment.beforeAfterImages?.[0]?.after && (
+                            <div className="relative h-28 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 mt-1">
+                              <img
+                                src={formatGoogleDriveImageUrl(editingTreatment.beforeAfterImages[0].after)}
+                                alt="Preview Depois"
+                                referrerPolicy="no-referrer"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  const thumb = getGoogleDriveThumbnailUrl(editingTreatment.beforeAfterImages?.[0]?.after);
+                                  if (thumb && target.src !== thumb) target.src = thumb;
+                                }}
+                              />
+                              <span className="absolute bottom-1.5 left-1.5 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                DEPOIS (Preview)
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
