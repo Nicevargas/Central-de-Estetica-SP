@@ -35,6 +35,7 @@ import {
   Server,
   Terminal,
   Search,
+  Filter,
 } from 'lucide-react';
 import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
 import {
@@ -121,6 +122,66 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
   const [treatmentImageStatus, setTreatmentImageStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+
+  // Treatment Quick Search & Filter States
+  const [treatmentSearchQuery, setTreatmentSearchQuery] = useState<string>('');
+  const [treatmentCategoryFilter, setTreatmentCategoryFilter] = useState<string>('all');
+  const [treatmentBadgeFilter, setTreatmentBadgeFilter] = useState<'all' | 'popular' | 'highlight' | 'beforeAfter' | 'video'>('all');
+
+  // Filtered Treatments for Admin Quick Search
+  const filteredTreatments = treatments.filter((t) => {
+    // 1. Search Query
+    if (treatmentSearchQuery.trim()) {
+      const q = treatmentSearchQuery.toLowerCase().trim();
+      const matchName = (t.name || '').toLowerCase().includes(q);
+      const matchDesc = (t.description || '').toLowerCase().includes(q);
+      const matchCat = (t.category || '').toLowerCase().includes(q);
+      const matchBenefits = Array.isArray(t.benefits) && t.benefits.some((b) => (b || '').toLowerCase().includes(q));
+      const matchSpecialist = (t.specialist?.name || '').toLowerCase().includes(q);
+      const matchPrice = (t.price || '').toLowerCase().includes(q);
+      if (!matchName && !matchDesc && !matchCat && !matchBenefits && !matchSpecialist && !matchPrice) {
+        return false;
+      }
+    }
+
+    // 2. Category Filter
+    if (treatmentCategoryFilter !== 'all' && t.category !== treatmentCategoryFilter) {
+      return false;
+    }
+
+    // 3. Badge Filter
+    if (treatmentBadgeFilter === 'popular' && !t.popular) return false;
+    if (treatmentBadgeFilter === 'highlight' && !t.highlight) return false;
+    if (treatmentBadgeFilter === 'beforeAfter') {
+      const hasBA = t.beforeAfterImages && t.beforeAfterImages.length > 0 && t.beforeAfterImages[0]?.before;
+      if (!hasBA) return false;
+    }
+    if (treatmentBadgeFilter === 'video') {
+      if (!t.videoUrl) return false;
+    }
+
+    return true;
+  });
+
+  const facialCount = treatments.filter((t) => t.category === 'facial').length;
+  const corporalCount = treatments.filter((t) => t.category === 'corporal').length;
+  const capilarCount = treatments.filter((t) => t.category === 'capilar').length;
+  const bemEstarCount = treatments.filter((t) => t.category === 'bem-estar').length;
+  const popularCount = treatments.filter((t) => t.popular).length;
+  const highlightCount = treatments.filter((t) => t.highlight).length;
+  const beforeAfterCount = treatments.filter((t) => t.beforeAfterImages && t.beforeAfterImages.length > 0 && t.beforeAfterImages[0]?.before).length;
+  const videoCount = treatments.filter((t) => !!t.videoUrl).length;
+
+  const isFilteringTreatments =
+    Boolean(treatmentSearchQuery.trim()) ||
+    treatmentCategoryFilter !== 'all' ||
+    treatmentBadgeFilter !== 'all';
+
+  const resetTreatmentFilters = () => {
+    setTreatmentSearchQuery('');
+    setTreatmentCategoryFilter('all');
+    setTreatmentBadgeFilter('all');
+  };
 
   // Contact Info Form State
   const [contactForm, setContactForm] = useState<ContactInfo>(contactInfo);
@@ -1153,112 +1214,342 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                 </form>
               )}
 
-              {/* Treatments List Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {treatments.map((t) => {
-                  const display = getSanitizedTreatmentDisplay(t);
-                  return (
-                  <div
-                    key={t.id}
-                    className="p-4 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col justify-between gap-3"
+              {/* Quick Search & Filters Bar */}
+              <div className="bg-white dark:bg-stone-900 p-4 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs space-y-3">
+                {/* Search Input Row */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                  <div className="relative flex-1">
+                    <Search className="h-4 w-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={treatmentSearchQuery}
+                      onChange={(e) => setTreatmentSearchQuery(e.target.value)}
+                      placeholder="Buscar rápido por nome, benefício, categoria, especialista..."
+                      className="w-full pl-9.5 pr-9 py-2.5 text-xs sm:text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all placeholder:text-stone-400"
+                    />
+                    {treatmentSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setTreatmentSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-lg transition-colors cursor-pointer"
+                        title="Limpar texto da busca"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {isFilteringTreatments && (
+                    <button
+                      type="button"
+                      onClick={resetTreatmentFilters}
+                      className="px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all border border-rose-200 dark:border-rose-900/50 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      <span>Limpar Filtros</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter Chips Row: Categories and Badges */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-stone-100 dark:border-stone-800">
+                  <span className="text-[11px] font-semibold text-stone-400 flex items-center gap-1 mr-1">
+                    <Filter className="h-3 w-3" /> Categorias:
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentCategoryFilter('all')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentCategoryFilter === 'all'
+                        ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900 shadow-xs font-bold'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
                   >
-                    <div className="space-y-3">
-                      <div className="flex gap-3">
-                        <img src={t.image} alt={t.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md">
-                              {t.category}
-                            </span>
-                            {t.popular && (
-                              <span className="text-[10px] font-bold bg-amber-400 text-stone-900 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-                                🔥 Popular
+                    <span>Todos</span>
+                    <span className="text-[10px] opacity-75 font-mono">({treatments.length})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentCategoryFilter('facial')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentCategoryFilter === 'facial'
+                        ? 'bg-rose-600 text-white shadow-xs font-bold'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>Facial</span>
+                    <span className="text-[10px] opacity-75 font-mono">({facialCount})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentCategoryFilter('corporal')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentCategoryFilter === 'corporal'
+                        ? 'bg-rose-600 text-white shadow-xs font-bold'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>Corporal</span>
+                    <span className="text-[10px] opacity-75 font-mono">({corporalCount})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentCategoryFilter('capilar')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentCategoryFilter === 'capilar'
+                        ? 'bg-rose-600 text-white shadow-xs font-bold'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>Capilar</span>
+                    <span className="text-[10px] opacity-75 font-mono">({capilarCount})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentCategoryFilter('bem-estar')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentCategoryFilter === 'bem-estar'
+                        ? 'bg-rose-600 text-white shadow-xs font-bold'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>Bem-Estar</span>
+                    <span className="text-[10px] opacity-75 font-mono">({bemEstarCount})</span>
+                  </button>
+
+                  {/* Badges / Extras Divider */}
+                  <div className="h-4 w-px bg-stone-200 dark:bg-stone-700 mx-1 hidden sm:block" />
+
+                  <span className="text-[11px] font-semibold text-stone-400 flex items-center gap-1 mr-1 sm:ml-1">
+                    Filtros:
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentBadgeFilter(treatmentBadgeFilter === 'popular' ? 'all' : 'popular')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentBadgeFilter === 'popular'
+                        ? 'bg-amber-400 text-stone-900 font-bold shadow-xs'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>🔥 Populares</span>
+                    <span className="text-[10px] opacity-80 font-mono">({popularCount})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentBadgeFilter(treatmentBadgeFilter === 'highlight' ? 'all' : 'highlight')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentBadgeFilter === 'highlight'
+                        ? 'bg-purple-600 text-white font-bold shadow-xs'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>⭐ Destaques</span>
+                    <span className="text-[10px] opacity-80 font-mono">({highlightCount})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentBadgeFilter(treatmentBadgeFilter === 'beforeAfter' ? 'all' : 'beforeAfter')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentBadgeFilter === 'beforeAfter'
+                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>📷 Antes & Depois</span>
+                    <span className="text-[10px] opacity-80 font-mono">({beforeAfterCount})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTreatmentBadgeFilter(treatmentBadgeFilter === 'video' ? 'all' : 'video')}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      treatmentBadgeFilter === 'video'
+                        ? 'bg-blue-600 text-white font-bold shadow-xs'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>🎥 Com Vídeo</span>
+                    <span className="text-[10px] opacity-80 font-mono">({videoCount})</span>
+                  </button>
+                </div>
+
+                {/* Status Bar */}
+                <div className="flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400 pt-0.5">
+                  <div>
+                    {isFilteringTreatments ? (
+                      <span>
+                        Exibindo <strong>{filteredTreatments.length}</strong> de <strong>{treatments.length}</strong> procedimentos encontrados
+                        {treatmentSearchQuery && (
+                          <span className="ml-1 text-rose-600 dark:text-rose-400">
+                            para "<strong>{treatmentSearchQuery}</strong>"
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span>
+                        Total de <strong>{treatments.length}</strong> procedimentos cadastrados
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Treatments List Grid or Empty State */}
+              {filteredTreatments.length === 0 ? (
+                <div className="p-8 text-center bg-stone-50 dark:bg-stone-800/40 rounded-2xl border border-dashed border-stone-300 dark:border-stone-700 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center">
+                    <Search className="h-6 w-6" />
+                  </div>
+                  <h4 className="font-bold text-sm text-stone-800 dark:text-stone-200">
+                    Nenhum procedimento encontrado
+                  </h4>
+                  <p className="text-xs text-stone-500 max-w-sm mx-auto">
+                    {treatmentSearchQuery
+                      ? `Não encontramos resultados correspondentes a "${treatmentSearchQuery}". Tente usar outro termo ou limpar os filtros.`
+                      : 'Nenhum procedimento corresponde aos filtros selecionados.'}
+                  </p>
+                  <div className="flex items-center justify-center gap-2 pt-2">
+                    {isFilteringTreatments && (
+                      <button
+                        type="button"
+                        onClick={resetTreatmentFilters}
+                        className="px-4 py-2 text-xs font-bold bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 rounded-xl transition-colors cursor-pointer"
+                      >
+                        Limpar Busca e Filtros
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditingTreatment({
+                          category: 'facial',
+                          benefits: ['Inovador', 'Seguro'],
+                          popular: false,
+                        })
+                      }
+                      className="px-4 py-2 text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>Cadastrar Novo</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredTreatments.map((t) => {
+                    const display = getSanitizedTreatmentDisplay(t);
+                    return (
+                      <div
+                        key={t.id}
+                        className="p-4 bg-stone-50 dark:bg-stone-800/60 rounded-2xl border border-stone-200 dark:border-stone-700 flex flex-col justify-between gap-3"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex gap-3">
+                            <img src={t.image} alt={t.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md">
+                                  {t.category}
+                                </span>
+                                {t.popular && (
+                                  <span className="text-[10px] font-bold bg-amber-400 text-stone-900 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                    🔥 Popular
+                                  </span>
+                                )}
+                                {t.highlight && (
+                                  <span className="text-[10px] font-bold bg-purple-600 text-white px-1.5 py-0.5 rounded-md">
+                                    ⭐ Destaque
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="font-bold text-sm line-clamp-1">{t.name}</h4>
+                              <p className="text-xs text-rose-600 font-extrabold">{display.hasPrice ? display.price : 'Sob Consulta'}</p>
+                              {display.hasDuration && <p className="text-[11px] text-stone-500">Duração: {display.duration}</p>}
+                            </div>
+                          </div>
+
+                          {/* Display Badges of Extra Options */}
+                          <div className="flex flex-wrap gap-1 text-[10px]">
+                            {t.videoUrl && (
+                              <span className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 px-2 py-0.5 rounded-md font-medium">
+                                🎥 Com Vídeo
                               </span>
                             )}
-                            {t.highlight && (
-                              <span className="text-[10px] font-bold bg-purple-600 text-white px-1.5 py-0.5 rounded-md">
-                                ⭐ Destaque
+                            {t.beforeAfterImages && t.beforeAfterImages.length > 0 && t.beforeAfterImages[0]?.before && (
+                              <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium">
+                                📷 Antes e Depois
+                              </span>
+                            )}
+                            {t.technicalSpecs && Object.keys(t.technicalSpecs).length > 0 && (
+                              <span className="bg-stone-200 text-stone-700 dark:bg-stone-700 dark:text-stone-300 px-2 py-0.5 rounded-md font-medium">
+                                🩺 Ficha Técnica
+                              </span>
+                            )}
+                            {t.specialist?.name && (
+                              <span className="bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 px-2 py-0.5 rounded-md font-medium">
+                                👤 {t.specialist.name}
                               </span>
                             )}
                           </div>
-                          <h4 className="font-bold text-sm line-clamp-1">{t.name}</h4>
-                          <p className="text-xs text-rose-600 font-extrabold">{display.hasPrice ? display.price : 'Sob Consulta'}</p>
-                          {display.hasDuration && <p className="text-[11px] text-stone-500">Duração: {display.duration}</p>}
+                        </div>
+
+                        <div className="pt-3 border-t border-stone-200 dark:border-stone-700 flex justify-between items-center text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleTogglePopular(t.id)}
+                              className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                                t.popular
+                                  ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-950 dark:border-amber-700 dark:text-amber-200'
+                                  : 'bg-stone-100 border-stone-200 text-stone-400 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700'
+                              }`}
+                              title="Alternar Destaque Popular"
+                            >
+                              {t.popular ? '🔥 Popular: Sim' : '+ Popular'}
+                            </button>
+                            <button
+                              onClick={() => handleToggleHighlight(t.id)}
+                              className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                                t.highlight
+                                  ? 'bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-950 dark:border-purple-700 dark:text-purple-200'
+                                  : 'bg-stone-100 border-stone-200 text-stone-400 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700'
+                              }`}
+                              title="Alternar Destaque Duplo"
+                            >
+                              {t.highlight ? '⭐ Destaque: Sim' : '+ Destaque'}
+                            </button>
+                          </div>
+
+                          <div className="flex gap-1 shrink-0">
+                            <button
+                              onClick={() => setEditingTreatment(t)}
+                              className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-lg transition-colors cursor-pointer"
+                              title="Editar Tratamento"
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTreatment(t.id)}
+                              className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-lg transition-colors cursor-pointer"
+                              title="Remover Tratamento"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-
-                      {/* Display Badges of Extra Options */}
-                      <div className="flex flex-wrap gap-1 text-[10px]">
-                        {t.videoUrl && (
-                          <span className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 px-2 py-0.5 rounded-md font-medium">
-                            🎥 Com Vídeo
-                          </span>
-                        )}
-                        {t.beforeAfterImages && t.beforeAfterImages.length > 0 && t.beforeAfterImages[0]?.before && (
-                          <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-md font-medium">
-                            📷 Antes e Depois
-                          </span>
-                        )}
-                        {t.technicalSpecs && Object.keys(t.technicalSpecs).length > 0 && (
-                          <span className="bg-stone-200 text-stone-700 dark:bg-stone-700 dark:text-stone-300 px-2 py-0.5 rounded-md font-medium">
-                            🩺 Ficha Técnica
-                          </span>
-                        )}
-                        {t.specialist?.name && (
-                          <span className="bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 px-2 py-0.5 rounded-md font-medium">
-                            👤 {t.specialist.name}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-stone-200 dark:border-stone-700 flex justify-between items-center text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => handleTogglePopular(t.id)}
-                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
-                            t.popular
-                              ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-950 dark:border-amber-700 dark:text-amber-200'
-                              : 'bg-stone-100 border-stone-200 text-stone-400 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700'
-                          }`}
-                          title="Alternar Destaque Popular"
-                        >
-                          {t.popular ? '🔥 Popular: Sim' : '+ Popular'}
-                        </button>
-                        <button
-                          onClick={() => handleToggleHighlight(t.id)}
-                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
-                            t.highlight
-                              ? 'bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-950 dark:border-purple-700 dark:text-purple-200'
-                              : 'bg-stone-100 border-stone-200 text-stone-400 hover:text-stone-700 dark:bg-stone-800 dark:border-stone-700'
-                          }`}
-                          title="Alternar Destaque Duplo"
-                        >
-                          {t.highlight ? '⭐ Destaque: Sim' : '+ Destaque'}
-                        </button>
-                      </div>
-
-                      <div className="flex gap-1 shrink-0">
-                        <button
-                          onClick={() => setEditingTreatment(t)}
-                          className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-lg transition-colors cursor-pointer"
-                          title="Editar Tratamento"
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTreatment(t.id)}
-                          className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-lg transition-colors cursor-pointer"
-                          title="Remover Tratamento"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
