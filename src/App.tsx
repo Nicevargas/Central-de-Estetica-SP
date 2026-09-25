@@ -568,7 +568,7 @@ export default function App() {
                     <div className="w-full aspect-[4/3] sm:aspect-[16/11] lg:h-[480px] rounded-[40px] overflow-hidden shadow-2xl relative">
                       <img
                         className="w-full h-full object-cover"
-                        src="https://centraldaestetica.com.br/banner.png"
+                        src="/banner.png"
                         alt="Tratamento de estética e cuidados com a pele de alta performance"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
@@ -730,7 +730,7 @@ export default function App() {
                     <div className="absolute -top-10 -left-10 w-40 h-40 bg-secondary/5 rounded-full blur-3xl" />
                     <img
                       className="w-full h-[500px] object-cover rounded-3xl relative z-10 shadow-lg border border-outline-variant/10"
-                      src="https://centraldaestetica.com.br/esteticista.png"
+                      src="/esteticista.png"
                       alt="Esteticista da Central da Estética"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
