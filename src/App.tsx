@@ -38,6 +38,7 @@ import {
   GraduationCap,
   ChevronUp
 } from 'lucide-react';
+import { getTreatmentIdFromPath, getTreatmentPath, TREATMENT_PAGES } from './lib/treatmentPages';
 import { FAQS, GOOGLE_REVIEW_URL, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
@@ -178,7 +179,7 @@ export default function App() {
   const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(() => {
     if (typeof window === 'undefined') return null;
     const params = new URLSearchParams(window.location.search);
-    const param = params.get('treatment');
+    const param = params.get('treatment') || getTreatmentIdFromPath(window.location.pathname);
     if (!param) return null;
     const initialList = getStoredTreatments();
     return findMatchingTreatment(param, initialList);
@@ -194,7 +195,7 @@ export default function App() {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       const params = new URLSearchParams(window.location.search);
-      const param = params.get('treatment');
+      const param = params.get('treatment') || getTreatmentIdFromPath(window.location.pathname);
       if (param && !selectedTreatmentForDetail && treatments.length > 0) {
         const match = findMatchingTreatment(param, treatments);
         if (match) {
@@ -204,11 +205,16 @@ export default function App() {
       return;
     }
 
+    // Tratamentos com página dedicada usam o endereço próprio (ex.: /botox-jardins-sp)
     const url = new URL(window.location.href);
+    url.searchParams.delete('treatment');
     if (selectedTreatmentForDetail) {
-      url.searchParams.set('treatment', selectedTreatmentForDetail.id);
-    } else {
-      url.searchParams.delete('treatment');
+      const path = getTreatmentPath(selectedTreatmentForDetail.id);
+      const [pathname, query] = path.split('?');
+      url.pathname = pathname;
+      if (query) new URLSearchParams(query).forEach((v, k) => url.searchParams.set(k, v));
+    } else if (getTreatmentIdFromPath(url.pathname)) {
+      url.pathname = '/';
     }
     window.history.replaceState(null, '', url.toString());
   }, [selectedTreatmentForDetail, treatments]);
@@ -1339,6 +1345,29 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* Links rastreáveis para as páginas dedicadas de cada tratamento */}
+        <nav aria-label="Tratamentos em São Paulo" className="max-w-7xl mx-auto px-6 mt-12">
+          <h4 className="font-semibold text-sm text-on-surface uppercase tracking-wider mb-4">Tratamentos em São Paulo</h4>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-on-surface-variant">
+            {treatments
+              .filter((t) => TREATMENT_PAGES[t.id])
+              .map((t) => (
+                <li key={t.id}>
+                  <a
+                    href={getTreatmentPath(t.id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSelectedTreatmentForDetail(t);
+                    }}
+                    className="hover:text-primary transition-colors"
+                  >
+                    {TREATMENT_PAGES[t.id].heading.replace(/ em São Paulo.*$| nos Jardins.*$/, '')}
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </nav>
 
         {/* Legal area */}
         <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant font-medium">
