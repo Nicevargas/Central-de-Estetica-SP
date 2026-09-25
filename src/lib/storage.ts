@@ -1,5 +1,5 @@
 import { Treatment, Testimonial, Promotion, BlogPost, BookingRequest, ContactInfo } from '../types';
-import { TREATMENTS, TESTIMONIALS, INITIAL_PROMOTIONS, INITIAL_BLOG_POSTS, DEFAULT_CONTACT_INFO } from '../data';
+import { DEFAULT_CONTACT_INFO } from '../data';
 import { sanitizeTreatmentObject } from './treatmentUtils';
 import {
   isSupabaseConfigured,
@@ -27,11 +27,12 @@ import {
   saveContactInfoToSupabase,
 } from './supabase';
 
+// Versões novas das chaves: descartam o cache antigo, que podia conter os dados de exemplo
 const STORAGE_KEYS = {
-  TREATMENTS: 'estetica_treatments_v5',
-  PROMOTIONS: 'estetica_promotions_v3',
-  TESTIMONIALS: 'estetica_testimonials_v1',
-  BLOG_POSTS: 'estetica_blog_posts_v1',
+  TREATMENTS: 'estetica_treatments_v6',
+  PROMOTIONS: 'estetica_promotions_v4',
+  TESTIMONIALS: 'estetica_testimonials_v2',
+  BLOG_POSTS: 'estetica_blog_posts_v2',
   BOOKINGS: 'estetica_bookings_v1',
   CONTACT_INFO: 'estetica_contact_info_v1',
 };
@@ -71,13 +72,8 @@ function saveToStorage<T>(key: string, value: T): void {
 // Treatments
 // =============================
 export function getStoredTreatments(): Treatment[] {
-  const stored = loadFromStorage<Treatment[]>(STORAGE_KEYS.TREATMENTS, TREATMENTS);
-  if (!stored || stored.length === 0) {
-    const sanitizedInit = TREATMENTS.map(sanitizeTreatmentObject);
-    saveToStorage(STORAGE_KEYS.TREATMENTS, sanitizedInit);
-    return sanitizedInit;
-  }
-  return stored.map(sanitizeTreatmentObject);
+  const stored = loadFromStorage<Treatment[]>(STORAGE_KEYS.TREATMENTS, []);
+  return Array.isArray(stored) ? stored.map(sanitizeTreatmentObject) : [];
 }
 
 export function saveStoredTreatments(treatments: Treatment[]): void {
@@ -129,7 +125,7 @@ export async function removeTreatment(id: string): Promise<void> {
 // Promotions
 // =============================
 export function getStoredPromotions(): Promotion[] {
-  return loadFromStorage<Promotion[]>(STORAGE_KEYS.PROMOTIONS, INITIAL_PROMOTIONS);
+  return loadFromStorage<Promotion[]>(STORAGE_KEYS.PROMOTIONS, []);
 }
 
 export function saveStoredPromotions(promotions: Promotion[]): void {
@@ -179,7 +175,7 @@ export async function removePromotion(id: string): Promise<void> {
 // Testimonials
 // =============================
 export function getStoredTestimonials(): Testimonial[] {
-  return loadFromStorage<Testimonial[]>(STORAGE_KEYS.TESTIMONIALS, TESTIMONIALS);
+  return loadFromStorage<Testimonial[]>(STORAGE_KEYS.TESTIMONIALS, []);
 }
 
 export function saveStoredTestimonials(testimonials: Testimonial[]): void {
@@ -229,7 +225,7 @@ export async function removeTestimonial(id: string): Promise<void> {
 // Blog Posts
 // =============================
 export function getStoredBlogPosts(): BlogPost[] {
-  return loadFromStorage<BlogPost[]>(STORAGE_KEYS.BLOG_POSTS, INITIAL_BLOG_POSTS);
+  return loadFromStorage<BlogPost[]>(STORAGE_KEYS.BLOG_POSTS, []);
 }
 
 export function saveStoredBlogPosts(posts: BlogPost[]): void {

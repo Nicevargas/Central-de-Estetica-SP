@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { BlogPost, Treatment, ContactInfo } from '../types';
-import { TREATMENT_PAGES, getTreatmentUrl } from '../lib/treatmentPages';
+import { getTreatmentSeo, getTreatmentUrl } from '../lib/treatmentPages';
 
 interface SEOHeadProps {
   activeTab: 'home' | 'tratamentos' | 'blog';
@@ -31,12 +31,10 @@ export function SEOHead({
       if (selectedBlogPost.image) pageImage = selectedBlogPost.image;
       pageType = 'article';
     } else if (selectedTreatment) {
-      const seoPage = TREATMENT_PAGES[selectedTreatment.id];
-      pageTitle = seoPage?.title || `${selectedTreatment.name} em São Paulo | Central da Estética`;
-      pageDescription =
-        seoPage?.description ||
-        `${selectedTreatment.name}: ${selectedTreatment.description.substring(0, 150)}... Conheça benefícios, duração e agende sua avaliação em SP.`;
-      pageUrl = getTreatmentUrl(selectedTreatment.id);
+      const seoPage = getTreatmentSeo(selectedTreatment);
+      pageTitle = seoPage.title;
+      pageDescription = seoPage.description;
+      pageUrl = getTreatmentUrl(selectedTreatment);
       if (selectedTreatment.image) pageImage = selectedTreatment.image;
       pageType = 'product';
     } else if (activeTab === 'tratamentos') {

@@ -38,7 +38,7 @@ import {
   GraduationCap,
   ChevronUp
 } from 'lucide-react';
-import { getTreatmentIdFromPath, getTreatmentPath, TREATMENT_PAGES } from './lib/treatmentPages';
+import { findTreatmentByPath, getTreatmentPath, isTreatmentLikePath } from './lib/treatmentPages';
 import { FAQS, GOOGLE_REVIEW_URL, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
@@ -175,45 +175,44 @@ export default function App() {
     refreshAllFromSupabase();
   }, []);
 
-  // Selected treatment for full detail modal view - initialized from URL search param if present
-  const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const params = new URLSearchParams(window.location.search);
-    const param = params.get('treatment') || getTreatmentIdFromPath(window.location.pathname);
-    if (!param) return null;
-    const initialList = getStoredTreatments();
-    return findMatchingTreatment(param, initialList);
-  });
+  // Tratamento aberto no modal de detalhes
+  const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(null);
 
-  const isFirstRender = useRef(true);
+  // Tratamento pedido pela URL (?treatment=... ou endereço próprio como /botox-jardins-sp/),
+  // resolvido assim que a lista de tratamentos do banco estiver disponível
+  const pendingTreatmentFromUrl = useRef<{ param: string | null; path: string } | null>(
+    typeof window === 'undefined'
+      ? null
+      : (() => {
+          const param = new URLSearchParams(window.location.search).get('treatment');
+          const path = window.location.pathname;
+          return param || isTreatmentLikePath(path) ? { param, path } : null;
+        })()
+  );
 
-  // Sync address bar URL search parameter when treatment detail modal is opened or closed
+  // Abre o tratamento pedido pela URL e mantém a barra de endereço sincronizada com o modal
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // On first mount, if URL had a parameter but wasn't matched initially, try matching again with loaded treatments
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      const params = new URLSearchParams(window.location.search);
-      const param = params.get('treatment') || getTreatmentIdFromPath(window.location.pathname);
-      if (param && !selectedTreatmentForDetail && treatments.length > 0) {
-        const match = findMatchingTreatment(param, treatments);
-        if (match) {
-          setSelectedTreatmentForDetail(match);
-        }
+    const pending = pendingTreatmentFromUrl.current;
+    if (pending) {
+      if (treatments.length === 0) return; // aguardando dados do banco
+      pendingTreatmentFromUrl.current = null;
+      const match = pending.param
+        ? findMatchingTreatment(pending.param, treatments)
+        : findTreatmentByPath(pending.path, treatments);
+      if (match) {
+        setSelectedTreatmentForDetail(match);
+        return;
       }
-      return;
     }
 
-    // Tratamentos com página dedicada usam o endereço próprio (ex.: /botox-jardins-sp)
+    // Cada tratamento usa o endereço próprio (ex.: /botox-jardins-sp/)
     const url = new URL(window.location.href);
     url.searchParams.delete('treatment');
     if (selectedTreatmentForDetail) {
-      const path = getTreatmentPath(selectedTreatmentForDetail.id);
-      const [pathname, query] = path.split('?');
-      url.pathname = pathname;
-      if (query) new URLSearchParams(query).forEach((v, k) => url.searchParams.set(k, v));
-    } else if (getTreatmentIdFromPath(url.pathname)) {
+      url.pathname = getTreatmentPath(selectedTreatmentForDetail);
+    } else if (url.pathname !== '/' && isTreatmentLikePath(url.pathname)) {
       url.pathname = '/';
     }
     window.history.replaceState(null, '', url.toString());
@@ -810,7 +809,7 @@ export default function App() {
               {/* User Dynamic Bookings Section */}
               {bookings.length > 0 && (
                 <section className="py-12 bg-white px-6">
-                  <ActiveBookingsList bookings={bookings} onCancelBooking={handleCancelBooking} />
+                  <ActiveBookingsList bookings={bookings} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
                 </section>
               )}
 
@@ -941,7 +940,7 @@ export default function App() {
                 {/* User Bookings list in treatments if exists */}
                 {bookings.length > 0 && (
                   <div className="mb-16">
-                    <ActiveBookingsList bookings={bookings} onCancelBooking={handleCancelBooking} />
+                    <ActiveBookingsList bookings={bookings} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
                   </div>
                 )}
 
@@ -1350,22 +1349,20 @@ export default function App() {
         <nav aria-label="Tratamentos em São Paulo" className="max-w-7xl mx-auto px-6 mt-12">
           <h4 className="font-semibold text-sm text-on-surface uppercase tracking-wider mb-4">Tratamentos em São Paulo</h4>
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-on-surface-variant">
-            {treatments
-              .filter((t) => TREATMENT_PAGES[t.id])
-              .map((t) => (
-                <li key={t.id}>
-                  <a
-                    href={getTreatmentPath(t.id)}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setSelectedTreatmentForDetail(t);
-                    }}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {TREATMENT_PAGES[t.id].heading.replace(/ em São Paulo.*$| nos Jardins.*$/, '')}
-                  </a>
-                </li>
-              ))}
+            {treatments.map((t) => (
+              <li key={t.id}>
+                <a
+                  href={getTreatmentPath(t)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedTreatmentForDetail(t);
+                  }}
+                  className="hover:text-primary transition-colors"
+                >
+                  {t.name}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
 
@@ -1425,6 +1422,7 @@ export default function App() {
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         selectedTreatmentId={preSelectedTreatment}
+        treatments={treatments}
         onBookingSuccess={handleBookingSuccess}
         whatsappNumber={contactInfo.whatsappNumber}
       />

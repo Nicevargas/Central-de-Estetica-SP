@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Clock, User, Mail, Phone, FileText, CheckCircle } from 'lucide-react';
 import { Treatment } from '../types';
-import { TREATMENTS } from '../data';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedTreatmentId?: string;
+  treatments: Treatment[];
   onBookingSuccess: (booking: any) => void;
   whatsappNumber?: string;
 }
@@ -16,6 +16,7 @@ export default function BookingModal({
   isOpen,
   onClose,
   selectedTreatmentId = '',
+  treatments,
   onBookingSuccess,
   whatsappNumber = '551194683765',
 }: BookingModalProps) {
@@ -60,7 +61,7 @@ export default function BookingModal({
     onBookingSuccess(newBooking);
   };
 
-  const selectedTreatment = TREATMENTS.find((t) => t.id === treatmentId);
+  const selectedTreatment = treatments.find((t) => t.id === treatmentId);
 
   const resetForm = () => {
     setName('');
@@ -135,28 +136,28 @@ export default function BookingModal({
                     >
                       <option value="" disabled>Selecione um tratamento...</option>
                       <optgroup label="Estética Facial">
-                        {TREATMENTS.filter((t) => t.category === 'facial').map((t) => (
+                        {treatments.filter((t) => t.category === 'facial').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>
                         ))}
                       </optgroup>
                       <optgroup label="Estética Corporal">
-                        {TREATMENTS.filter((t) => t.category === 'corporal').map((t) => (
+                        {treatments.filter((t) => t.category === 'corporal').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>
                         ))}
                       </optgroup>
                       <optgroup label="Terapia Capilar">
-                        {TREATMENTS.filter((t) => t.category === 'capilar').map((t) => (
+                        {treatments.filter((t) => t.category === 'capilar').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>
                         ))}
                       </optgroup>
                       <optgroup label="Bem-estar & Relaxamento">
-                        {TREATMENTS.filter((t) => t.category === 'bem-estar').map((t) => (
+                        {treatments.filter((t) => t.category === 'bem-estar').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>

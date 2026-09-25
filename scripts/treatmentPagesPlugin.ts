@@ -1,16 +1,31 @@
 /**
- * Plugin do Vite que, ao final do build, gera:
+ * Plugin do Vite que, ao final do build, lê os tratamentos e o contato do Supabase e gera:
  *  - dist/<slug>/index.html  → uma página estática por tratamento (conteúdo legível pelo Google sem JavaScript)
  *  - dist/sitemap.xml        → sitemap com a home e todas as páginas de tratamento
  *
- * O React carrega normalmente em cada página e abre o tratamento correspondente.
+ * Os dados são os mesmos exibidos no site. O React carrega normalmente em cada página e abre o tratamento
+ * correspondente. Alterações feitas no painel admin entram nas páginas estáticas no próximo deploy.
  */
 import fs from 'fs';
 import path from 'path';
 import type { Plugin } from 'vite';
-import { TREATMENTS, DEFAULT_CONTACT_INFO, OPENING_HOURS, GOOGLE_MAPS_URL } from '../src/data';
-import { SITE_URL, TREATMENT_PAGES, getTreatmentUrl } from '../src/lib/treatmentPages';
-import type { Treatment } from '../src/types';
+import { DEFAULT_CONTACT_INFO, OPENING_HOURS, GOOGLE_MAPS_URL } from '../src/data';
+import { SITE_URL, getTreatmentSeo, getTreatmentPath, getTreatmentUrl } from '../src/lib/treatmentPages';
+import { mapTreatmentRow, mapContactInfoRow } from '../src/lib/supabaseMappers';
+import type { ContactInfo, Treatment } from '../src/types';
+
+interface SupabaseEnv {
+  url?: string;
+  anonKey?: string;
+}
+
+async function fetchRows(env: Required<SupabaseEnv>, query: string): Promise<any[]> {
+  const res = await fetch(`${env.url.replace(/\/+$/, '')}/rest/v1/${query}`, {
+    headers: { apikey: env.anonKey, Authorization: `Bearer ${env.anonKey}` },
+  });
+  if (!res.ok) throw new Error(`Supabase respondeu ${res.status} para ${query}: ${await res.text()}`);
+  return res.json();
+}
 
 const escapeHtml = (value: string) =>
   value
@@ -51,14 +66,14 @@ function renderList(title: string, items?: string[]): string {
   return `<h2>${escapeHtml(title)}</h2><ul>${items.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
 }
 
-function renderBody(t: Treatment): string {
-  const page = TREATMENT_PAGES[t.id];
-  const contact = DEFAULT_CONTACT_INFO;
+function renderBody(t: Treatment, all: Treatment[], contact: ContactInfo): string {
+  const page = getTreatmentSeo(t);
   const whatsapp = `https://wa.me/${contact.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent(
     `Olá! Gostaria de agendar uma avaliação para ${t.name}.`,
   )}`;
-  const others = TREATMENTS.filter((o) => o.id !== t.id && TREATMENT_PAGES[o.id])
-    .map((o) => `<li><a href="/${TREATMENT_PAGES[o.id].slug}/">${escapeHtml(TREATMENT_PAGES[o.id].heading)}</a></li>`)
+  const others = all
+    .filter((o) => o.id !== t.id)
+    .map((o) => `<li><a href="${getTreatmentPath(o)}">${escapeHtml(o.name)}</a></li>`)
     .join('');
 
   return `<main style="max-width:760px;margin:0 auto;padding:24px 16px;font-family:system-ui,sans-serif;line-height:1.6;color:#1c1b1f">
@@ -81,9 +96,9 @@ Telefone: ${escapeHtml(contact.phonePrimary)}. Horários: ${escapeHtml(OPENING_H
 </main>`;
 }
 
-function renderPage(template: string, t: Treatment): string {
-  const page = TREATMENT_PAGES[t.id];
-  const url = getTreatmentUrl(t.id);
+function renderPage(template: string, t: Treatment, all: Treatment[], contact: ContactInfo): string {
+  const page = getTreatmentSeo(t);
+  const url = getTreatmentUrl(t);
   let html = template;
 
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(page.title)}</title>`);
@@ -127,16 +142,16 @@ function renderPage(template: string, t: Treatment): string {
   });
 
   html = html.replace('</head>', `    ${structuredData}\n  </head>`);
-  html = html.replace('<div id="root"></div>', `<div id="root">${renderBody(t)}</div>`);
+  html = html.replace('<div id="root"></div>', `<div id="root">${renderBody(t, all, contact)}</div>`);
   return html;
 }
 
-function renderSitemap(): string {
+function renderSitemap(treatments: Treatment[]): string {
   const today = new Date().toISOString().slice(0, 10);
   const urls = [
     { loc: `${SITE_URL}/`, priority: '1.0', changefreq: 'weekly' },
-    ...TREATMENTS.filter((t) => TREATMENT_PAGES[t.id]).map((t) => ({
-      loc: getTreatmentUrl(t.id),
+    ...treatments.map((t) => ({
+      loc: getTreatmentUrl(t),
       priority: '0.9',
       changefreq: 'monthly',
     })),
@@ -150,7 +165,7 @@ function renderSitemap(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
 
-export function treatmentPagesPlugin(): Plugin {
+export function treatmentPagesPlugin(env: SupabaseEnv): Plugin {
   let outDir = 'dist';
   return {
     name: 'central-treatment-pages',
@@ -158,18 +173,37 @@ export function treatmentPagesPlugin(): Plugin {
     configResolved(config) {
       outDir = path.resolve(config.root, config.build.outDir);
     },
-    closeBundle() {
-      const template = fs.readFileSync(path.join(outDir, 'index.html'), 'utf-8');
-      let count = 0;
-      for (const t of TREATMENTS) {
-        if (!TREATMENT_PAGES[t.id]) continue;
-        const dir = path.join(outDir, TREATMENT_PAGES[t.id].slug);
-        fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(path.join(dir, 'index.html'), renderPage(template, t));
-        count++;
+    async closeBundle() {
+      let treatments: Treatment[] = [];
+      let contact: ContactInfo = DEFAULT_CONTACT_INFO;
+
+      if (env.url && env.anonKey) {
+        // Se o banco falhar, o build falha: melhor manter o deploy anterior no ar do que publicar sem as páginas
+        const creds = { url: env.url, anonKey: env.anonKey };
+        treatments = (await fetchRows(creds, 'treatments?select=*&order=name')).map(mapTreatmentRow);
+        const settings = await fetchRows(creds, 'site_settings?select=*&id=eq.default').catch(() => []);
+        if (settings[0]) contact = { ...DEFAULT_CONTACT_INFO, ...mapContactInfoRow(settings[0]) };
+      } else {
+        this.warn('VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY ausentes: páginas de tratamento não foram geradas.');
       }
-      fs.writeFileSync(path.join(outDir, 'sitemap.xml'), renderSitemap());
-      this.info?.(`${count} páginas de tratamento geradas + sitemap.xml`);
+
+      // Dois tratamentos com o mesmo endereço: só o primeiro ganha página
+      const seen = new Set<string>();
+      const withPages = treatments.filter((t) => {
+        const slug = getTreatmentSeo(t).slug;
+        if (seen.has(slug)) return false;
+        seen.add(slug);
+        return true;
+      });
+
+      const template = fs.readFileSync(path.join(outDir, 'index.html'), 'utf-8');
+      for (const t of withPages) {
+        const dir = path.join(outDir, getTreatmentSeo(t).slug);
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'index.html'), renderPage(template, t, withPages, contact));
+      }
+      fs.writeFileSync(path.join(outDir, 'sitemap.xml'), renderSitemap(withPages));
+      this.info?.(`${withPages.length} páginas de tratamento geradas a partir do Supabase + sitemap.xml`);
     },
   };
 }

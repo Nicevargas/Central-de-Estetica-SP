@@ -1,10 +1,13 @@
 /**
  * Páginas dedicadas por tratamento (SEO local).
- * Cada tratamento ganha um endereço próprio, ex.: https://centraldaestetica.com.br/secagem-de-vasinhos-sp/
- * O HTML estático dessas páginas é gerado no build (ver vite.config.ts).
+ * Cada tratamento cadastrado no banco ganha um endereço próprio, ex.: https://centraldaestetica.com.br/secagem-de-vasinhos-sp/
+ * O HTML estático dessas páginas é gerado no build a partir do Supabase (ver scripts/treatmentPagesPlugin.ts).
  */
+import type { Treatment } from '../types';
 
 export const SITE_URL = 'https://centraldaestetica.com.br';
+
+type TreatmentRef = Pick<Treatment, 'id' | 'name'>;
 
 export interface TreatmentPageSeo {
   slug: string;
@@ -16,7 +19,11 @@ export interface TreatmentPageSeo {
   description: string;
 }
 
-export const TREATMENT_PAGES: Record<string, TreatmentPageSeo> = {
+/**
+ * Textos de busca escritos à mão para os tratamentos principais (por ID do banco).
+ * Tratamentos que não estão aqui recebem endereço e textos gerados a partir do nome.
+ */
+export const TREATMENT_SEO_OVERRIDES: Record<string, TreatmentPageSeo> = {
   'secagem-vasinhos': {
     slug: 'secagem-de-vasinhos-sp',
     title: 'Secagem de Vasinhos em SP (Laser e PEIM) | Central da Estética',
@@ -43,7 +50,7 @@ export const TREATMENT_PAGES: Record<string, TreatmentPageSeo> = {
     title: 'Laser Lavieén em SP (BB Laser) | Central da Estética',
     heading: 'Laser Lavieén em São Paulo: manchas, melasma e viço',
     description:
-      'Laser Lavieén (efeito BB Laser) para manchas, melasma, poros e viço da pele no Jardim Paulista, SP. Pacote de 3 sessões. Agende sua avaliação.',
+      'Laser Lavieén (efeito BB Laser) para manchas, melasma, poros e viço da pele no Jardim Paulista, SP. Agende sua avaliação.',
   },
   'co2-hibrido': {
     slug: 'laser-co2-fracionado-sp',
@@ -89,20 +96,53 @@ export const TREATMENT_PAGES: Record<string, TreatmentPageSeo> = {
   },
 };
 
-/** Endereço público do tratamento: página dedicada quando existe, senão o link com ?treatment= */
-export function getTreatmentPath(treatmentId: string): string {
-  const page = TREATMENT_PAGES[treatmentId];
-  return page ? `/${page.slug}/` : `/?treatment=${encodeURIComponent(treatmentId)}`;
+function slugify(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/g, '');
 }
 
-export function getTreatmentUrl(treatmentId: string): string {
-  return `${SITE_URL}${getTreatmentPath(treatmentId)}`;
+/** Título, H1, descrição e endereço da página de um tratamento */
+export function getTreatmentSeo(treatment: TreatmentRef & { description?: string }): TreatmentPageSeo {
+  const override = TREATMENT_SEO_OVERRIDES[treatment.id];
+  if (override) return override;
+  const plainName = treatment.name.replace(/\s*\([^)]*\)\s*/g, ' ').trim() || treatment.name;
+  const base = slugify(plainName) || slugify(treatment.id) || 'tratamento';
+  const summary = (treatment.description || '').replace(/\s+/g, ' ').trim();
+  return {
+    slug: `${base}-sp`,
+    title: `${plainName} em SP | Central da Estética`,
+    heading: `${plainName} em São Paulo`,
+    description: (summary
+      ? `${plainName} no Jardim Paulista, SP. ${summary}`
+      : `${plainName} no Jardim Paulista, São Paulo. Agende sua avaliação na Central da Estética.`
+    ).slice(0, 155),
+  };
 }
 
-/** Descobre o tratamento a partir do caminho da URL (ex.: "/botox-jardins-sp/") */
-export function getTreatmentIdFromPath(pathname: string): string | null {
+/** Caminho público do tratamento, ex.: "/botox-jardins-sp/" */
+export function getTreatmentPath(treatment: TreatmentRef): string {
+  return `/${getTreatmentSeo(treatment).slug}/`;
+}
+
+export function getTreatmentUrl(treatment: TreatmentRef): string {
+  return `${SITE_URL}${getTreatmentPath(treatment)}`;
+}
+
+/** Encontra o tratamento cujo endereço corresponde ao caminho da URL (ex.: "/botox-jardins-sp/") */
+export function findTreatmentByPath<T extends TreatmentRef>(pathname: string, treatments: T[]): T | null {
   const slug = pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
   if (!slug) return null;
-  const entry = Object.entries(TREATMENT_PAGES).find(([, page]) => page.slug === slug);
-  return entry ? entry[0] : null;
+  return treatments.find((t) => getTreatmentSeo(t).slug === slug) || null;
+}
+
+/** Indica se o caminho parece ser a página de um tratamento (qualquer caminho de um nível só) */
+export function isTreatmentLikePath(pathname: string): boolean {
+  return /^\/[a-z0-9-]+\/?$/i.test(pathname);
 }

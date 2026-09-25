@@ -79,7 +79,7 @@ export default function TreatmentDetailModal({
 
   // Prepare Share URLs specific to this treatment
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const treatmentShareUrl = `${baseUrl}${getTreatmentPath(treatment.id)}`;
+  const treatmentShareUrl = `${baseUrl}${getTreatmentPath(treatment)}`;
   const shareText = `Confira este procedimento de ${treatment.name} na Central da Estética! ${display.hasPrice ? `Por ${display.price}` : ''}`;
   const rawWhatsappNum = whatsappNumber.replace(/\D/g, '') || '551194683765';
   const whatsappShareUrl = `https://wa.me/${rawWhatsappNum}?text=${encodeURIComponent(`${shareText}\n${treatmentShareUrl}`)}`;
