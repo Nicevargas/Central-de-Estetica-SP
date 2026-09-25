@@ -11,6 +11,16 @@ export const DEFAULT_CONTACT_INFO: ContactInfo = {
   facebookUrl: 'https://facebook.com/CENTRALDAESTETICASP',
 };
 
+// Google Meu Negócio (Perfil da Empresa no Google)
+// Cole aqui o link "Pedir avaliações" do painel do Perfil da Empresa (ex.: https://g.page/r/XXXX/review).
+// Enquanto estiver vazio, o botão "Avaliar no Google" não é exibido.
+export const GOOGLE_REVIEW_URL = '';
+export const GOOGLE_MAPS_URL =
+  'https://www.google.com/maps/search/?api=1&query=Central+da+Est%C3%A9tica+Rua+Artur+Fraz%C3%A3o+33+S%C3%A3o+Paulo';
+export const GOOGLE_MAPS_EMBED_URL =
+  'https://www.google.com/maps?q=Central+da+Est%C3%A9tica,+Rua+Artur+Fraz%C3%A3o,+33,+Jardim+Paulista,+S%C3%A3o+Paulo+-+SP&output=embed';
+export const OPENING_HOURS = ['Seg a Sex: 8h às 20h', 'Sábado: 8h às 16h'];
+
 
 export const TREATMENTS: Treatment[] = [
   {

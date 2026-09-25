@@ -38,7 +38,7 @@ import {
   GraduationCap,
   ChevronUp
 } from 'lucide-react';
-import { FAQS } from './data';
+import { FAQS, GOOGLE_REVIEW_URL, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
   getStoredTreatments,
@@ -576,7 +576,7 @@ export default function App() {
                         </div>
                         <div>
                           <div className="font-bold text-xs text-primary uppercase tracking-wider">82% de Recomendação</div>
-                          <div className="text-[10px] text-on-surface-variant font-semibold">91 avaliações de clientes no Google</div>
+                          <div className="text-[10px] text-on-surface-variant font-semibold">91 avaliações de clientes</div>
                         </div>
                       </div>
                     </div>
@@ -1125,7 +1125,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => {
-                  window.open('https://wa.me/551130521400', '_blank');
+                  window.open(`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '551194683765'}`, '_blank');
                 }}
                 className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-sm hover:bg-white hover:text-primary transition-all w-full sm:w-auto cursor-pointer"
               >
@@ -1135,6 +1135,59 @@ export default function App() {
           </div>
         </section>
       </main>
+
+      {/* Google Meu Negócio - destaque: mapa, como chegar e avaliações */}
+      <section id="google" aria-labelledby="google-heading" className="py-16 bg-white border-t border-outline-variant/20">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
+          <div className="space-y-6">
+            <span className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+              <MapPin className="h-3.5 w-3.5" /> Encontre-nos no Google
+            </span>
+            <h2 id="google-heading" className="font-serif text-3xl sm:text-4xl font-bold text-primary">
+              Central da Estética no Jardim Paulista
+            </h2>
+            <div className="space-y-3 text-sm text-on-surface-variant">
+              <p className="flex items-start gap-2">
+                <MapPin className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
+                <span>{contactInfo.addressLine1} – {contactInfo.addressLine2} – CEP {contactInfo.cep}</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <Clock className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
+                <span>{OPENING_HOURS.join(' · ')}</span>
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href={GOOGLE_MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="primary-gradient text-white px-6 py-3.5 rounded-full font-semibold text-sm shadow-md hover:scale-105 transition-all text-center"
+              >
+                Como chegar (Google Maps)
+              </a>
+              {GOOGLE_REVIEW_URL && (
+                <a
+                  href={GOOGLE_REVIEW_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border-2 border-primary text-primary px-6 py-3.5 rounded-full font-semibold text-sm hover:bg-primary hover:text-white transition-all text-center inline-flex items-center justify-center gap-2"
+                >
+                  <Star className="h-4 w-4 fill-current" /> Avaliar no Google
+                </a>
+              )}
+            </div>
+          </div>
+          <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-premium border border-outline-variant/20">
+            <iframe
+              title="Mapa - Central da Estética, Rua Artur Frazão 33, São Paulo"
+              src={GOOGLE_MAPS_EMBED_URL}
+              className="w-full h-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Footer component */}
       <footer id="contato" className="pt-20 pb-10 bg-surface-container-lowest border-t border-outline-variant/20">
@@ -1289,7 +1342,7 @@ export default function App() {
 
         {/* Legal area */}
         <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant font-medium">
-          <div>© 2026 Clínica de Estética. Todos os direitos reservados.</div>
+          <div>© 2026 Central da Estética. Todos os direitos reservados.</div>
           <div className="flex items-center gap-6">
             <button className="hover:text-primary transition-colors cursor-pointer">Privacidade</button>
             <button className="hover:text-primary transition-colors cursor-pointer">Termos de Uso</button>

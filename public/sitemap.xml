@@ -14,13 +14,6 @@
     </image:image>
   </url>
 
-  <!-- Seção de Tratamentos -->
-  <url>
-    <loc>https://centraldaestetica.com.br/#tratamentos</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
 
   <!-- Tratamentos Específicos para Busca do Google -->
   <url>
@@ -66,29 +59,4 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- Blog & Artigos -->
-  <url>
-    <loc>https://centraldaestetica.com.br/#blog</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://centraldaestetica.com.br/#sobre</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://centraldaestetica.com.br/#depoimentos</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://centraldaestetica.com.br/#contato</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
 </urlset>
