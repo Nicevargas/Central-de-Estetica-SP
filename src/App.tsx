@@ -532,7 +532,7 @@ export default function App() {
                   <div className="space-y-6">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-wider">
                       <Sparkles className="h-4 w-4 text-primary" />
-                      20 Anos de Excelência no Jardim Paulista
+                      12 Anos de Excelência no Jardim Paulista
                     </div>
                     <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-on-surface leading-tight">
                       Sua melhor versão, com o <span className="gradient-text">cuidado</span> que você merece
@@ -733,10 +733,10 @@ export default function App() {
                     />
                     {/* Floating badge */}
                     <div className="absolute -bottom-6 -right-6 glass-card p-6 rounded-2xl z-20 max-w-xs shadow-xl">
-                      <div className="font-serif text-primary text-5xl font-bold mb-1">20+</div>
+                      <div className="font-serif text-primary text-5xl font-bold mb-1">12+</div>
                       <div className="text-xs font-bold uppercase tracking-wider text-on-surface mb-1">Anos de Tradição</div>
                       <p className="text-xs text-on-surface-variant font-medium leading-relaxed">
-                        Clínica de saúde, beleza e bem-estar há mais de 20 anos no Mercado com uma carteira sólida de clientes.
+                        Clínica de saúde, beleza e bem-estar há mais de 12 anos no Mercado com uma carteira sólida de clientes.
                       </p>
                     </div>
                   </div>
@@ -789,7 +789,7 @@ export default function App() {
                           className="bg-white rounded-2xl p-6 border border-outline-variant/15 text-sm text-on-surface-variant space-y-3 leading-relaxed mt-4"
                         >
                           <p>
-                            Com mais de 20 anos de atuação no mercado, a Central da Estética se consolidou como referência em saúde, beleza e bem-estar no Jardim Paulista, contando com uma carteira sólida de clientes satisfeitos. Acreditamos que a beleza é a expressão exterior de uma saúde equilibrada.
+                            Com mais de 12 anos de atuação no mercado, a Central da Estética se consolidou como referência em saúde, beleza e bem-estar no Jardim Paulista, contando com uma carteira sólida de clientes satisfeitos. Acreditamos que a beleza é a expressão exterior de uma saúde equilibrada.
                           </p>
                           <p>
                             Nossos profissionais realizam constantes especializações internacionais para trazer as técnicas de rejuvenescimento facial e remodelagem corporal mais modernas do mundo, garantindo segurança clínica absoluta.
