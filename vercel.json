@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/:path((?!assets/).*\\.(?:png|jpe?g|webp|gif|svg|ico|avif|mp4|webm|pdf))",
+      "destination": "https://ipv4.centraldaestetica.com.br/:path"
+    }
+  ]
+}
