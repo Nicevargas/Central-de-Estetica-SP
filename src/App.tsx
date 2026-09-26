@@ -38,7 +38,7 @@ import {
   GraduationCap,
   ChevronUp
 } from 'lucide-react';
-import { trackEvent, trackWhatsAppOpen } from './lib/analytics';
+import { openCookiePreferences, trackEvent, trackWhatsAppOpen } from './lib/analytics';
 import { findTreatmentByPath, getTreatmentPath, isTreatmentLikePath } from './lib/treatmentPages';
 import { FAQS, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
@@ -1374,7 +1374,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant font-medium">
           <div>© 2026 Central da Estética. Todos os direitos reservados.</div>
           <div className="flex items-center gap-6">
-            <button className="hover:text-primary transition-colors cursor-pointer">Privacidade</button>
+            <button onClick={openCookiePreferences} className="hover:text-primary transition-colors cursor-pointer">Privacidade e cookies</button>
             <button className="hover:text-primary transition-colors cursor-pointer">Termos de Uso</button>
             <button
               onClick={() => setIsAdminOpen(true)}

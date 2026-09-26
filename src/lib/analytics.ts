@@ -5,6 +5,7 @@
  *   Ativar em Vercel → projeto → Analytics → Enable.
  * - Google Analytics 4 (propriedade "Central da Estética", ID G-F6JB9Z88VY). A variável
  *   VITE_GA_MEASUREMENT_ID, se definida no Vercel, substitui o ID padrão. Registra também os eventos de conversão abaixo.
+ *   Cookies do GA só são gravados após a visitante aceitar o aviso (components/CookieBanner.tsx).
  */
 
 const DEFAULT_GA_ID = 'G-F6JB9Z88VY';
@@ -33,6 +34,43 @@ function classifyLink(href: string): { event: string; params: Record<string, str
   return null;
 }
 
+// =============================
+// Consentimento de cookies (LGPD) — Modo de Consentimento do Google
+// =============================
+export type CookieConsent = 'granted' | 'denied';
+
+const CONSENT_KEY = 'central_cookie_consent_v1';
+export const OPEN_COOKIE_PREFERENCES_EVENT = 'central:open-cookie-preferences';
+
+export function getCookieConsent(): CookieConsent | null {
+  try {
+    const value = localStorage.getItem(CONSENT_KEY);
+    return value === 'granted' || value === 'denied' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function consentState(consent: CookieConsent | null) {
+  const analytics = consent === 'granted' ? 'granted' : 'denied';
+  // O site não usa anúncios: armazenamento e personalização de anúncios ficam sempre negados
+  return { analytics_storage: analytics, ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' };
+}
+
+export function setCookieConsent(consent: CookieConsent): void {
+  try {
+    localStorage.setItem(CONSENT_KEY, consent);
+  } catch {
+    // navegador bloqueia armazenamento: a escolha vale só para esta visita
+  }
+  window.gtag?.('consent', 'update', consentState(consent));
+}
+
+/** Reabre o aviso de cookies (link "Privacidade e cookies" do rodapé) */
+export function openCookiePreferences(): void {
+  window.dispatchEvent(new Event(OPEN_COOKIE_PREFERENCES_EVENT));
+}
+
 let initialized = false;
 
 export function initAnalytics(): void {
@@ -45,6 +83,8 @@ export function initAnalytics(): void {
       // eslint-disable-next-line prefer-rest-params
       window.dataLayer!.push(arguments);
     };
+    // Antes de aceitar, o GA não grava cookies (envia apenas sinais anônimos, sem identificador)
+    window.gtag('consent', 'default', consentState(getCookieConsent()));
     window.gtag('js', new Date());
     window.gtag('config', GA_ID);
     const script = document.createElement('script');
