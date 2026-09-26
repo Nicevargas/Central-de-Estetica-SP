@@ -2,6 +2,7 @@
  * Plugin do Vite que, ao final do build, lê os tratamentos e o contato do Supabase e gera:
  *  - dist/<slug>/index.html  → uma página estática por tratamento (conteúdo legível pelo Google sem JavaScript)
  *  - dist/sitemap.xml        → sitemap com a home e todas as páginas de tratamento
+ *  - dist/avaliar/index.html → atalho centraldaestetica.com.br/avaliar para o formulário de avaliação do Google (QR code)
  *
  * Os dados são os mesmos exibidos no site. O React carrega normalmente em cada página e abre o tratamento
  * correspondente. Alterações feitas no painel admin entram nas páginas estáticas no próximo deploy.
@@ -9,7 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Plugin } from 'vite';
-import { DEFAULT_CONTACT_INFO, OPENING_HOURS, GOOGLE_MAPS_URL } from '../src/data';
+import { DEFAULT_CONTACT_INFO, OPENING_HOURS, GOOGLE_MAPS_URL, GOOGLE_REVIEW_URL } from '../src/data';
 import { SITE_URL, getTreatmentSeo, getTreatmentPath, getTreatmentUrl } from '../src/lib/treatmentPages';
 import { mapTreatmentRow, mapContactInfoRow } from '../src/lib/supabaseMappers';
 import type { ContactInfo, Treatment } from '../src/types';
@@ -165,6 +166,32 @@ function renderSitemap(treatments: Treatment[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
 
+/**
+ * Atalho /avaliar: leva direto ao formulário de avaliação do Google.
+ * Enquanto GOOGLE_REVIEW_URL não estiver preenchido, abre o perfil da clínica no Google Maps.
+ * O endereço impresso no QR code nunca muda: basta atualizar o link em src/data.ts.
+ */
+function renderReviewRedirect(): string {
+  const target = GOOGLE_REVIEW_URL || GOOGLE_MAPS_URL;
+  const safe = escapeHtml(target);
+  return `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Avalie a Central da Estética no Google</title>
+<meta http-equiv="refresh" content="0; url=${safe}">
+<script>window.location.replace(${JSON.stringify(target).replace(/</g, '\\u003c')});</script>
+</head>
+<body style="font-family:system-ui,sans-serif;text-align:center;padding:48px 16px;color:#1c1b1f">
+<p>Abrindo o Google para você avaliar a Central da Estética…</p>
+<p><a href="${safe}">Toque aqui se não abrir automaticamente</a></p>
+</body>
+</html>
+`;
+}
+
 export function treatmentPagesPlugin(env: SupabaseEnv): Plugin {
   let outDir = 'dist';
   return {
@@ -203,6 +230,8 @@ export function treatmentPagesPlugin(env: SupabaseEnv): Plugin {
         fs.writeFileSync(path.join(dir, 'index.html'), renderPage(template, t, withPages, contact));
       }
       fs.writeFileSync(path.join(outDir, 'sitemap.xml'), renderSitemap(withPages));
+      fs.mkdirSync(path.join(outDir, 'avaliar'), { recursive: true });
+      fs.writeFileSync(path.join(outDir, 'avaliar', 'index.html'), renderReviewRedirect());
       this.info?.(`${withPages.length} páginas de tratamento geradas a partir do Supabase + sitemap.xml`);
     },
   };
