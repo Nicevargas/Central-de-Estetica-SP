@@ -37,7 +37,7 @@ export default function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label="Aviso de cookies"
-      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-3xl rounded-3xl border border-outline-variant/30 bg-white p-5 shadow-2xl sm:p-6"
+      className="fixed inset-x-4 bottom-4 z-[45] mx-auto max-w-3xl rounded-3xl border border-outline-variant/30 bg-white p-5 shadow-2xl sm:p-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex items-start gap-3 sm:flex-1">
