@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CalendarCheck, Trash2, MessageCircle, Clock, Calendar } from 'lucide-react';
 import { Treatment } from '../types';
+import { trackWhatsAppOpen } from '../lib/analytics';
 
 interface ActiveBookingsListProps {
   bookings: any[];
@@ -30,6 +31,7 @@ export default function ActiveBookingsList({ bookings, treatments, onCancelBooki
     const text = `Olá! Gostaria de confirmar meu agendamento na Central da Estética:\n\n*Procedimento:* ${treatmentName}\n*Nome:* ${booking.name}\n*Data:* ${booking.date.split('-').reverse().join('/')}\n*Horário:* ${booking.time}\n\nObrigado!`;
     const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551130512433';
     const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+    trackWhatsAppOpen('Confirmar agendamento (lista)');
     window.open(url, '_blank');
   };
 

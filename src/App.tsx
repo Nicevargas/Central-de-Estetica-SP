@@ -38,6 +38,7 @@ import {
   GraduationCap,
   ChevronUp
 } from 'lucide-react';
+import { trackEvent, trackWhatsAppOpen } from './lib/analytics';
 import { findTreatmentByPath, getTreatmentPath, isTreatmentLikePath } from './lib/treatmentPages';
 import { FAQS, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
@@ -255,6 +256,10 @@ export default function App() {
   }, [activeTab]);
 
   const handleBookingSuccess = (newBooking: BookingRequest) => {
+    trackEvent('booking_request', {
+      treatment_id: newBooking.treatmentId,
+      treatment_name: treatments.find((t) => t.id === newBooking.treatmentId)?.name,
+    });
     const updated = [newBooking, ...bookings];
     setBookings(updated);
     saveStoredBookings(updated);
@@ -1130,6 +1135,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => {
+                  trackWhatsAppOpen('Ver Agenda no WhatsApp');
                   window.open(`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '551194683765'}`, '_blank');
                 }}
                 className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-sm hover:bg-white hover:text-primary transition-all w-full sm:w-auto cursor-pointer"

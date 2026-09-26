@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Clock, User, Mail, Phone, FileText, CheckCircle } from 'lucide-react';
 import { Treatment } from '../types';
+import { trackWhatsAppOpen } from '../lib/analytics';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -82,6 +83,7 @@ export default function BookingModal({
     const text = `Olá! Gostaria de confirmar meu agendamento na Central da Estética:\n\n*Procedimento:* ${selectedTreatment?.name}\n*Nome:* ${name}\n*Data:* ${date.split('-').reverse().join('/')}\n*Horário:* ${time}\n\nObrigado!`;
     const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551130512433';
     const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+    trackWhatsAppOpen('Confirmar agendamento');
     window.open(url, '_blank');
   };
 
