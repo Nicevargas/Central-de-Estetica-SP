@@ -3,11 +3,12 @@
  *
  * - Vercel Analytics (componente <Analytics /> em main.tsx): visitas e origem, sem cookies.
  *   Ativar em Vercel → projeto → Analytics → Enable.
- * - Google Analytics 4: carregado só quando VITE_GA_MEASUREMENT_ID (ex.: G-XXXXXXXXXX) está definido
- *   nas variáveis de ambiente do Vercel. Registra também os eventos de conversão abaixo.
+ * - Google Analytics 4 (propriedade "Central da Estética", ID G-F6JB9Z88VY). A variável
+ *   VITE_GA_MEASUREMENT_ID, se definida no Vercel, substitui o ID padrão. Registra também os eventos de conversão abaixo.
  */
 
-const GA_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID || '').trim();
+const DEFAULT_GA_ID = 'G-F6JB9Z88VY';
+const GA_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID || DEFAULT_GA_ID).trim();
 
 declare global {
   interface Window {
