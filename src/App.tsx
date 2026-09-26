@@ -55,7 +55,8 @@ import {
   getStoredBlogPosts,
   saveStoredBlogPosts,
   syncBlogPosts,
-  getStoredBookings,
+  getMyBookingRequests,
+  saveMyBookingRequests,
   saveStoredBookings,
   syncBookings,
   addBooking,
@@ -144,7 +145,10 @@ export default function App() {
   const [promotions, setPromotions] = useState<Promotion[]>(getStoredPromotions);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(getStoredTestimonials);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(getStoredBlogPosts);
-  const [bookings, setBookings] = useState<BookingRequest[]>(getStoredBookings);
+  // Todos os agendamentos: carregados só no painel admin (nunca para visitantes do site)
+  const [bookings, setBookings] = useState<BookingRequest[]>([]);
+  // Solicitações enviadas por esta visitante (ficam só no navegador dela)
+  const [myBookingRequests, setMyBookingRequests] = useState<BookingRequest[]>(getMyBookingRequests);
   const [contactInfo, setContactInfo] = useState<ContactInfo>(getStoredContactInfo);
 
   // Sync with Supabase remote database on mount if configured
@@ -165,11 +169,15 @@ export default function App() {
     const syncedPosts = await syncBlogPosts();
     if (syncedPosts !== null) setBlogPosts(syncedPosts);
 
-    const syncedBookings = await syncBookings();
-    if (syncedBookings !== null) setBookings(syncedBookings);
-
     const syncedContact = await syncContactInfo();
     if (syncedContact !== null) setContactInfo(syncedContact);
+  };
+
+  // Painel admin: conteúdo do site + agendamentos recebidos
+  const refreshAdminData = async () => {
+    await refreshAllFromSupabase();
+    const syncedBookings = await syncBookings();
+    if (syncedBookings !== null) setBookings(syncedBookings);
   };
 
   useEffect(() => {
@@ -260,16 +268,17 @@ export default function App() {
       treatment_id: newBooking.treatmentId,
       treatment_name: treatments.find((t) => t.id === newBooking.treatmentId)?.name,
     });
-    const updated = [newBooking, ...bookings];
-    setBookings(updated);
-    saveStoredBookings(updated);
+    const updated = [newBooking, ...myBookingRequests];
+    setMyBookingRequests(updated);
+    saveMyBookingRequests(updated);
+    // Só insere o novo pedido; nunca sincroniza a lista inteira a partir do navegador da visitante
     addBooking(newBooking);
   };
 
   const handleCancelBooking = (id: string) => {
-    const updated = bookings.filter((b) => b.id !== id);
-    setBookings(updated);
-    saveStoredBookings(updated);
+    const updated = myBookingRequests.filter((b) => b.id !== id);
+    setMyBookingRequests(updated);
+    saveMyBookingRequests(updated);
     removeBooking(id);
   };
 
@@ -812,9 +821,9 @@ export default function App() {
               </section>
 
               {/* User Dynamic Bookings Section */}
-              {bookings.length > 0 && (
+              {myBookingRequests.length > 0 && (
                 <section className="py-12 bg-white px-6">
-                  <ActiveBookingsList bookings={bookings} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
+                  <ActiveBookingsList bookings={myBookingRequests} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
                 </section>
               )}
 
@@ -943,9 +952,9 @@ export default function App() {
                 </div>
 
                 {/* User Bookings list in treatments if exists */}
-                {bookings.length > 0 && (
+                {myBookingRequests.length > 0 && (
                   <div className="mb-16">
-                    <ActiveBookingsList bookings={bookings} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
+                    <ActiveBookingsList bookings={myBookingRequests} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
                   </div>
                 )}
 
@@ -1463,7 +1472,7 @@ export default function App() {
           onSaveBookings={handleSaveBookings}
           contactInfo={contactInfo}
           onSaveContactInfo={handleSaveContactInfo}
-          onAdminLogin={refreshAllFromSupabase}
+          onAdminLogin={refreshAdminData}
           onClose={() => setIsAdminOpen(false)}
         />
       )}
