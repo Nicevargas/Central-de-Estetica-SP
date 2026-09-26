@@ -39,7 +39,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { findTreatmentByPath, getTreatmentPath, isTreatmentLikePath } from './lib/treatmentPages';
-import { FAQS, GOOGLE_REVIEW_URL, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
+import { FAQS, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
   getStoredTreatments,
@@ -1170,16 +1170,14 @@ export default function App() {
               >
                 Como chegar (Google Maps)
               </a>
-              {GOOGLE_REVIEW_URL && (
-                <a
-                  href={GOOGLE_REVIEW_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="border-2 border-primary text-primary px-6 py-3.5 rounded-full font-semibold text-sm hover:bg-primary hover:text-white transition-all text-center inline-flex items-center justify-center gap-2"
-                >
-                  <Star className="h-4 w-4 fill-current" /> Avaliar no Google
-                </a>
-              )}
+              <a
+                href="/avaliar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-2 border-primary text-primary px-6 py-3.5 rounded-full font-semibold text-sm hover:bg-primary hover:text-white transition-all text-center inline-flex items-center justify-center gap-2"
+              >
+                <Star className="h-4 w-4 fill-current" /> Avaliar no Google
+              </a>
             </div>
           </div>
           <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-premium border border-outline-variant/20">

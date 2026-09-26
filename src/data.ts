@@ -13,7 +13,8 @@ export const DEFAULT_CONTACT_INFO: ContactInfo = {
 
 // Google Meu Negócio (Perfil da Empresa no Google)
 // Cole aqui o link "Pedir avaliações" do painel do Perfil da Empresa (ex.: https://g.page/r/XXXX/review).
-// Enquanto estiver vazio, o botão "Avaliar no Google" não é exibido.
+// Ele é usado pelo atalho centraldaestetica.com.br/avaliar (botão do site e QR code impresso).
+// Enquanto estiver vazio, /avaliar abre o perfil da clínica no Google Maps.
 export const GOOGLE_REVIEW_URL = '';
 export const GOOGLE_MAPS_URL =
   'https://www.google.com/maps/search/?api=1&query=Central+da+Est%C3%A9tica+Rua+Artur+Fraz%C3%A3o+33+S%C3%A3o+Paulo';
