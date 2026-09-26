@@ -1,26 +1,27 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CalendarCheck, Trash2, MessageCircle, Clock, Calendar } from 'lucide-react';
-import { TREATMENTS } from '../data';
+import { Treatment } from '../types';
 
 interface ActiveBookingsListProps {
   bookings: any[];
+  treatments: Treatment[];
   onCancelBooking: (id: string) => void;
   whatsappNumber?: string;
 }
 
-export default function ActiveBookingsList({ bookings, onCancelBooking, whatsappNumber = '551130512433' }: ActiveBookingsListProps) {
+export default function ActiveBookingsList({ bookings, treatments, onCancelBooking, whatsappNumber = '551130512433' }: ActiveBookingsListProps) {
   if (bookings.length === 0) {
     return null;
   }
 
   const getTreatmentName = (id: string) => {
-    const treatment = TREATMENTS.find((t) => t.id === id);
+    const treatment = treatments.find((t) => t.id === id);
     return treatment ? treatment.name : 'Procedimento Geral';
   };
 
   const getTreatmentImage = (id: string) => {
-    const treatment = TREATMENTS.find((t) => t.id === id);
+    const treatment = treatments.find((t) => t.id === id);
     return treatment ? treatment.image : '';
   };
 

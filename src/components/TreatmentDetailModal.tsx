@@ -36,6 +36,7 @@ import {
   formatVideoEmbedUrl,
   parseBeforeAfterImages,
 } from '../lib/treatmentUtils';
+import { getTreatmentPath } from '../lib/treatmentPages';
 
 interface TreatmentDetailModalProps {
   treatment: Treatment | null;
@@ -77,10 +78,8 @@ export default function TreatmentDetailModal({
   const formattedMainImage = formatGoogleDriveImageUrl(treatment.image) || treatment.image || '';
 
   // Prepare Share URLs specific to this treatment
-  const baseUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}${window.location.pathname}`
-    : '';
-  const treatmentShareUrl = `${baseUrl}?treatment=${encodeURIComponent(treatment.id)}`;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const treatmentShareUrl = `${baseUrl}${getTreatmentPath(treatment)}`;
   const shareText = `Confira este procedimento de ${treatment.name} na Central da Estética! ${display.hasPrice ? `Por ${display.price}` : ''}`;
   const rawWhatsappNum = whatsappNumber.replace(/\D/g, '') || '551194683765';
   const whatsappShareUrl = `https://wa.me/${rawWhatsappNum}?text=${encodeURIComponent(`${shareText}\n${treatmentShareUrl}`)}`;

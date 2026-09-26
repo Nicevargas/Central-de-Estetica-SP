@@ -38,7 +38,8 @@ import {
   GraduationCap,
   ChevronUp
 } from 'lucide-react';
-import { FAQS } from './data';
+import { findTreatmentByPath, getTreatmentPath, isTreatmentLikePath } from './lib/treatmentPages';
+import { FAQS, GOOGLE_REVIEW_URL, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
   getStoredTreatments,
@@ -174,41 +175,45 @@ export default function App() {
     refreshAllFromSupabase();
   }, []);
 
-  // Selected treatment for full detail modal view - initialized from URL search param if present
-  const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const params = new URLSearchParams(window.location.search);
-    const param = params.get('treatment');
-    if (!param) return null;
-    const initialList = getStoredTreatments();
-    return findMatchingTreatment(param, initialList);
-  });
+  // Tratamento aberto no modal de detalhes
+  const [selectedTreatmentForDetail, setSelectedTreatmentForDetail] = useState<Treatment | null>(null);
 
-  const isFirstRender = useRef(true);
+  // Tratamento pedido pela URL (?treatment=... ou endereço próprio como /botox-jardins-sp/),
+  // resolvido assim que a lista de tratamentos do banco estiver disponível
+  const pendingTreatmentFromUrl = useRef<{ param: string | null; path: string } | null>(
+    typeof window === 'undefined'
+      ? null
+      : (() => {
+          const param = new URLSearchParams(window.location.search).get('treatment');
+          const path = window.location.pathname;
+          return param || isTreatmentLikePath(path) ? { param, path } : null;
+        })()
+  );
 
-  // Sync address bar URL search parameter when treatment detail modal is opened or closed
+  // Abre o tratamento pedido pela URL e mantém a barra de endereço sincronizada com o modal
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // On first mount, if URL had a parameter but wasn't matched initially, try matching again with loaded treatments
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      const params = new URLSearchParams(window.location.search);
-      const param = params.get('treatment');
-      if (param && !selectedTreatmentForDetail && treatments.length > 0) {
-        const match = findMatchingTreatment(param, treatments);
-        if (match) {
-          setSelectedTreatmentForDetail(match);
-        }
+    const pending = pendingTreatmentFromUrl.current;
+    if (pending) {
+      if (treatments.length === 0) return; // aguardando dados do banco
+      pendingTreatmentFromUrl.current = null;
+      const match = pending.param
+        ? findMatchingTreatment(pending.param, treatments)
+        : findTreatmentByPath(pending.path, treatments);
+      if (match) {
+        setSelectedTreatmentForDetail(match);
+        return;
       }
-      return;
     }
 
+    // Cada tratamento usa o endereço próprio (ex.: /botox-jardins-sp/)
     const url = new URL(window.location.href);
+    url.searchParams.delete('treatment');
     if (selectedTreatmentForDetail) {
-      url.searchParams.set('treatment', selectedTreatmentForDetail.id);
-    } else {
-      url.searchParams.delete('treatment');
+      url.pathname = getTreatmentPath(selectedTreatmentForDetail);
+    } else if (url.pathname !== '/' && isTreatmentLikePath(url.pathname)) {
+      url.pathname = '/';
     }
     window.history.replaceState(null, '', url.toString());
   }, [selectedTreatmentForDetail, treatments]);
@@ -576,7 +581,7 @@ export default function App() {
                         </div>
                         <div>
                           <div className="font-bold text-xs text-primary uppercase tracking-wider">82% de Recomendação</div>
-                          <div className="text-[10px] text-on-surface-variant font-semibold">91 avaliações de clientes no Google</div>
+                          <div className="text-[10px] text-on-surface-variant font-semibold">91 avaliações de clientes</div>
                         </div>
                       </div>
                     </div>
@@ -804,7 +809,7 @@ export default function App() {
               {/* User Dynamic Bookings Section */}
               {bookings.length > 0 && (
                 <section className="py-12 bg-white px-6">
-                  <ActiveBookingsList bookings={bookings} onCancelBooking={handleCancelBooking} />
+                  <ActiveBookingsList bookings={bookings} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
                 </section>
               )}
 
@@ -935,7 +940,7 @@ export default function App() {
                 {/* User Bookings list in treatments if exists */}
                 {bookings.length > 0 && (
                   <div className="mb-16">
-                    <ActiveBookingsList bookings={bookings} onCancelBooking={handleCancelBooking} />
+                    <ActiveBookingsList bookings={bookings} treatments={treatments} onCancelBooking={handleCancelBooking} whatsappNumber={contactInfo.whatsappNumber} />
                   </div>
                 )}
 
@@ -1125,7 +1130,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => {
-                  window.open('https://wa.me/551130521400', '_blank');
+                  window.open(`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '551194683765'}`, '_blank');
                 }}
                 className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-sm hover:bg-white hover:text-primary transition-all w-full sm:w-auto cursor-pointer"
               >
@@ -1135,6 +1140,59 @@ export default function App() {
           </div>
         </section>
       </main>
+
+      {/* Google Meu Negócio - destaque: mapa, como chegar e avaliações */}
+      <section id="google" aria-labelledby="google-heading" className="py-16 bg-white border-t border-outline-variant/20">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
+          <div className="space-y-6">
+            <span className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+              <MapPin className="h-3.5 w-3.5" /> Encontre-nos no Google
+            </span>
+            <h2 id="google-heading" className="font-serif text-3xl sm:text-4xl font-bold text-primary">
+              Central da Estética no Jardim Paulista
+            </h2>
+            <div className="space-y-3 text-sm text-on-surface-variant">
+              <p className="flex items-start gap-2">
+                <MapPin className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
+                <span>{contactInfo.addressLine1} – {contactInfo.addressLine2} – CEP {contactInfo.cep}</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <Clock className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
+                <span>{OPENING_HOURS.join(' · ')}</span>
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href={GOOGLE_MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="primary-gradient text-white px-6 py-3.5 rounded-full font-semibold text-sm shadow-md hover:scale-105 transition-all text-center"
+              >
+                Como chegar (Google Maps)
+              </a>
+              {GOOGLE_REVIEW_URL && (
+                <a
+                  href={GOOGLE_REVIEW_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border-2 border-primary text-primary px-6 py-3.5 rounded-full font-semibold text-sm hover:bg-primary hover:text-white transition-all text-center inline-flex items-center justify-center gap-2"
+                >
+                  <Star className="h-4 w-4 fill-current" /> Avaliar no Google
+                </a>
+              )}
+            </div>
+          </div>
+          <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-premium border border-outline-variant/20">
+            <iframe
+              title="Mapa - Central da Estética, Rua Artur Frazão 33, São Paulo"
+              src={GOOGLE_MAPS_EMBED_URL}
+              className="w-full h-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Footer component */}
       <footer id="contato" className="pt-20 pb-10 bg-surface-container-lowest border-t border-outline-variant/20">
@@ -1287,9 +1345,30 @@ export default function App() {
           </div>
         </div>
 
+        {/* Links rastreáveis para as páginas dedicadas de cada tratamento */}
+        <nav aria-label="Tratamentos em São Paulo" className="max-w-7xl mx-auto px-6 mt-12">
+          <h4 className="font-semibold text-sm text-on-surface uppercase tracking-wider mb-4">Tratamentos em São Paulo</h4>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-on-surface-variant">
+            {treatments.map((t) => (
+              <li key={t.id}>
+                <a
+                  href={getTreatmentPath(t)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedTreatmentForDetail(t);
+                  }}
+                  className="hover:text-primary transition-colors"
+                >
+                  {t.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         {/* Legal area */}
         <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant font-medium">
-          <div>© 2026 Clínica de Estética. Todos os direitos reservados.</div>
+          <div>© 2026 Central da Estética. Todos os direitos reservados.</div>
           <div className="flex items-center gap-6">
             <button className="hover:text-primary transition-colors cursor-pointer">Privacidade</button>
             <button className="hover:text-primary transition-colors cursor-pointer">Termos de Uso</button>
@@ -1343,6 +1422,7 @@ export default function App() {
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         selectedTreatmentId={preSelectedTreatment}
+        treatments={treatments}
         onBookingSuccess={handleBookingSuccess}
         whatsappNumber={contactInfo.whatsappNumber}
       />
