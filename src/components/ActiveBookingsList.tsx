@@ -11,7 +11,7 @@ interface ActiveBookingsListProps {
   whatsappNumber?: string;
 }
 
-export default function ActiveBookingsList({ bookings, treatments, onCancelBooking, whatsappNumber = '551130512433' }: ActiveBookingsListProps) {
+export default function ActiveBookingsList({ bookings, treatments, onCancelBooking, whatsappNumber = '551194683765' }: ActiveBookingsListProps) {
   if (bookings.length === 0) {
     return null;
   }
@@ -28,10 +28,10 @@ export default function ActiveBookingsList({ bookings, treatments, onCancelBooki
 
   const openWhatsAppConfirm = (booking: any) => {
     const treatmentName = getTreatmentName(booking.treatmentId);
-    const text = `Olá! Gostaria de confirmar meu agendamento na Central da Estética:\n\n*Procedimento:* ${treatmentName}\n*Nome:* ${booking.name}\n*Data:* ${booking.date.split('-').reverse().join('/')}\n*Horário:* ${booking.time}\n\nObrigado!`;
-    const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551130512433';
+    const text = `Olá! Enviei uma solicitação de agendamento pelo site da Central da Estética:\n\n*Procedimento:* ${treatmentName}\n*Nome:* ${booking.name}\n*Data:* ${booking.date.split('-').reverse().join('/')}\n*Horário:* ${booking.time}\n\nObrigado!`;
+    const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551194683765';
     const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
-    trackWhatsAppOpen('Confirmar agendamento (lista)');
+    trackWhatsAppOpen('Solicitação (lista)');
     window.open(url, '_blank');
   };
 
@@ -42,8 +42,10 @@ export default function ActiveBookingsList({ bookings, treatments, onCancelBooki
           <CalendarCheck className="h-6 w-6" />
         </div>
         <div>
-          <h3 className="font-serif text-xl font-bold text-primary">Seus Agendamentos</h3>
-          <p className="text-xs text-on-surface-variant">Acompanhe e confirme suas consultas solicitadas</p>
+          <h3 className="font-serif text-xl font-bold text-primary">Suas Solicitações de Agendamento</h3>
+          <p className="text-xs text-on-surface-variant">
+            Enviadas deste aparelho. O horário só vale após a confirmação da Central da Estética pelo WhatsApp.
+          </p>
         </div>
       </div>
 
@@ -94,7 +96,7 @@ export default function ActiveBookingsList({ bookings, treatments, onCancelBooki
                   
                   <button
                     onClick={() => openWhatsAppConfirm(booking)}
-                    title="Confirmar via WhatsApp"
+                    title="Falar com a clínica pelo WhatsApp"
                     className="p-2 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-colors cursor-pointer"
                   >
                     <MessageCircle className="h-4 w-4" />
@@ -102,7 +104,7 @@ export default function ActiveBookingsList({ bookings, treatments, onCancelBooki
 
                   <button
                     onClick={() => onCancelBooking(booking.id)}
-                    title="Excluir Solicitação"
+                    title="Cancelar solicitação"
                     className="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />

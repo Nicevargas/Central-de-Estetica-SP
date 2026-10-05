@@ -439,6 +439,31 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
     notify('Status do agendamento atualizado.');
   };
 
+  // Confirma a solicitação com a cliente pelo WhatsApp (mensagem pronta) e marca como confirmada
+  const handleConfirmBookingViaWhatsApp = (booking: BookingRequest) => {
+    let phone = (booking.phone || '').replace(/\D/g, '');
+    if (phone.length === 10 || phone.length === 11) phone = `55${phone}`;
+    if (phone.length < 12) {
+      notify('Telefone da cliente inválido para WhatsApp. Confirme por ligação.');
+      return;
+    }
+    const treatmentName = treatments.find((t) => t.id === booking.treatmentId)?.name || 'sua avaliação';
+    const firstName = (booking.name || '').trim().split(/\s+/)[0] || '';
+    const text =
+      `Olá, ${firstName}! Aqui é da Central da Estética 💜\n\n` +
+      `Seu agendamento está *confirmado*:\n` +
+      `*Procedimento:* ${treatmentName}\n` +
+      `*Data:* ${booking.date.split('-').reverse().join('/')}\n` +
+      `*Horário:* ${booking.time}\n` +
+      `*Endereço:* ${contactInfo.addressLine1} – ${contactInfo.addressLine2}\n\n` +
+      `Se precisar remarcar, é só responder esta mensagem. Até breve!`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+    if (booking.status !== 'confirmed') {
+      onSaveBookings(bookings.map((b) => (b.id === booking.id ? { ...b, status: 'confirmed' as const } : b)));
+      notify('Mensagem de confirmação aberta no WhatsApp e agendamento marcado como confirmado.');
+    }
+  };
+
   const handleDeleteBooking = (id: string) => {
     onSaveBookings(bookings.filter((b) => b.id !== id));
     notify('Agendamento excluído da lista com sucesso.');
@@ -2297,16 +2322,21 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleToggleBookingStatus(b.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                            b.status === 'confirmed'
-                              ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                              : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          }`}
-                        >
-                          {b.status === 'confirmed' ? 'Marcar Pendente' : 'Confirmar Agendamento'}
-                        </button>
+                        {b.status === 'confirmed' ? (
+                          <button
+                            onClick={() => handleToggleBookingStatus(b.id)}
+                            className="px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all bg-amber-100 text-amber-700 hover:bg-amber-200"
+                          >
+                            Marcar Pendente
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleConfirmBookingViaWhatsApp(b)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all bg-[#25D366] text-white hover:opacity-90"
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" /> Confirmar pelo WhatsApp
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDeleteBooking(b.id)}
                           className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-rose-600 hover:text-white rounded-xl transition-colors cursor-pointer"

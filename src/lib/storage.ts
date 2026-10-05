@@ -322,6 +322,22 @@ export async function removeBooking(id: string): Promise<void> {
 }
 
 // =============================
+// Solicitações de agendamento da própria visitante
+// =============================
+// Ficam só no navegador de quem enviou. O site público nunca baixa os agendamentos do banco:
+// eles são lidos apenas no painel admin (ver refreshAdminData em App.tsx).
+const MY_BOOKING_REQUESTS_KEY = 'central_estetica_bookings';
+
+export function getMyBookingRequests(): BookingRequest[] {
+  const stored = loadFromStorage<BookingRequest[]>(MY_BOOKING_REQUESTS_KEY, []);
+  return Array.isArray(stored) ? stored : [];
+}
+
+export function saveMyBookingRequests(requests: BookingRequest[]): void {
+  saveToStorage(MY_BOOKING_REQUESTS_KEY, requests);
+}
+
+// =============================
 // Contact Info
 // =============================
 export function getStoredContactInfo(): ContactInfo {
