@@ -328,15 +328,24 @@ export async function removeBooking(id: string): Promise<void> {
 // =============================
 // Contact Info
 // =============================
+/**
+ * Números que a clínica não usa mais. Quando um deles aparece no contato salvo,
+ * o cadastro é substituído pelo atual, para o site não exibir telefone desativado.
+ */
+const CONTATOS_DESATIVADOS = {
+  whatsapp: ['551130512433', '551194683765'],
+  telefone: ['3051-2433', '3052', '3052-1400', '9468-3765'],
+};
+
+function isContatoDesativado(info: ContactInfo | null | undefined): boolean {
+  if (!info) return true;
+  if (CONTATOS_DESATIVADOS.whatsapp.includes(info.whatsappNumber)) return true;
+  return CONTATOS_DESATIVADOS.telefone.some((t) => info.phonePrimary?.includes(t));
+}
+
 export function getStoredContactInfo(): ContactInfo {
   const loaded = loadFromStorage<ContactInfo>(STORAGE_KEYS.CONTACT_INFO, DEFAULT_CONTACT_INFO);
-  if (
-    !loaded ||
-    loaded.whatsappNumber === '551130512433' ||
-    loaded.phonePrimary?.includes('3051-2433') ||
-    loaded.phonePrimary?.includes('3052') ||
-    loaded.phonePrimary?.includes('3052-1400')
-  ) {
+  if (isContatoDesativado(loaded)) {
     saveStoredContactInfo(DEFAULT_CONTACT_INFO);
     return DEFAULT_CONTACT_INFO;
   }
@@ -356,12 +365,7 @@ export async function syncContactInfo(): Promise<ContactInfo> {
   if (isSupabaseConfigured()) {
     const remote = await fetchContactInfoFromSupabase();
     if (remote !== null) {
-      if (
-        remote.whatsappNumber === '551130512433' ||
-        remote.phonePrimary?.includes('3051-2433') ||
-        remote.phonePrimary?.includes('3052') ||
-        remote.phonePrimary?.includes('3052-1400')
-      ) {
+      if (isContatoDesativado(remote)) {
         await saveContactInfoToSupabase(DEFAULT_CONTACT_INFO);
         saveStoredContactInfo(DEFAULT_CONTACT_INFO);
         return DEFAULT_CONTACT_INFO;

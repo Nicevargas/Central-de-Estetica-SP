@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Settings,
   Plus,
@@ -38,6 +38,35 @@ import {
   Filter,
 } from 'lucide-react';
 import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
+
+/**
+ * Rola a tela até o formulário quando ele é aberto.
+ *
+ * O formulário fica no topo de cada aba e a lista fica embaixo. Sem isto,
+ * quem clica no lápis de um item no fim da lista não vê nada acontecer:
+ * o formulário abre fora da área visível e parece que o botão não funcionou.
+ */
+function useScrollToForm(isOpen: boolean, itemId?: string | number) {
+  const ref = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    // Salto imediato, não rolagem suave: a distância costuma passar de 1500px e
+    // a animação ainda disputava com as imagens do formulário carregando,
+    // terminando longe do lugar certo.
+    const irAteOFormulario = () => ref.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    // Duas passadas: a primeira assim que o formulário é desenhado, a segunda
+    // depois que os campos e as prévias de imagem assentam a altura.
+    const primeira = window.setTimeout(irAteOFormulario, 60);
+    const segunda = window.setTimeout(irAteOFormulario, 350);
+    return () => {
+      window.clearTimeout(primeira);
+      window.clearTimeout(segunda);
+    };
+  }, [isOpen, itemId]);
+
+  return ref;
+}
 import {
   getSanitizedTreatmentDisplay,
   sanitizeTreatmentObject,
@@ -122,6 +151,12 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
   const [treatmentImageStatus, setTreatmentImageStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+
+  // Leva a tela até o formulário recém-aberto em cada aba
+  const treatmentFormRef = useScrollToForm(Boolean(editingTreatment), editingTreatment?.id);
+  const promoFormRef = useScrollToForm(Boolean(editingPromo), editingPromo?.id);
+  const testimonialFormRef = useScrollToForm(Boolean(editingTestimonial), editingTestimonial?.id);
+  const postFormRef = useScrollToForm(Boolean(editingPost), editingPost?.id);
 
   // Treatment Quick Search & Filter States
   const [treatmentSearchQuery, setTreatmentSearchQuery] = useState<string>('');
@@ -714,6 +749,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
               {/* Edit/Create Form Modal if active */}
               {editingTreatment && (
                 <form
+                  ref={treatmentFormRef}
                   onSubmit={handleSaveTreatmentSubmit}
                   className="p-5 bg-rose-50/50 dark:bg-stone-800/80 rounded-2xl border border-rose-200 dark:border-stone-700 space-y-4"
                 >
@@ -1611,6 +1647,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
 
               {editingPromo && (
                 <form
+                  ref={promoFormRef}
                   onSubmit={handleSavePromoSubmit}
                   className="p-5 bg-rose-50/70 dark:bg-stone-800/90 rounded-2xl border border-rose-200 dark:border-stone-700 space-y-4 shadow-lg animate-fade-in"
                 >
@@ -1941,6 +1978,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
 
               {editingTestimonial && (
                 <form
+                  ref={testimonialFormRef}
                   onSubmit={handleSaveTestimonialSubmit}
                   className="p-5 bg-rose-50/50 dark:bg-stone-800/80 rounded-2xl border border-rose-200 dark:border-stone-700 space-y-4"
                 >
@@ -2081,6 +2119,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
 
               {editingPost && (
                 <form
+                  ref={postFormRef}
                   onSubmit={handleSaveBlogPostSubmit}
                   className="p-5 bg-rose-50/50 dark:bg-stone-800/80 rounded-2xl border border-rose-200 dark:border-stone-700 space-y-4"
                 >

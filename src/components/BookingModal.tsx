@@ -4,6 +4,9 @@ import { X, Calendar, Clock, User, Mail, Phone, FileText, CheckCircle } from 'lu
 import { Treatment } from '../types';
 import { TREATMENTS } from '../data';
 
+/** WhatsApp do atendimento da Central da Estética: (11) 98525-4584 */
+const ATENDENTE_WHATSAPP = '5511985254584';
+
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,7 +20,7 @@ export default function BookingModal({
   onClose,
   selectedTreatmentId = '',
   onBookingSuccess,
-  whatsappNumber = '551194683765',
+  whatsappNumber = ATENDENTE_WHATSAPP,
 }: BookingModalProps) {
   const [treatmentId, setTreatmentId] = useState(selectedTreatmentId);
   const [name, setName] = useState('');
@@ -58,6 +61,10 @@ export default function BookingModal({
 
     setIsSubmitted(true);
     onBookingSuccess(newBooking);
+
+    // Leva a solicitação ao atendente na hora. Sai de dentro do clique de envio
+    // para o navegador não tratar como pop-up indesejado.
+    openWhatsApp();
   };
 
   const selectedTreatment = TREATMENTS.find((t) => t.id === treatmentId);
@@ -77,10 +84,34 @@ export default function BookingModal({
     onClose();
   };
 
+  /** Monta a mensagem com tudo que o atendente precisa para confirmar sem ter que perguntar de novo. */
+  const buildWhatsAppMessage = () => {
+    const dataBR = date ? date.split('-').reverse().join('/') : 'a combinar';
+    const linhas = [
+      '*NOVA SOLICITAÇÃO DE AGENDAMENTO*',
+      '_Enviada pelo site da Central da Estética_',
+      '',
+      `*Procedimento:* ${selectedTreatment?.name || 'não informado'}`,
+      `*Data preferida:* ${dataBR}`,
+      `*Horário preferido:* ${time || 'a combinar'}`,
+      '',
+      '*DADOS DO CLIENTE*',
+      `*Nome:* ${name}`,
+      `*WhatsApp:* ${phone}`,
+      `*E-mail:* ${email}`,
+    ];
+
+    if (notes.trim()) {
+      linhas.push('', `*Observações:* ${notes.trim()}`);
+    }
+
+    linhas.push('', 'Aguardo a confirmação do horário. Obrigado!');
+    return linhas.join('\n');
+  };
+
   const openWhatsApp = () => {
-    const text = `Olá! Gostaria de confirmar meu agendamento na Central da Estética:\n\n*Procedimento:* ${selectedTreatment?.name}\n*Nome:* ${name}\n*Data:* ${date.split('-').reverse().join('/')}\n*Horário:* ${time}\n\nObrigado!`;
-    const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551130512433';
-    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+    const cleanNumber = whatsappNumber.replace(/\D/g, '') || ATENDENTE_WHATSAPP;
+    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(buildWhatsAppMessage())}`;
     window.open(url, '_blank');
   };
 
