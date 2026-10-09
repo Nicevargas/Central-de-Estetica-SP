@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Clock, User, Mail, Phone, FileText, CheckCircle } from 'lucide-react';
 import { Treatment } from '../types';
-import { TREATMENTS } from '../data';
+import { trackWhatsAppOpen } from '../lib/analytics';
 
 /** WhatsApp do atendimento da Central da Estética: (11) 98525-4584 */
 const ATENDENTE_WHATSAPP = '5511985254584';
@@ -11,6 +11,7 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedTreatmentId?: string;
+  treatments: Treatment[];
   onBookingSuccess: (booking: any) => void;
   whatsappNumber?: string;
 }
@@ -19,6 +20,7 @@ export default function BookingModal({
   isOpen,
   onClose,
   selectedTreatmentId = '',
+  treatments,
   onBookingSuccess,
   whatsappNumber = ATENDENTE_WHATSAPP,
 }: BookingModalProps) {
@@ -55,10 +57,6 @@ export default function BookingModal({
       createdAt: new Date().toISOString(),
     };
 
-    // Save to localStorage
-    const existingBookings = JSON.parse(localStorage.getItem('central_estetica_bookings') || '[]');
-    localStorage.setItem('central_estetica_bookings', JSON.stringify([newBooking, ...existingBookings]));
-
     setIsSubmitted(true);
     onBookingSuccess(newBooking);
 
@@ -67,7 +65,7 @@ export default function BookingModal({
     openWhatsApp();
   };
 
-  const selectedTreatment = TREATMENTS.find((t) => t.id === treatmentId);
+  const selectedTreatment = treatments.find((t) => t.id === treatmentId);
 
   const resetForm = () => {
     setName('');
@@ -112,6 +110,7 @@ export default function BookingModal({
   const openWhatsApp = () => {
     const cleanNumber = whatsappNumber.replace(/\D/g, '') || ATENDENTE_WHATSAPP;
     const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(buildWhatsAppMessage())}`;
+    trackWhatsAppOpen('Agilizar solicitação');
     window.open(url, '_blank');
   };
 
@@ -146,9 +145,9 @@ export default function BookingModal({
             {!isSubmitted ? (
               <div>
                 <div className="mb-6">
-                  <h3 className="font-serif text-2xl font-semibold text-primary">Agendar Consulta</h3>
+                  <h3 className="font-serif text-2xl font-semibold text-primary">Solicitar Agendamento</h3>
                   <p className="text-sm text-on-surface-variant mt-1">
-                    Preencha os dados abaixo e escolha o melhor horário. Entraremos em contato para confirmar.
+                    Preencha os dados abaixo e escolha o melhor horário. A Central da Estética vai confirmar com você pelo WhatsApp.
                   </p>
                 </div>
 
@@ -166,28 +165,28 @@ export default function BookingModal({
                     >
                       <option value="" disabled>Selecione um tratamento...</option>
                       <optgroup label="Estética Facial">
-                        {TREATMENTS.filter((t) => t.category === 'facial').map((t) => (
+                        {treatments.filter((t) => t.category === 'facial').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>
                         ))}
                       </optgroup>
                       <optgroup label="Estética Corporal">
-                        {TREATMENTS.filter((t) => t.category === 'corporal').map((t) => (
+                        {treatments.filter((t) => t.category === 'corporal').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>
                         ))}
                       </optgroup>
                       <optgroup label="Terapia Capilar">
-                        {TREATMENTS.filter((t) => t.category === 'capilar').map((t) => (
+                        {treatments.filter((t) => t.category === 'capilar').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>
                         ))}
                       </optgroup>
                       <optgroup label="Bem-estar & Relaxamento">
-                        {TREATMENTS.filter((t) => t.category === 'bem-estar').map((t) => (
+                        {treatments.filter((t) => t.category === 'bem-estar').map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name}
                           </option>
@@ -326,12 +325,19 @@ export default function BookingModal({
                     </div>
                   </div>
 
+                  {/* Aviso: é uma solicitação, não um agendamento confirmado */}
+                  <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+                    <strong>Importante:</strong> este formulário é uma <strong>solicitação</strong>. O agendamento só é
+                    válido após a <strong>confirmação da Central da Estética pelo WhatsApp</strong>, de acordo com a
+                    disponibilidade da agenda.
+                  </p>
+
                   {/* Submit Button */}
                   <button
                     type="submit"
                     className="primary-gradient w-full cursor-pointer rounded-full py-3 font-semibold text-white shadow-premium transition-all hover:scale-[1.02] active:scale-95"
                   >
-                    Agendar Horário
+                    Enviar Solicitação
                   </button>
                 </form>
               </div>
@@ -342,11 +348,15 @@ export default function BookingModal({
                   <CheckCircle className="h-16 w-16" />
                 </div>
                 <h3 className="font-serif text-2xl font-bold text-primary mb-2">Solicitação Enviada!</h3>
-                <p className="text-sm text-on-surface-variant max-w-md mb-6">
-                  Olá, <span className="font-bold">{name}</span>! Sua pré-reserva de consulta para{' '}
-                  <span className="font-bold text-primary">{selectedTreatment?.name}</span> foi registrada para{' '}
+                <p className="text-sm text-on-surface-variant max-w-md mb-3">
+                  Olá, <span className="font-bold">{name}</span>! Recebemos sua solicitação para{' '}
+                  <span className="font-bold text-primary">{selectedTreatment?.name}</span> em{' '}
                   <span className="font-bold">{date.split('-').reverse().join('/')}</span> às{' '}
                   <span className="font-bold">{time}</span>.
+                </p>
+                <p className="mb-6 max-w-md rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+                  <strong>Aguarde a confirmação:</strong> o horário só está garantido depois que a Central da Estética
+                  confirmar com você pelo WhatsApp <strong>{phone}</strong>.
                 </p>
 
                 <div className="w-full space-y-3">
@@ -361,7 +371,7 @@ export default function BookingModal({
                     >
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.705 1.456h.008c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                     </svg>
-                    Confirmar no WhatsApp
+                    Agilizar pelo WhatsApp
                   </button>
 
                   <button

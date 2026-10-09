@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Treatment, Promotion, Testimonial, BlogPost, BookingRequest, ContactInfo } from '../types';
 import { sanitizeTreatmentObject, formatGoogleDriveImageUrl, formatVideoEmbedUrl, parseBeforeAfterImages } from './treatmentUtils';
+import { mapTreatmentRow, mapContactInfoRow } from './supabaseMappers';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -30,26 +31,7 @@ export async function fetchTreatmentsFromSupabase(): Promise<Treatment[] | null>
     }
     if (!data) return [];
 
-    return data.map((row: any) => {
-      const rawTreatment: Treatment = {
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        category: row.category,
-        popular: row.popular ?? false,
-        highlight: row.highlight ?? false,
-        duration: row.duration,
-        price: row.price,
-        image: formatGoogleDriveImageUrl(row.image) || row.image || '',
-        benefits: Array.isArray(row.benefits) ? row.benefits : [],
-        beforeAfterImages: parseBeforeAfterImages(row.before_after_images || row.beforeAfterImages || row.before_image || row.after_image),
-        videoUrl: formatVideoEmbedUrl(row.video_url || row.videoUrl || ''),
-        technicalSpecs: row.technical_specs || row.technicalSpecs || {},
-        postCareTips: Array.isArray(row.post_care_tips) ? row.post_care_tips : (Array.isArray(row.postCareTips) ? row.postCareTips : []),
-        specialist: row.specialist || null,
-      };
-      return sanitizeTreatmentObject(rawTreatment);
-    });
+    return data.map(mapTreatmentRow);
   } catch (err) {
     console.warn('Notice: Exception fetching treatments from Supabase:', err);
     return null;
@@ -803,16 +785,7 @@ export async function fetchContactInfoFromSupabase(): Promise<ContactInfo | null
       return null;
     }
 
-    return {
-      phonePrimary: data.phone_primary,
-      whatsappNumber: data.whatsapp_number,
-      email: data.email,
-      addressLine1: data.address_line1,
-      addressLine2: data.address_line2,
-      cep: data.cep,
-      instagramUrl: data.instagram_url,
-      facebookUrl: data.facebook_url,
-    };
+    return mapContactInfoRow(data);
   } catch (err) {
     console.warn('Notice: Exception fetching site_settings from Supabase:', err);
     return null;
