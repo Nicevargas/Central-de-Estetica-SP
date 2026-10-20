@@ -8,6 +8,8 @@
  *                           → app 1315858633192552 → Instagram → API Setup
  *   INSTAGRAM_USER_ID       opcional; descoberto via /me se ausente
  *   INSTAGRAM_API_VERSION   opcional; padrão v23.0
+ *   PUBLIC_BASE_URL         opcional; URL pública da raiz do repositório
+ *                           (ex.: raw.githubusercontent.com/<repo>/<sha>)
  *
  * Uso:
  *   node scripts/instagram/publish.mjs check
@@ -15,9 +17,9 @@
  *   node scripts/instagram/publish.mjs post --caption "Legenda" --dry-run https://site/foto.jpg
  *   node scripts/instagram/publish.mjs refresh   (renova o token de 60 dias)
  *
- * Imagens: URL pública (https://...) ou arquivo local JPEG. Arquivos locais
- * são enviados ao catbox.moe para gerar uma URL pública, pois a API do
- * Instagram só aceita imagens por URL. 1 imagem = post simples; 2–10 = carrossel.
+ * Imagens: URL pública (https://...) ou arquivo local JPEG. A API do Instagram
+ * só aceita imagens por URL: arquivos locais viram PUBLIC_BASE_URL/<caminho>
+ * ou, sem ela, são enviados ao catbox.moe. 1 imagem = post simples; 2–10 = carrossel.
  */
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -61,6 +63,11 @@ async function getUser() {
 
 async function toPublicUrl(src) {
   if (/^https:\/\//.test(src)) return src;
+  // No GitHub Actions o repositório público serve o arquivo do próprio commit
+  if (process.env.PUBLIC_BASE_URL) {
+    const path = src.replace(/^\.\//, '').split('/').map(encodeURIComponent).join('/');
+    return `${process.env.PUBLIC_BASE_URL.replace(/\/$/, '')}/${path}`;
+  }
   const form = new FormData();
   form.append('reqtype', 'fileupload');
   form.append('fileToUpload', new Blob([await readFile(src)]), basename(src));
