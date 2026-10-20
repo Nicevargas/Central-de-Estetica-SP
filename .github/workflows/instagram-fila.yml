@@ -1,0 +1,53 @@
+name: Instagram — publicar fila
+
+# Cada pasta em instagram/publicar/<nome>/ com fotos .jpg (ordem alfabética)
+# e legenda.txt vira um post. Após publicar, o workflow grava publicado.txt
+# na pasta para que ela nunca seja publicada de novo (inclusive após merge).
+on:
+  push:
+    paths:
+      - instagram/publicar/**
+  workflow_dispatch:
+
+concurrency:
+  group: instagram-publish
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publicar pastas pendentes
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+        run: |
+          set -o pipefail
+          shopt -s nullglob
+          for dir in instagram/publicar/*/; do
+            dir="${dir%/}"
+            [ -f "$dir/publicado.txt" ] && continue
+            [ -f "$dir/legenda.txt" ] || { echo "::warning::$dir sem legenda.txt, ignorada"; continue; }
+            imgs=("$dir"/*.jpg)
+            [ ${#imgs[@]} -gt 0 ] || { echo "::warning::$dir sem fotos .jpg, ignorada"; continue; }
+            echo "== $dir (${#imgs[@]} imagem(ns))"
+            node scripts/instagram/publish.mjs post --caption "$(cat "$dir/legenda.txt")" "${imgs[@]}" | tee /tmp/resultado.txt
+            mv /tmp/resultado.txt "$dir/publicado.txt"
+            echo "PUBLICOU=1" >> "$GITHUB_ENV"
+            echo "### $dir" >> "$GITHUB_STEP_SUMMARY"
+            cat "$dir/publicado.txt" >> "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Marcar como publicado
+        if: always() && env.PUBLICOU == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add instagram/publicar/*/publicado.txt
+          git commit -m "chore(instagram): marca posts publicados [skip ci]"
+          git push
