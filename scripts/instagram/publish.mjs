@@ -15,10 +15,11 @@
  *   node scripts/instagram/publish.mjs post --caption "Legenda" --dry-run https://site/foto.jpg
  *   node scripts/instagram/publish.mjs refresh   (renova o token de 60 dias)
  *
- * Imagens: URL pública (https://...) ou arquivo local JPEG/PNG. Arquivos locais
+ * Imagens: URL pública (https://...) ou arquivo local JPEG. Arquivos locais
  * são enviados ao catbox.moe para gerar uma URL pública, pois a API do
  * Instagram só aceita imagens por URL. 1 imagem = post simples; 2–10 = carrossel.
  */
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 
@@ -84,6 +85,11 @@ async function waitReady(containerId) {
 
 async function post(images, caption, dryRun) {
   if (images.length < 1 || images.length > 10) fail('Informe de 1 a 10 imagens.');
+  for (const img of images) {
+    if (/^https:\/\//.test(img)) continue;
+    if (!/\.jpe?g$/i.test(img)) fail(`${img}: o Instagram só aceita imagens JPEG (.jpg).`);
+    if (!existsSync(img)) fail(`${img}: arquivo não encontrado.`);
+  }
   const me = await getUser();
   const igId = process.env.INSTAGRAM_USER_ID || me.user_id;
   console.log(`Conta: @${me.username} (${igId}) — ${images.length} imagem(ns)`);
