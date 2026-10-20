@@ -6,7 +6,7 @@
  * Variáveis de ambiente (nunca commitar o token):
  *   INSTAGRAM_ACCESS_TOKEN  token IGAA... gerado em developers.facebook.com
  *                           → app 1315858633192552 → Instagram → API Setup
- *   INSTAGRAM_USER_ID       opcional; descoberto via /me se ausente
+ *   INSTAGRAM_USER_ID       opcional; só conferido (o ID usado vem do token)
  *   INSTAGRAM_API_VERSION   opcional; padrão v23.0
  *   PUBLIC_BASE_URL         opcional; URL pública da raiz do repositório
  *                           (ex.: raw.githubusercontent.com/<repo>/<sha>)
@@ -98,7 +98,11 @@ async function post(images, caption, dryRun) {
     if (!existsSync(img)) fail(`${img}: arquivo não encontrado.`);
   }
   const me = await getUser();
-  const igId = process.env.INSTAGRAM_USER_ID || me.user_id;
+  // O ID vindo do próprio token é a fonte confiável; INSTAGRAM_USER_ID só confere
+  const igId = me.user_id;
+  if (process.env.INSTAGRAM_USER_ID && process.env.INSTAGRAM_USER_ID !== igId) {
+    console.warn(`Aviso: INSTAGRAM_USER_ID difere do ID da conta (${igId}); usando o ID da conta.`);
+  }
   console.log(`Conta: @${me.username} (${igId}) — ${images.length} imagem(ns)`);
   if (dryRun) {
     console.log('[dry-run] Token e conta OK. Nada foi publicado.');
