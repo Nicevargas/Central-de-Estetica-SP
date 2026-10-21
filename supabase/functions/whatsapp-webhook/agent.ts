@@ -1,12 +1,18 @@
-import Anthropic from 'npm:@anthropic-ai/sdk@0.110.0';
 import { db, env, type Lead } from '../_shared/supabase.ts';
 import { embed } from '../_shared/embeddings.ts';
 
-const client = new Anthropic({ apiKey: env('ANTHROPIC_API_KEY') });
-const MODEL = 'claude-opus-5-5';
+// OpenAI Chat Completions com function calling. O modelo pode ser trocado pelo secret OPENAI_MODEL.
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const MODEL = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-mini';
 const HISTORY_LIMIT = 30;
 
-// Fixo e sem dados variáveis, para o prompt caching funcionar entre conversas.
+type ChatMessage =
+  | { role: 'system' | 'user'; content: string }
+  | { role: 'assistant'; content: string | null; tool_calls?: ToolCall[] }
+  | { role: 'tool'; tool_call_id: string; content: string };
+type ToolCall = { id: string; type: 'function'; function: { name: string; arguments: string } };
+
+// Fixo e sem dados variáveis, para o cache automático de prompt da OpenAI funcionar entre conversas.
 const SYSTEM_PROMPT = `Você é a assistente virtual da Central da Estética, clínica de estética no Jardim Paulista, São Paulo, e atende clientes pelo WhatsApp.
 
 Seu objetivo é acolher a cliente, tirar dúvidas iniciais sobre os tratamentos e encaminhar para a consultora, que é quem agenda a avaliação e fala de valores fechados.
@@ -25,49 +31,55 @@ Quando chamar transferir_para_consultora:
 - você não conseguiu ajudar depois de duas tentativas.
 Depois de transferir, avise a cliente com uma mensagem curta que a consultora vai continuar o atendimento por aqui em instantes. Não continue a conversa depois disso.`;
 
-const tools: Anthropic.Tool[] = [
+const tools = [
   {
-    name: 'salvar_dados_cliente',
-    description:
-      'Salva no cadastro da cliente os dados que ela informou na conversa. Envie só os campos que ela disse agora; os demais ficam como estão.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        nome: { type: 'string', description: 'Nome como a cliente se apresentou.' },
-        email: { type: 'string', description: 'E-mail informado pela cliente.' },
-        tratamento_interesse: {
-          type: 'string',
-          description: 'Tratamento ou queixa de interesse, ex.: "Ultraformer para papada", "manchas no rosto".',
+    type: 'function',
+    function: {
+      name: 'salvar_dados_cliente',
+      description:
+        'Salva no cadastro da cliente os dados que ela informou na conversa. Envie só os campos que ela disse agora; os demais ficam como estão.',
+      parameters: {
+        type: 'object',
+        properties: {
+          nome: { type: 'string', description: 'Nome como a cliente se apresentou.' },
+          email: { type: 'string', description: 'E-mail informado pela cliente.' },
+          tratamento_interesse: {
+            type: 'string',
+            description: 'Tratamento ou queixa de interesse, ex.: "Ultraformer para papada", "manchas no rosto".',
+          },
+          melhor_horario: {
+            type: 'string',
+            description: 'Preferência de dia/horário para a avaliação, com as palavras da cliente.',
+          },
+          observacoes: { type: 'string', description: 'Outra informação útil para a consultora.' },
         },
-        melhor_horario: {
-          type: 'string',
-          description: 'Preferência de dia/horário para a avaliação, com as palavras da cliente.',
-        },
-        observacoes: { type: 'string', description: 'Outra informação útil para a consultora.' },
+        additionalProperties: false,
       },
-      additionalProperties: false,
     },
   },
   {
-    name: 'transferir_para_consultora',
-    description:
-      'Passa o atendimento para a consultora humana. A partir daí a IA para de responder esta cliente.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        motivo: {
-          type: 'string',
-          enum: ['agendamento', 'pediu_atendente', 'assunto_sensivel', 'sem_resposta'],
+    type: 'function',
+    function: {
+      name: 'transferir_para_consultora',
+      description:
+        'Passa o atendimento para a consultora humana. A partir daí a IA para de responder esta cliente.',
+      strict: true,
+      parameters: {
+        type: 'object',
+        properties: {
+          motivo: {
+            type: 'string',
+            enum: ['agendamento', 'pediu_atendente', 'assunto_sensivel', 'sem_resposta'],
+          },
+          resumo: {
+            type: 'string',
+            description: 'Resumo em 2 a 4 linhas para a consultora: quem é, o que quer e o que já foi conversado.',
+          },
         },
-        resumo: {
-          type: 'string',
-          description: 'Resumo em 2 a 4 linhas para a consultora: quem é, o que quer e o que já foi conversado.',
-        },
+        required: ['motivo', 'resumo'],
+        additionalProperties: false,
       },
-      required: ['motivo', 'resumo'],
-      additionalProperties: false,
     },
-    strict: true,
   },
 ];
 
@@ -86,7 +98,7 @@ async function buildKnowledgeContext(question: string): Promise<string> {
   return data.map((d: { titulo: string; conteudo: string }) => `## ${d.titulo}\n${d.conteudo}`).join('\n\n');
 }
 
-async function loadHistory(leadId: string): Promise<Anthropic.MessageParam[]> {
+async function loadHistory(leadId: string): Promise<ChatMessage[]> {
   const { data, error } = await db
     .from('wa_messages')
     .select('autor, texto')
@@ -94,12 +106,10 @@ async function loadHistory(leadId: string): Promise<Anthropic.MessageParam[]> {
     .order('created_at', { ascending: false })
     .limit(HISTORY_LIMIT);
   if (error) throw error;
-  const history: Anthropic.MessageParam[] = (data ?? []).reverse().map((m) => ({
-    role: m.autor === 'cliente' ? 'user' : 'assistant',
+  const history: ChatMessage[] = (data ?? []).reverse().map((m) => ({
+    role: m.autor === 'cliente' ? ('user' as const) : ('assistant' as const),
     content: m.autor === 'consultora' ? `[Consultora] ${m.texto}` : m.texto,
   }));
-  // A conversa enviada à API precisa começar pela cliente.
-  while (history.length && history[0].role !== 'user') history.shift();
   return history;
 }
 
@@ -127,66 +137,58 @@ export async function runAgent(lead: Lead, latestText: string): Promise<AgentRes
 
   const context = `<base_de_conhecimento>\n${knowledge}\n</base_de_conhecimento>\n\n<cadastro_cliente>\n${leadSnapshot(lead)}\n</cadastro_cliente>\n\nData e hora atuais: ${now}.`;
   const last = history.pop();
-  const messages: Anthropic.Beta.BetaMessageParam[] = [
+  const messages: ChatMessage[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
     ...history,
-    {
-      role: 'user',
-      content: [
-        { type: 'text', text: context },
-        { type: 'text', text: typeof last?.content === 'string' ? last.content : latestText },
-      ],
-    },
+    { role: 'user', content: `${context}\n\n${typeof last?.content === 'string' ? last.content : latestText}` },
   ];
 
   let transfer: AgentResult['transfer'] = null;
   const replyParts: string[] = [];
 
   for (let turn = 0; turn < 4; turn++) {
-    const response = await client.beta.messages.create({
-      model: MODEL,
-      max_tokens: 8000,
-      betas: ['server-side-fallback-2026-07-01'],
-      // Se o modelo recusar por política, a API refaz no modelo de fallback.
-      fallbacks: 'default',
-      output_config: { effort: 'low' },
-      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-      tools,
-      messages,
-    } as unknown as Anthropic.Beta.MessageCreateParamsNonStreaming); // tipos do SDK ainda não têm fallbacks: "default"
+    const res = await fetch(OPENAI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env('OPENAI_API_KEY')}` },
+      body: JSON.stringify({ model: MODEL, max_completion_tokens: 1500, tools, messages }),
+    });
+    if (!res.ok) throw new Error(`OpenAI ${res.status}: ${await res.text()}`);
+    const choice = (await res.json()).choices[0];
+    const msg = choice.message as { content: string | null; refusal?: string | null; tool_calls?: ToolCall[] };
 
-    for (const block of response.content) {
-      if (block.type === 'text' && block.text.trim()) replyParts.push(block.text.trim());
-    }
+    if (msg.content?.trim()) replyParts.push(msg.content.trim());
 
-    if (response.stop_reason === 'refusal') {
+    if (msg.refusal) {
       transfer ??= { motivo: 'assunto_sensivel', resumo: 'A IA não pôde responder esta mensagem.' };
       break;
     }
-    if (response.stop_reason !== 'tool_use') break;
+    if (!msg.tool_calls?.length) break;
 
-    messages.push({ role: 'assistant', content: response.content });
-    const results: Anthropic.Beta.BetaToolResultBlockParam[] = [];
-    for (const block of response.content) {
-      if (block.type !== 'tool_use') continue;
-      const input = block.input as Record<string, string>;
-      if (block.name === 'salvar_dados_cliente') {
+    messages.push({ role: 'assistant', content: msg.content, tool_calls: msg.tool_calls });
+    for (const call of msg.tool_calls) {
+      let input: Record<string, string> = {};
+      try {
+        input = JSON.parse(call.function.arguments || '{}');
+      } catch {
+        messages.push({ role: 'tool', tool_call_id: call.id, content: 'Argumentos inválidos.' });
+        continue;
+      }
+      if (call.function.name === 'salvar_dados_cliente') {
         const update = Object.fromEntries(Object.entries(input).filter(([, v]) => typeof v === 'string' && v.trim()));
         const { error } = await db.from('leads').update(update).eq('id', lead.id);
         Object.assign(lead, update);
-        results.push({
-          type: 'tool_result',
-          tool_use_id: block.id,
+        messages.push({
+          role: 'tool',
+          tool_call_id: call.id,
           content: error ? `Erro ao salvar: ${error.message}` : 'Dados salvos.',
-          is_error: Boolean(error),
         });
-      } else if (block.name === 'transferir_para_consultora') {
+      } else if (call.function.name === 'transferir_para_consultora') {
         transfer = { motivo: input.motivo, resumo: input.resumo };
-        results.push({ type: 'tool_result', tool_use_id: block.id, content: 'Transferência registrada.' });
+        messages.push({ role: 'tool', tool_call_id: call.id, content: 'Transferência registrada.' });
       } else {
-        results.push({ type: 'tool_result', tool_use_id: block.id, content: 'Ferramenta desconhecida.', is_error: true });
+        messages.push({ role: 'tool', tool_call_id: call.id, content: 'Ferramenta desconhecida.' });
       }
     }
-    messages.push({ role: 'user', content: results });
   }
 
   return { reply: replyParts.join('\n\n') || null, transfer };

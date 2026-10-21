@@ -41,7 +41,8 @@ No painel do Supabase → Edge Functions → Secrets (ou `supabase secrets set N
 
 | Secret | Valor |
 |---|---|
-| `ANTHROPIC_API_KEY` | chave da API da Anthropic (console.anthropic.com) |
+| `OPENAI_API_KEY` | chave da API da OpenAI (platform.openai.com → API keys) |
+| `OPENAI_MODEL` | opcional; padrão `gpt-4.1-mini` |
 | `EVOLUTION_API_URL` | URL da sua Evolution API, ex.: `https://evolution.seudominio.com` |
 | `EVOLUTION_API_KEY` | apikey da Evolution |
 | `EVOLUTION_INSTANCE` | nome da instância conectada ao (11) 98525-4584 |
@@ -68,6 +69,10 @@ supabase functions deploy kb-sync --no-verify-jwt
 ```bash
 curl -X POST https://<projeto>.supabase.co/functions/v1/kb-sync -H "x-sync-token: <KB_SYNC_TOKEN>"
 ```
+Cada chamada gera no máximo 3 embeddings (limite de CPU das Edge Functions; mude com `?lote=N`) e pula documentos que não mudaram. Repita até a resposta trazer `"pendentes": 0`. No PowerShell:
+```powershell
+do { $r = Invoke-RestMethod -Method Post -Uri https://<projeto>.supabase.co/functions/v1/kb-sync -Headers @{ 'x-sync-token' = '<KB_SYNC_TOKEN>' }; $r } while ($r.pendentes -gt 0)
+```
 Rode de novo sempre que mudar tratamentos, preços, promoções, FAQs ou `kb-sync/conhecimento.ts`.
 
 ### 5. Webhook da Evolution
@@ -86,4 +91,4 @@ Permissões necessárias no token: `instagram_business_basic`, `instagram_busine
 > ⚠️ Com o app em modo **Desenvolvimento**, a Meta só entrega webhooks de contas com função no app. Para receber comentários de qualquer pessoa, o app precisa estar **Ao vivo** e com acesso avançado a essas permissões (Análise do app), o que pede política de privacidade publicada.
 
 ## Custos e modelo
-A IA usa `claude-opus-5-5` com esforço `low` (respostas curtas de chat) e cache do prompt de sistema. Embeddings usam o gte-small embutido no Supabase, sem custo extra de API.
+A IA usa a API da OpenAI (Chat Completions com function calling), modelo `gpt-4.1-mini` por padrão (troque com o secret `OPENAI_MODEL`). O prompt de sistema é fixo para aproveitar o cache automático de prompt da OpenAI. Embeddings usam o gte-small embutido no Supabase, sem custo extra de API.
