@@ -5,6 +5,8 @@ import { sendWhatsAppText } from '../_shared/evolution.ts';
 import { runAgent } from './agent.ts';
 
 const REATIVAR_BOT = '#bot'; // a consultora envia isso na conversa para devolver à IA
+// Depois que a consultora responde à mão, a IA só volta se ela ficar esse tempo sem escrever na conversa.
+const PAUSA_CONSULTORA_MS = Number(Deno.env.get('CONSULTORA_PAUSA_MINUTOS') || 10) * 60_000;
 const CODIGO_INSTAGRAM = /c[oó]d(?:igo)?\.?\s*:?\s*([A-Z0-9]{6})/i;
 
 type EvolutionMessage = {
@@ -78,6 +80,21 @@ async function notifyConsultora(lead: Lead, transfer: { motivo: string; resumo: 
   await sendWhatsAppText(normalizePhone(target), text);
 }
 
+/** True se a consultora já respondeu nesta conversa e está há PAUSA_CONSULTORA_MS sem escrever. */
+async function consultoraEmStandby(leadId: string): Promise<boolean> {
+  const { data } = await db
+    .from('wa_messages')
+    .select('created_at')
+    .eq('lead_id', leadId)
+    .eq('autor', 'consultora')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // Transferida pela IA e a consultora ainda não respondeu: continua aguardando por ela.
+  if (!data) return false;
+  return Date.now() - new Date(data.created_at).getTime() >= PAUSA_CONSULTORA_MS;
+}
+
 async function handleMessage(m: EvolutionMessage) {
   const jid = m.key.remoteJid;
   if (!jid.endsWith('@s.whatsapp.net')) return; // ignora grupos, status e canais
@@ -113,6 +130,10 @@ async function handleMessage(m: EvolutionMessage) {
   if (dupError?.code === '23505') return; // a Evolution reenviou o mesmo evento
 
   lead = await linkInstagramLead(lead, text);
+  if (lead.status === 'consultora' && (await consultoraEmStandby(lead.id))) {
+    await db.from('leads').update({ status: 'bot' }).eq('id', lead.id);
+    lead.status = 'bot';
+  }
   if (lead.status !== 'bot') return; // consultora atendendo: IA em silêncio
 
   const { reply, transfer } = await runAgent(lead, text);

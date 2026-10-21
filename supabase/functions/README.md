@@ -27,7 +27,8 @@ As três têm RLS ligado e **nenhuma** política pública: só as Edge Functions
 3. Durante a conversa, a IA grava nome, interesse, melhor horário e e-mail no lead (ferramenta `salvar_dados_cliente`).
 4. A IA transfere para a consultora (`transferir_para_consultora`) quando a cliente quer agendar, pede uma pessoa, traz assunto sensível (saúde, reclamação) ou a IA não consegue ajudar. O lead vai para `status = consultora`, a IA para de responder e a consultora recebe no WhatsApp (`CONSULTORA_WHATSAPP`) um resumo com o link da cliente.
 5. Se alguém da clínica responder manualmente pelo número (celular ou WhatsApp Web), a IA entende que a consultora assumiu e também para.
-6. Para devolver a conversa à IA, a consultora envia `#bot` na conversa da cliente.
+6. A IA volta sozinha quando a cliente escreve e a consultora está há 10 minutos sem mandar mensagem naquela conversa (mude com o secret `CONSULTORA_PAUSA_MINUTOS`). Depois de uma transferência feita pela IA, ela só volta depois que a consultora tiver respondido pelo menos uma vez.
+7. Para devolver a conversa à IA na hora, a consultora envia `#bot` na conversa da cliente.
 
 **Instagram:** quem comenta "EU QUERO" (configurável em `IG_KEYWORD`) recebe no Direct o link do WhatsApp com a mensagem pronta "Vim pelo Instagram… Cód. XXXXXX". Quando a cliente envia essa mensagem, o bot junta o cadastro do Instagram ao do WhatsApp (e já sabe de qual post ela veio).
 
@@ -54,6 +55,7 @@ No painel do Supabase → Edge Functions → Secrets (ou `supabase secrets set N
 | `IG_VERIFY_TOKEN` | um texto aleatório, repetido no cadastro do webhook na Meta |
 | `KB_SYNC_TOKEN` | um texto aleatório, para proteger o kb-sync |
 | `IG_KEYWORD` | opcional; padrão `eu quero` |
+| `CONSULTORA_PAUSA_MINUTOS` | opcional; minutos sem resposta da consultora para a IA voltar (padrão `10`) |
 
 `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já existem automaticamente nas funções.
 
