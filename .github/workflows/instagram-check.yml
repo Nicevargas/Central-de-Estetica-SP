@@ -1,0 +1,31 @@
+name: Instagram — verificar conexão
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/instagram/**
+      - .github/workflows/instagram-check.yml
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Conferir secrets
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+        run: |
+          [ -n "$INSTAGRAM_ACCESS_TOKEN" ] && echo "INSTAGRAM_ACCESS_TOKEN: definido (${#INSTAGRAM_ACCESS_TOKEN} caracteres, começa com ${INSTAGRAM_ACCESS_TOKEN:0:4})" || echo "INSTAGRAM_ACCESS_TOKEN: AUSENTE"
+          [ -n "$INSTAGRAM_USER_ID" ] && echo "INSTAGRAM_USER_ID: definido" || echo "INSTAGRAM_USER_ID: ausente (opcional)"
+      - name: Testar conta e permissão de publicação
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+        run: |
+          node scripts/instagram/publish.mjs check
+          node scripts/instagram/publish.mjs post --dry-run --caption teste https://centraldaestetica.com.br/x.jpg

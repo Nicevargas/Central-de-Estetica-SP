@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Ultraformer MPT — carrossel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#FBF5F2; --ink:#1E1B1B; --rose:#C8304A; --blush:#F3D3CF; --soft:#5A5050; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#ddd; }
+  .slide { width:1080px; height:1350px; position:relative; overflow:hidden; background:var(--bg);
+           font-family:'Outfit',sans-serif; color:var(--ink); }
+  .wave { position:absolute; inset:0; pointer-events:none; }
+  .pill { position:absolute; top:52px; left:84px; border:2px solid var(--rose); border-radius:40px;
+          padding:10px 34px; font-size:30px; color:var(--rose); letter-spacing:2px; }
+  .content { position:absolute; left:96px; right:150px; top:250px; }
+  h1 { font-family:'Playfair Display',serif; font-weight:500; font-size:118px; line-height:1.02; letter-spacing:-2px; }
+  h1.md { font-size:96px; }
+  h1.sm { font-size:84px; }
+  em { font-family:'Playfair Display',serif; font-style:italic; color:var(--rose); }
+  .rule { width:220px; height:2px; background:var(--rose); margin:56px 0 48px; }
+  p { font-size:44px; line-height:1.35; font-weight:300; color:var(--ink); }
+  p + p { margin-top:28px; }
+  ul { list-style:none; margin-top:48px; }
+  li { font-size:44px; font-weight:300; line-height:1.3; padding:20px 0 20px 64px; position:relative;
+       border-bottom:1px solid #E8CFCB; }
+  li::before { content:'✦'; position:absolute; left:0; color:var(--rose); font-size:38px; top:22px; }
+  li b { font-weight:500; }
+  .note { position:absolute; left:96px; bottom:250px; font-size:26px; color:var(--soft); font-weight:300; }
+  .logo { position:absolute; bottom:44px; left:50%; transform:translateX(-50%); width:220px; }
+  .cta { display:inline-block; margin-top:56px; background:var(--rose); color:#fff; border-radius:60px;
+         padding:26px 52px; font-size:40px; font-weight:500; }
+  .price { margin-top:36px; font-size:40px; font-weight:300; }
+  .price b { font-family:'Playfair Display',serif; font-weight:600; font-size:64px; color:var(--rose); }
+</style>
+</head>
+<body>
+
+<!-- 1 — capa -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M0 1350 C 250 1000, 650 1050, 1080 600 L1080 1350 Z" fill="#F6E1DD"/><path d="M270 42 H950 Q1005 42 1005 100 V760" stroke="#C8304A" stroke-width="2" fill="none"/></svg>
+  <div class="pill">✦ 1 de 7</div>
+  <div class="content" style="top:280px">
+    <h1>Ultraformer MPT</h1>
+    <h1 style="margin-top:6px"><em>lifting sem cortes.</em></h1>
+    <div class="rule"></div>
+    <p>Resultado visível<br>já na 1ª sessão.</p>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 2 — o problema -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M1080 0 C 880 300, 1020 700, 760 1350 L1080 1350 Z" fill="#F8E4E0"/><path d="M1060 0 C 820 320, 860 560, 1080 980" stroke="#C8304A" stroke-width="2" fill="none"/></svg>
+  <div class="pill">2 / 7</div>
+  <div class="content" style="top:300px">
+    <h1 class="md">Flacidez, contorno do rosto perdido, papada.</h1>
+    <div class="rule"></div>
+    <p>Dá para tratar <em style="font-size:56px">sem cirurgia</em><br>e sem parar a sua rotina.</p>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 3 — como funciona -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M680 0 C 820 200, 960 380, 1080 470 L1080 0 Z" fill="#F7DCD7"/><path d="M680 0 C 820 200, 960 380, 1080 470" stroke="#C8304A" stroke-width="2" fill="none"/><path d="M0 1110 C 300 1120, 500 1250, 700 1350 L0 1350 Z" fill="#F8E4E0"/></svg>
+  <div class="pill">3 / 7</div>
+  <div class="content" style="top:300px">
+    <h1 class="md">Lifting sem cortes e <em>sem agulhas.</em></h1>
+    <div class="rule"></div>
+    <p>Ultrassom micro e macrofocado que atua nas camadas profundas da pele e estimula o colágeno.</p>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 4 — benefícios -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M780 0 C 820 150, 960 280, 1080 330 L1080 0 Z" fill="#F7DCD7"/><path d="M0 1020 C 150 1080, 250 1250, 300 1350 L0 1350 Z" fill="#F6DEDA"/></svg>
+  <div class="pill">4 / 7</div>
+  <div class="content" style="top:290px">
+    <h1 class="sm">Os <em>benefícios</em></h1>
+    <ul>
+      <li><b>Sem cortes</b> e sem agulhas</li>
+      <li><b>Volta à rotina</b> no mesmo dia</li>
+      <li><b>Estimula o colágeno</b> natural da pele</li>
+      <li><b>Rosto e papada</b> no mesmo protocolo</li>
+      <li><b>Conforto planejado</b> para cada pele</li>
+    </ul>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 5 — 1ª sessão -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M520 0 C 700 120, 900 300, 1080 390 L1080 0 Z" fill="#F7DCD7"/><path d="M520 0 C 700 120, 900 300, 1080 390" stroke="#C8304A" stroke-width="2" fill="none"/><path d="M640 1350 C 760 1100, 900 980, 1080 880 L1080 1350 Z" fill="#F6E1DD"/></svg>
+  <div class="pill">5 / 7</div>
+  <div class="content" style="top:290px">
+    <h1>Já na <em>1ª sessão.</em></h1>
+    <div class="rule"></div>
+    <p>O efeito lifting aparece logo após o procedimento.</p>
+    <p>E continua melhorando nos meses seguintes, conforme o novo colágeno se forma.</p>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 6 — exemplos de resultados -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M1080 0 C 900 250, 1040 600, 860 1350 L1080 1350 Z" fill="#F8E4E0"/></svg>
+  <div class="pill">6 / 7</div>
+  <div class="content" style="top:250px">
+    <h1 class="sm">Resultados<br><em>que você nota</em></h1>
+    <ul>
+      <li>Contorno do maxilar <b>mais definido</b></li>
+      <li>Papada <b>reduzida</b></li>
+      <li>Pele <b>mais firme</b> e com viço</li>
+      <li>Olhar <b>mais aberto</b></li>
+      <li>Rosto com aspecto <b>descansado</b></li>
+    </ul>
+  </div>
+  <div class="note">Resultados variam de pessoa para pessoa.</div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 7 — CTA -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M0 1350 C 250 1000, 650 1050, 1080 600 L1080 1350 Z" fill="#F6E1DD"/></svg>
+  <div class="pill">7 / 7</div>
+  <div class="content" style="top:260px">
+    <h1 class="md">Agende sua <em>avaliação.</em></h1>
+    <div class="rule"></div>
+    <p>Montamos o plano ideal para a sua pele.</p>
+    <div class="price">A partir de <b>R$ 499</b></div>
+    <div class="cta">WhatsApp (11) 94680-3765</div>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+</body>
+</html>

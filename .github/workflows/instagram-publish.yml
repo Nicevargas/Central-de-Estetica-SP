@@ -1,0 +1,47 @@
+name: Publicar no Instagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      imagens:
+        description: "Imagens (1 a 10), separadas por espaço ou vírgula: links https:// públicos ou caminhos de arquivos do repositório (ex.: instagram/post1.jpg)"
+        required: true
+        type: string
+      legenda:
+        description: "Legenda do post. Use \\n para quebrar linha"
+        required: false
+        type: string
+      teste:
+        description: "Só testar (não publica)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: instagram-publish
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publicar
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          PUBLIC_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}
+          IMAGENS: ${{ inputs.imagens }}
+          LEGENDA: ${{ inputs.legenda }}
+          TESTE: ${{ inputs.teste }}
+        run: |
+          set -o pipefail
+          read -r -a imgs <<< "${IMAGENS//,/ }"
+          legenda="${LEGENDA//\\n/$'\n'}"
+          args=(post --caption "$legenda")
+          [ "$TESTE" = "true" ] && args+=(--dry-run)
+          node scripts/instagram/publish.mjs "${args[@]}" "${imgs[@]}" | tee resultado.txt
+          echo "### Instagram" >> "$GITHUB_STEP_SUMMARY"
+          cat resultado.txt >> "$GITHUB_STEP_SUMMARY"
