@@ -2452,7 +2452,7 @@ export const AdminArea: React.FC<AdminAreaProps> = ({
                       type="email"
                       value={contactForm.email}
                       onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                      placeholder="contatocentraldaestetica@gmail.com"
+                      placeholder="contato@centraldaestetica.com.br"
                       className="w-full px-3 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none dark:text-white"
                       required
                     />

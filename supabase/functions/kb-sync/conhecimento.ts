@@ -8,7 +8,7 @@ Segunda a sexta, das 8h às 20h. Sábado, das 8h às 16h. Domingos e feriados fe
 
 # Contatos
 WhatsApp oficial de atendimento: (11) 98525-4584. Telefone fixo: (11) 3151-2433.
-E-mail: contatocentraldaestetica@gmail.com. Instagram: @centraldaesteticasp.
+E-mail: contato@centraldaestetica.com.br. Instagram: @centraldaesteticasp.
 
 # Como funciona o agendamento
 Todo tratamento começa por uma avaliação, em que a especialista entende a queixa e monta o plano ideal. A consultora agenda a avaliação pelo WhatsApp e confirma o dia e o horário com a cliente. O agendamento só vale depois da confirmação da Central da Estética pelo WhatsApp.

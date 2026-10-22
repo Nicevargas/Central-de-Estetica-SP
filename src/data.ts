@@ -3,7 +3,7 @@ import { FAQ, ContactInfo } from './types';
 export const DEFAULT_CONTACT_INFO: ContactInfo = {
   phonePrimary: '(11) 3151-2433 / (11) 94680-3765',
   whatsappNumber: '5511985254584',
-  email: 'contatocentraldaestetica@gmail.com',
+  email: 'contato@centraldaestetica.com.br',
   addressLine1: 'Rua Artur Frazão, 33',
   addressLine2: 'Jardim Paulista, São Paulo - SP',
   cep: '01423-030',

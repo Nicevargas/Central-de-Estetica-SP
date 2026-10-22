@@ -1383,6 +1383,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant font-medium">
           <div>© 2026 Central da Estética. Todos os direitos reservados.</div>
           <div className="flex items-center gap-6">
+            <a href="/politica-de-privacidade/" className="hover:text-primary transition-colors">Política de privacidade</a>
             <button onClick={openCookiePreferences} className="hover:text-primary transition-colors cursor-pointer">Privacidade e cookies</button>
             <button className="hover:text-primary transition-colors cursor-pointer">Termos de Uso</button>
             <button
