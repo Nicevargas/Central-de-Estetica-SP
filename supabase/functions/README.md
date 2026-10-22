@@ -48,8 +48,7 @@ No painel do Supabase → Edge Functions → Secrets (ou `supabase secrets set N
 | `EVOLUTION_API_KEY` | apikey da Evolution |
 | `EVOLUTION_INSTANCE` | nome da instância conectada ao (11) 98525-4584 |
 | `EVOLUTION_WEBHOOK_TOKEN` | um texto aleatório longo, usado na URL do webhook |
-| `CONSULTORA_WHATSAPP` | WhatsApp pessoal da consultora, para receber os avisos de transferência |
-| `CLINICA_WHATSAPP` | `5511985254584` |
+| `CONSULTORA_WHATSAPP` | WhatsApp da consultora (`5511985254584`, o mesmo atendido pela IA): recebe os avisos de transferência e é o número do link do "EU QUERO" no Instagram e do WhatsApp do site. O número da clínica, (11) 94680-3765, aparece só como telefone no site. |
 | `INSTAGRAM_ACCESS_TOKEN` | o mesmo token IGAA… usado na publicação |
 | `IG_APP_SECRET` | "Chave secreta do app" do Instagram (painel Meta → Instagram → Configuração da API) |
 | `IG_VERIFY_TOKEN` | um texto aleatório, repetido no cadastro do webhook na Meta |

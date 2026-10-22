@@ -1187,8 +1187,8 @@ CREATE TRIGGER update_bookings_updated_at
 -- 7. Tabela de Configurações do Site / Contato
 CREATE TABLE IF NOT EXISTS public.site_settings (
     id TEXT PRIMARY KEY DEFAULT 'default',
-    phone_primary TEXT NOT NULL DEFAULT '(11) 3151-2433 / (11) 9468-3765',
-    whatsapp_number TEXT NOT NULL DEFAULT '551194683765',
+    phone_primary TEXT NOT NULL DEFAULT '(11) 3151-2433 / (11) 94680-3765',
+    whatsapp_number TEXT NOT NULL DEFAULT '5511985254584',
     email TEXT NOT NULL DEFAULT 'contatocentraldaestetica@gmail.com',
     address_line1 TEXT NOT NULL DEFAULT 'Rua Artur Frazão, 33',
     address_line2 TEXT NOT NULL DEFAULT 'Jardim Paulista, São Paulo - SP',
@@ -1199,7 +1199,7 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
 );
 
 INSERT INTO public.site_settings (id, phone_primary, whatsapp_number, email, address_line1, address_line2, cep, instagram_url, facebook_url)
-VALUES ('default', '(11) 3151-2433 / (11) 9468-3765', '551194683765', 'contatocentraldaestetica@gmail.com', 'Rua Artur Frazão, 33', 'Jardim Paulista, São Paulo - SP', '01423-030', 'https://instagram.com/centraldaesteticasp', 'https://facebook.com/CENTRALDAESTETICASP')
+VALUES ('default', '(11) 3151-2433 / (11) 94680-3765', '5511985254584', 'contatocentraldaestetica@gmail.com', 'Rua Artur Frazão, 33', 'Jardim Paulista, São Paulo - SP', '01423-030', 'https://instagram.com/centraldaesteticasp', 'https://facebook.com/CENTRALDAESTETICASP')
 ON CONFLICT (id) DO NOTHING;
 
 -- 8. Permissões de Segurança (RLS) para Acesso Anônimo / Público
