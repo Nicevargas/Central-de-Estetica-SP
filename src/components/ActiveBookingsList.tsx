@@ -11,7 +11,7 @@ interface ActiveBookingsListProps {
   whatsappNumber?: string;
 }
 
-export default function ActiveBookingsList({ bookings, treatments, onCancelBooking, whatsappNumber = '551194683765' }: ActiveBookingsListProps) {
+export default function ActiveBookingsList({ bookings, treatments, onCancelBooking, whatsappNumber = '5511985254584' }: ActiveBookingsListProps) {
   if (bookings.length === 0) {
     return null;
   }
@@ -29,7 +29,7 @@ export default function ActiveBookingsList({ bookings, treatments, onCancelBooki
   const openWhatsAppConfirm = (booking: any) => {
     const treatmentName = getTreatmentName(booking.treatmentId);
     const text = `Olá! Enviei uma solicitação de agendamento pelo site da Central da Estética:\n\n*Procedimento:* ${treatmentName}\n*Nome:* ${booking.name}\n*Data:* ${booking.date.split('-').reverse().join('/')}\n*Horário:* ${booking.time}\n\nObrigado!`;
-    const cleanNumber = whatsappNumber.replace(/\D/g, '') || '551194683765';
+    const cleanNumber = whatsappNumber.replace(/\D/g, '') || '5511985254584';
     const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
     trackWhatsAppOpen('Solicitação (lista)');
     window.open(url, '_blank');

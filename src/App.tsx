@@ -1145,7 +1145,7 @@ export default function App() {
               <button
                 onClick={() => {
                   trackWhatsAppOpen('Ver Agenda no WhatsApp');
-                  window.open(`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '551194683765'}`, '_blank');
+                  window.open(`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '5511985254584'}`, '_blank');
                 }}
                 className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-sm hover:bg-white hover:text-primary transition-all w-full sm:w-auto cursor-pointer"
               >
@@ -1415,7 +1415,7 @@ export default function App() {
 
       {/* Floating WhatsApp Action FAB Button */}
       <a
-        href={`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '551194683765'}`}
+        href={`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '') || '5511985254584'}`}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#25D366] text-white px-5 py-3 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group"

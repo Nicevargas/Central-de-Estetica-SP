@@ -73,7 +73,7 @@ async function handleComment(accountId: string, c: CommentValue) {
     if (error) throw error;
   }
 
-  const phone = normalizePhone(env('CLINICA_WHATSAPP'));
+  const phone = normalizePhone(env('CONSULTORA_WHATSAPP')); // o mesmo número atendido pela IA
   const prefilled = `Olá! Vim pelo Instagram e quero saber mais. Cód. ${code}`;
   const link = `https://wa.me/${phone}?text=${encodeURIComponent(prefilled)}`;
   const text =

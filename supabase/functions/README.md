@@ -27,7 +27,8 @@ As três têm RLS ligado e **nenhuma** política pública: só as Edge Functions
 3. Durante a conversa, a IA grava nome, interesse, melhor horário e e-mail no lead (ferramenta `salvar_dados_cliente`).
 4. A IA transfere para a consultora (`transferir_para_consultora`) quando a cliente quer agendar, pede uma pessoa, traz assunto sensível (saúde, reclamação) ou a IA não consegue ajudar. O lead vai para `status = consultora`, a IA para de responder e a consultora recebe no WhatsApp (`CONSULTORA_WHATSAPP`) um resumo com o link da cliente.
 5. Se alguém da clínica responder manualmente pelo número (celular ou WhatsApp Web), a IA entende que a consultora assumiu e também para.
-6. Para devolver a conversa à IA, a consultora envia `#bot` na conversa da cliente.
+6. A IA volta sozinha quando a cliente escreve e a consultora está há 10 minutos sem mandar mensagem naquela conversa (mude com o secret `CONSULTORA_PAUSA_MINUTOS`). Depois de uma transferência feita pela IA, ela só volta depois que a consultora tiver respondido pelo menos uma vez.
+7. Para devolver a conversa à IA na hora, a consultora envia `#bot` na conversa da cliente.
 
 **Instagram:** quem comenta "EU QUERO" (configurável em `IG_KEYWORD`) recebe no Direct o link do WhatsApp com a mensagem pronta "Vim pelo Instagram… Cód. XXXXXX". Quando a cliente envia essa mensagem, o bot junta o cadastro do Instagram ao do WhatsApp (e já sabe de qual post ela veio).
 
@@ -41,18 +42,19 @@ No painel do Supabase → Edge Functions → Secrets (ou `supabase secrets set N
 
 | Secret | Valor |
 |---|---|
-| `ANTHROPIC_API_KEY` | chave da API da Anthropic (console.anthropic.com) |
+| `OPENAI_API_KEY` | chave da API da OpenAI (platform.openai.com → API keys) |
+| `OPENAI_MODEL` | opcional; padrão `gpt-4.1-mini` |
 | `EVOLUTION_API_URL` | URL da sua Evolution API, ex.: `https://evolution.seudominio.com` |
 | `EVOLUTION_API_KEY` | apikey da Evolution |
 | `EVOLUTION_INSTANCE` | nome da instância conectada ao (11) 98525-4584 |
 | `EVOLUTION_WEBHOOK_TOKEN` | um texto aleatório longo, usado na URL do webhook |
-| `CONSULTORA_WHATSAPP` | WhatsApp pessoal da consultora, para receber os avisos de transferência |
-| `CLINICA_WHATSAPP` | `5511985254584` |
+| `CONSULTORA_WHATSAPP` | WhatsApp da consultora (`5511985254584`, o mesmo atendido pela IA): recebe os avisos de transferência e é o número do link do "EU QUERO" no Instagram e do WhatsApp do site. O número da clínica, (11) 94680-3765, aparece só como telefone no site. |
 | `INSTAGRAM_ACCESS_TOKEN` | o mesmo token IGAA… usado na publicação |
 | `IG_APP_SECRET` | "Chave secreta do app" do Instagram (painel Meta → Instagram → Configuração da API) |
 | `IG_VERIFY_TOKEN` | um texto aleatório, repetido no cadastro do webhook na Meta |
 | `KB_SYNC_TOKEN` | um texto aleatório, para proteger o kb-sync |
 | `IG_KEYWORD` | opcional; padrão `eu quero` |
+| `CONSULTORA_PAUSA_MINUTOS` | opcional; minutos sem resposta da consultora para a IA voltar (padrão `10`) |
 
 `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já existem automaticamente nas funções.
 
@@ -67,6 +69,10 @@ supabase functions deploy kb-sync --no-verify-jwt
 ### 4. Base de conhecimento
 ```bash
 curl -X POST https://<projeto>.supabase.co/functions/v1/kb-sync -H "x-sync-token: <KB_SYNC_TOKEN>"
+```
+Cada chamada gera no máximo 3 embeddings (limite de CPU das Edge Functions; mude com `?lote=N`) e pula documentos que não mudaram. Repita até a resposta trazer `"pendentes": 0`. No PowerShell:
+```powershell
+do { $r = Invoke-RestMethod -Method Post -Uri https://<projeto>.supabase.co/functions/v1/kb-sync -Headers @{ 'x-sync-token' = '<KB_SYNC_TOKEN>' }; $r } while ($r.pendentes -gt 0)
 ```
 Rode de novo sempre que mudar tratamentos, preços, promoções, FAQs ou `kb-sync/conhecimento.ts`.
 
@@ -86,4 +92,4 @@ Permissões necessárias no token: `instagram_business_basic`, `instagram_busine
 > ⚠️ Com o app em modo **Desenvolvimento**, a Meta só entrega webhooks de contas com função no app. Para receber comentários de qualquer pessoa, o app precisa estar **Ao vivo** e com acesso avançado a essas permissões (Análise do app), o que pede política de privacidade publicada.
 
 ## Custos e modelo
-A IA usa `claude-opus-5-5` com esforço `low` (respostas curtas de chat) e cache do prompt de sistema. Embeddings usam o gte-small embutido no Supabase, sem custo extra de API.
+A IA usa a API da OpenAI (Chat Completions com function calling), modelo `gpt-4.1-mini` por padrão (troque com o secret `OPENAI_MODEL`). O prompt de sistema é fixo para aproveitar o cache automático de prompt da OpenAI. Embeddings usam o gte-small embutido no Supabase, sem custo extra de API.

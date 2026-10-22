@@ -1,6 +1,6 @@
 // Monta a base de conhecimento do atendente a partir das tabelas do site
 // (treatments, promotions ativas, faqs) e de conhecimento.ts.
-// Rodar depois de mudar tratamentos, preços, promoções ou FAQs:
+// Rodar depois de mudar tratamentos, preços, promoções ou FAQs, repetindo até pendentes = 0:
 //   curl -X POST <função>/kb-sync -H "x-sync-token: <KB_SYNC_TOKEN>"
 import { db, env } from '../_shared/supabase.ts';
 import { embed } from '../_shared/embeddings.ts';
@@ -69,17 +69,32 @@ async function collectDocs(): Promise<Doc[]> {
   return docs;
 }
 
+// Gerar embeddings gasta CPU, e o limite por chamada é baixo: cada chamada processa
+// no máximo `lote` documentos novos ou alterados. Repita até `pendentes` ser 0.
 Deno.serve(async (req) => {
   if (req.method !== 'POST' || req.headers.get('x-sync-token') !== env('KB_SYNC_TOKEN')) {
     return new Response('forbidden', { status: 403 });
   }
+  const lote = Math.max(1, Number(new URL(req.url).searchParams.get('lote')) || 3);
   const docs = await collectDocs();
+
+  const { data: existing, error: exError } = await db.from('kb_documents').select('id, titulo, conteudo');
+  if (exError) return Response.json({ error: exError.message }, { status: 500 });
+  const saved = new Map((existing ?? []).map((e) => [e.id, `${e.titulo}\n${e.conteudo}`]));
+  const changed = docs.filter((d) => saved.get(d.id) !== `${d.titulo}\n${d.conteudo}`);
+
   const rows = [];
-  for (const d of docs) {
+  for (const d of changed.slice(0, lote)) {
     rows.push({ ...d, embedding: await embed(`${d.titulo}\n${d.conteudo}`), updated_at: new Date().toISOString() });
   }
-  const { error } = await db.from('kb_documents').upsert(rows);
-  if (error) return Response.json({ error: error.message }, { status: 500 });
+  if (rows.length) {
+    const { error } = await db.from('kb_documents').upsert(rows);
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+  }
+  const pendentes = changed.length - rows.length;
+  if (pendentes > 0) {
+    return Response.json({ documentos: docs.length, atualizados: rows.length, pendentes });
+  }
 
   // Remove documentos que não existem mais (tratamento apagado, promoção desativada).
   const ids = docs.map((d) => d.id);
@@ -89,5 +104,5 @@ Deno.serve(async (req) => {
     .not('id', 'in', `(${ids.map((id) => `"${id}"`).join(',')})`);
   if (delError) return Response.json({ error: delError.message }, { status: 500 });
 
-  return Response.json({ documentos: docs.length });
+  return Response.json({ documentos: docs.length, atualizados: rows.length, pendentes: 0 });
 });

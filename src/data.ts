@@ -1,7 +1,7 @@
 import { FAQ, ContactInfo } from './types';
 
 export const DEFAULT_CONTACT_INFO: ContactInfo = {
-  phonePrimary: '(11) 3151-2433 / (11) 98525-4584',
+  phonePrimary: '(11) 3151-2433 / (11) 94680-3765',
   whatsappNumber: '5511985254584',
   email: 'contatocentraldaestetica@gmail.com',
   addressLine1: 'Rua Artur Frazão, 33',
