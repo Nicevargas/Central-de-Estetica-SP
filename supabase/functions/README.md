@@ -30,6 +30,12 @@ As três têm RLS ligado e **nenhuma** política pública: só as Edge Functions
 6. A IA volta sozinha quando a cliente escreve e a consultora está há 10 minutos sem mandar mensagem naquela conversa (mude com o secret `CONSULTORA_PAUSA_MINUTOS`). Depois de uma transferência feita pela IA, ela só volta depois que a consultora tiver respondido pelo menos uma vez.
 7. Para devolver a conversa à IA na hora, a consultora envia `#bot` na conversa da cliente.
 
+**Avaliação grátis para seguidores:** quem comenta "AVALIAÇÃO" (configurável em `IG_KEYWORD_AVALIACAO`) recebe a resposta pública "Te mandei no Direct!" e, no Direct:
+- se já segue a @centraldaesteticasp: o link do WhatsApp com a mensagem "quero minha avaliação gratuita… Cód. XXXXXX";
+- se não segue (ou a Meta não informa): um pedido para seguir e responder "OK" no Direct. Quando ela responde, a função confere de novo (`is_user_follow_business`) e manda o link; se ainda não segue, lembra de seguir.
+
+O lead fica com `campanha = avaliacao_gratis` (migração `20261022000000_leads_campanha_avaliacao_gratis.sql`): a IA do WhatsApp confirma que a avaliação é gratuita e o aviso da consultora mostra a oferta. O Instagram não avisa quando alguém passa a seguir, por isso a campanha sempre começa por um comentário.
+
 **Instagram:** quem comenta "EU QUERO" (configurável em `IG_KEYWORD`) recebe no Direct o link do WhatsApp com a mensagem pronta "Vim pelo Instagram… Cód. XXXXXX". Quando a cliente envia essa mensagem, o bot junta o cadastro do Instagram ao do WhatsApp (e já sabe de qual post ela veio).
 
 ## Instalação
@@ -54,6 +60,7 @@ No painel do Supabase → Edge Functions → Secrets (ou `supabase secrets set N
 | `IG_VERIFY_TOKEN` | um texto aleatório, repetido no cadastro do webhook na Meta |
 | `KB_SYNC_TOKEN` | um texto aleatório, para proteger o kb-sync |
 | `IG_KEYWORD` | opcional; padrão `eu quero` |
+| `IG_KEYWORD_AVALIACAO` | opcional; expressão da palavra da avaliação grátis, padrão `avalia[cç][aã]o` |
 | `CONSULTORA_PAUSA_MINUTOS` | opcional; minutos sem resposta da consultora para a IA voltar (padrão `10`) |
 
 `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já existem automaticamente nas funções.
@@ -82,10 +89,10 @@ Na instância, configure o webhook:
 - Evento: `MESSAGES_UPSERT` (os outros podem ficar desligados)
 
 ### 6. Webhook do Instagram ("EU QUERO")
-No painel Meta (app 1315858633192552) → Instagram → Configuração da API → **Configurar webhooks**:
+No painel Meta (app centraldaesteticasp 2193346618194502) → Instagram → Configuração da API → **Configurar webhooks**:
 - URL de callback: `https://<projeto>.supabase.co/functions/v1/instagram-webhook`
 - Token de verificação: o valor de `IG_VERIFY_TOKEN`
-- Assine o campo **comments**.
+- Assine os campos **comments** e **messages** (o Direct é usado pela avaliação grátis). Confira também a assinatura da conta: `GET https://graph.instagram.com/v23.0/me/subscribed_apps` deve listar `comments, messages`; se faltar, `POST /me/subscribed_apps?subscribed_fields=comments,messages`.
 
 Permissões necessárias no token: `instagram_business_basic`, `instagram_business_manage_comments` e `instagram_business_manage_messages`. Gere o token de novo depois de adicioná-las.
 

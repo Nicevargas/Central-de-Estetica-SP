@@ -22,6 +22,7 @@ export type Lead = {
   origem: string;
   instagram_username: string | null;
   codigo_indicacao: string | null;
+  campanha: string | null;
   status: 'bot' | 'consultora' | 'encerrado';
 };
 
