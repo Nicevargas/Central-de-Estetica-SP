@@ -58,9 +58,12 @@ No painel do Supabase → Edge Functions → Secrets (ou `supabase secrets set N
 | `EVOLUTION_INSTANCE` | nome da instância conectada ao (11) 98525-4584 |
 | `EVOLUTION_WEBHOOK_TOKEN` | um texto aleatório longo, usado na URL do webhook |
 | `CONSULTORA_WHATSAPP` | WhatsApp da consultora (`5511985254584`, o mesmo atendido pela IA): recebe os avisos de transferência e é o número do link do "EU QUERO" no Instagram e do WhatsApp do site. O número da clínica, (11) 94680-3765, aparece só como telefone no site. |
-| `INSTAGRAM_ACCESS_TOKEN` | o mesmo token IGAA… usado na publicação |
+| `INSTAGRAM_ACCESS_TOKEN` | token IGAA… da conta gerado no **creatIApp** (o mesmo usado na publicação) |
 | `IG_APP_SECRET` | "Chave secreta do app" do Instagram (painel Meta → Instagram → Configuração da API) |
-| `IG_VERIFY_TOKEN` | um texto aleatório, repetido no cadastro do webhook na Meta |
+| `IG_VERIFY_TOKEN` | um texto aleatório; só usado se a Meta chamar esta função direto (hoje quem verifica é o roteador) |
+| `IG_APP_SECRET_CREATIAPP` | "Chave secreta do app do Instagram" do creatIApp (eventos repassados pelo roteador) |
+| `IG_ACCOUNT_ID` | ids da conta, separados por vírgula: só essas entradas são tratadas |
+| `IG_USERNAME` | @ da conta (sem @), para ignorar os comentários dela mesma |
 | `KB_SYNC_TOKEN` | um texto aleatório, para proteger o kb-sync |
 | `IG_KEYWORD` | opcional; padrão `eu quero` |
 | `IG_KEYWORD_AVALIACAO` | opcional; expressão da palavra da avaliação grátis, padrão `avalia[cç][aã]o` |
@@ -91,15 +94,25 @@ Na instância, configure o webhook:
 - URL: `https://<projeto>.supabase.co/functions/v1/whatsapp-webhook?token=<EVOLUTION_WEBHOOK_TOKEN>`
 - Evento: `MESSAGES_UPSERT` (os outros podem ficar desligados)
 
-### 6. Webhook do Instagram ("EU QUERO")
-No painel Meta (app centraldaesteticasp 2193346618194502) → Instagram → Configuração da API → **Configurar webhooks**:
-- URL de callback: `https://<projeto>.supabase.co/functions/v1/instagram-webhook`
-- Token de verificação: o valor de `IG_VERIFY_TOKEN`
-- Assine os campos **comments** e **messages** (o Direct é usado pela avaliação grátis). Confira também a assinatura da conta: `GET https://graph.instagram.com/v23.0/me/subscribed_apps` deve listar `comments, messages`; se faltar, `POST /me/subscribed_apps?subscribed_fields=comments,messages`.
+### 6. Webhook do Instagram ("EU QUERO" e avaliação grátis)
+A @centraldaesteticasp está ligada no app **creatIApp** (`1315858633192552`, tipo Empresa), que entrega comentários e Direct de qualquer pessoa. Um app da Meta tem uma URL de webhook só, então os eventos de todas as contas do creatIApp chegam ao roteador **creatiapp-webhook** (`https://creatiapp-webhook.vercel.app/api/webhook`, projeto `creatiapp-webhook` na Vercel da Nice). Ele confere a assinatura e repassa cada evento, intacto, para o atendente da conta (`contas.json` do roteador). Os eventos da clínica vêm para esta função.
 
-Permissões necessárias no token: `instagram_business_basic`, `instagram_business_manage_comments` e `instagram_business_manage_messages`. Gere o token de novo depois de adicioná-las.
+```
+Meta (creatIApp) ─► creatiapp-webhook ─┬─► natação (natacao-autoresposta)
+                                       └─► clínica (Supabase, instagram-webhook)
+```
 
-> ⚠️ Com o app em modo **Desenvolvimento**, a Meta só entrega webhooks de contas com função no app. Para receber comentários de qualquer pessoa, o app precisa estar **Ao vivo** e com acesso avançado a essas permissões (Análise do app), o que pede política de privacidade publicada.
+Secrets da clínica ligados a isso:
+- `INSTAGRAM_ACCESS_TOKEN`: token **gerado no creatIApp** para a @centraldaesteticasp (o do app antigo parou de valer). É o mesmo do `.env` de `centraldaestetica-instagram`.
+- `IG_APP_SECRET_CREATIAPP`: "Chave secreta do app do Instagram" do creatIApp. Os eventos repassados chegam com essa assinatura.
+- `IG_ACCOUNT_ID`: ids da conta, separados por vírgula (`user_id` e o id dela no creatIApp). Entradas de outras contas no mesmo lote são ignoradas.
+- `IG_USERNAME`: `centraldaesteticasp`, para ignorar os comentários da própria clínica (`entry.id` e `from.id` são espaços de ID diferentes).
+
+A conta precisa estar assinada em `comments` e `messages`: `GET https://graph.instagram.com/v23.0/me/subscribed_apps` com o token deve listar os dois; se faltar, `POST /me/subscribed_apps?subscribed_fields=comments,messages`.
+
+> ⚠️ **Comentários só chegam em posts publicados pelo creatIApp ou pelo próprio Instagram.** Em posts criados pela API por outro app (os de 20 e 21/10/2026, publicados pelo app centraldaesteticasp), a Meta não avisa o creatIApp. Publique os posts novos com o token do creatIApp. O Direct funciona em qualquer caso.
+
+Para ligar outro cliente no creatIApp: convidar a conta como Testadora do Instagram, gerar o token, assinar `comments` e `messages` e acrescentar uma linha no `contas.json` do roteador apontando para o Supabase ou n8n dele.
 
 ## Custos e modelo
 A IA usa a API da OpenAI (Chat Completions com function calling), modelo `gpt-4.1-mini` por padrão (troque com o secret `OPENAI_MODEL`). O prompt de sistema é fixo para aproveitar o cache automático de prompt da OpenAI. Embeddings usam o gte-small embutido no Supabase, sem custo extra de API.
