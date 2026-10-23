@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Avaliação gratuita — carrossel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#FBF5F2; --ink:#1E1B1B; --rose:#C8304A; --blush:#F3D3CF; --soft:#5A5050; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#ddd; }
+  .slide { width:1080px; height:1350px; position:relative; overflow:hidden; background:var(--bg);
+           font-family:'Outfit',sans-serif; color:var(--ink); }
+  .wave { position:absolute; inset:0; pointer-events:none; }
+  .pill { position:absolute; top:52px; left:84px; border:2px solid var(--rose); border-radius:40px;
+          padding:10px 34px; font-size:30px; color:var(--rose); letter-spacing:2px; }
+  .content { position:absolute; left:96px; right:120px; top:250px; }
+  h1 { font-family:'Playfair Display',serif; font-weight:500; font-size:118px; line-height:1.02; letter-spacing:-2px; }
+  h1.md { font-size:92px; }
+  h1.sm { font-size:80px; }
+  em { font-family:'Playfair Display',serif; font-style:italic; color:var(--rose); }
+  .rule { width:220px; height:2px; background:var(--rose); margin:52px 0 44px; }
+  p { font-size:44px; line-height:1.35; font-weight:300; color:var(--ink); }
+  p + p { margin-top:28px; }
+  .step { font-family:'Playfair Display',serif; font-style:italic; font-size:150px; line-height:1; color:var(--rose);
+          opacity:.9; margin-bottom:18px; }
+  .note { position:absolute; left:96px; right:120px; bottom:230px; font-size:26px; line-height:1.4; color:var(--soft); font-weight:300; }
+  .logo { position:absolute; bottom:44px; left:50%; transform:translateX(-50%); width:220px; }
+  .cta { display:inline-block; margin-top:56px; background:var(--rose); color:#fff; border-radius:60px;
+         padding:26px 52px; font-size:40px; font-weight:500; }
+  .swipe { margin-top:64px; font-size:32px; color:var(--rose); letter-spacing:2px; }
+
+  /* conversa do Direct */
+  .chat { margin-top:56px; width:780px; background:#fff; border-radius:44px; padding:40px 40px 44px;
+          box-shadow:0 18px 50px rgba(200,48,74,.10); }
+  .chat-head { display:flex; align-items:center; gap:22px; padding-bottom:26px; margin-bottom:30px;
+               border-bottom:1px solid #F0E0DD; font-size:30px; font-weight:500; }
+  .chat-head img { width:64px; height:64px; border-radius:50%; object-fit:contain; background:var(--bg);
+                   border:1px solid #F0E0DD; padding:6px; }
+  .chat-head span { display:block; font-size:24px; font-weight:300; color:var(--soft); }
+  .msg { width:fit-content; max-width:86%; font-size:32px; line-height:1.35; padding:22px 30px; border-radius:34px; font-weight:300; }
+  .msg + .msg { margin-top:18px; }
+  .out { margin-left:auto; background:var(--rose); color:#fff; border-bottom-right-radius:10px; font-weight:400; }
+  .in { background:#F4ECEA; color:var(--ink); border-bottom-left-radius:10px; }
+  /* fotos */
+  .photo { position:absolute; overflow:hidden; box-shadow:0 18px 50px rgba(200,48,74,.14); }
+  .photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .photo.wide { left:96px; right:96px; top:660px; height:440px; border-radius:44px; }
+  .photo.arch { right:0; bottom:0; width:390px; height:620px; border-top-left-radius:195px; box-shadow:none; }
+  .photo.round { width:240px; height:240px; border-radius:50%; border:6px solid #fff; }
+  .btn { margin-top:20px; text-align:center; border-radius:24px; padding:20px; font-size:30px; font-weight:500;
+         color:var(--rose); background:#fff; border:2px solid var(--blush); }
+</style>
+</head>
+<body>
+
+<!-- 1 — capa -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M0 1350 C 250 1000, 650 1050, 1080 600 L1080 1350 Z" fill="#F6E1DD"/><path d="M270 42 H950 Q1005 42 1005 100 V760" stroke="#C8304A" stroke-width="2" fill="none"/></svg>
+  <div class="pill">✦ Para quem segue a gente</div>
+  <div class="content" style="top:190px">
+    <h1>Avaliação</h1>
+    <h1 style="margin-top:6px"><em>gratuita.</em></h1>
+    <div class="rule" style="margin:40px 0 34px"></div>
+    <p>Peça pelo Direct em 3 passos simples.</p>
+  </div>
+  <div class="photo wide"><img src="../../public/banner.png" style="object-position:50% 40%"></div>
+  <div class="swipe" style="position:absolute;right:96px;top:1130px;margin:0">ARRASTE →</div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 2 — passo 1 -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M1080 0 C 880 300, 1020 700, 760 1350 L1080 1350 Z" fill="#F8E4E0"/><path d="M1060 0 C 820 320, 860 560, 1080 980" stroke="#C8304A" stroke-width="2" fill="none"/></svg>
+  <div class="pill">PASSO 1</div>
+  <div class="content" style="top:200px">
+    <div class="step">01</div>
+    <h1 class="sm">Mande <em>AVALIAÇÃO</em><br>no nosso Direct.</h1>
+    <div class="chat">
+      <div class="chat-head"><img src="../../public/logo.png">centraldaesteticasp<span></span></div>
+      <div class="msg out">Avaliação</div>
+    </div>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 3 — passo 2 -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M680 0 C 820 200, 960 380, 1080 470 L1080 0 Z" fill="#F7DCD7"/><path d="M680 0 C 820 200, 960 380, 1080 470" stroke="#C8304A" stroke-width="2" fill="none"/><path d="M0 1110 C 300 1120, 500 1250, 700 1350 L0 1350 Z" fill="#F8E4E0"/></svg>
+  <div class="pill">PASSO 2</div>
+  <div class="content" style="top:170px">
+    <div class="step">02</div>
+    <h1 class="sm" style="font-size:72px">Siga a <em>@centraldaesteticasp.</em></h1>
+    <p style="margin-top:26px">A gente confere na hora. Se ainda não segue, mandamos o botão para seguir.</p>
+    <div class="chat" style="margin-top:36px">
+      <div class="msg in">Sua avaliação gratuita está quase garantida 💗 É só seguir e me responder aqui com OK.
+        <div class="btn">Seguir a clínica</div>
+      </div>
+      <div class="msg out">OK</div>
+    </div>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 4 — passo 3 -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M780 0 C 820 150, 960 280, 1080 330 L1080 0 Z" fill="#F7DCD7"/><path d="M0 1020 C 150 1080, 250 1250, 300 1350 L0 1350 Z" fill="#F6DEDA"/></svg>
+  <div class="pill">PASSO 3</div>
+  <div class="photo round" style="right:100px;top:120px"><img src="../../public/esteticista.png" style="object-position:50% 18%"></div>
+  <div class="content" style="top:200px">
+    <div class="step">03</div>
+    <h1 class="sm">Toque e fale com a nossa <em>consultora.</em></h1>
+    <p style="margin-top:30px">Você recebe o botão do WhatsApp e escolhe o melhor dia e horário.</p>
+    <div class="chat" style="margin-top:44px">
+      <div class="msg in">Obrigada por seguir a Central da Estética 💗 Sua avaliação é gratuita.
+        <div class="btn">Agendar no WhatsApp</div>
+      </div>
+    </div>
+  </div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+<!-- 5 — CTA -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M0 1350 C 250 1000, 650 1050, 1080 600 L1080 1350 Z" fill="#F6E1DD"/></svg>
+  <div class="pill">✦ Garanta a sua</div>
+  <div class="content" style="top:240px">
+    <h1 class="md">Mande <em>AVALIAÇÃO</em> no Direct.</h1>
+    <div class="rule"></div>
+    <p>Sua avaliação é gratuita.<br>Montamos o plano ideal<br>para a sua pele.</p>
+    <div class="cta">Enviar mensagem →</div>
+  </div>
+  <div class="photo arch"><img src="../../public/esteticista.png" style="object-position:50% 20%"></div>
+  <div class="note" style="right:470px;bottom:300px">*Benefício válido para a avaliação, para quem segue o perfil @centraldaesteticasp. Os tratamentos são cobrados à parte.</div>
+  <img class="logo" src="../../public/logo.png">
+</section>
+
+</body>
+</html>

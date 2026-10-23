@@ -36,18 +36,35 @@ type MessagingEvent = {
   message?: { text?: string; is_echo?: boolean };
 };
 
-async function validSignature(req: Request, raw: string): Promise<boolean> {
-  const header = req.headers.get('x-hub-signature-256') ?? '';
+// O app creatIApp atende várias contas e o roteador (creatiapp-webhook) repassa o
+// lote inteiro, assinado: só as entradas desta conta são tratadas aqui.
+// IG_ACCOUNT_ID aceita mais de um id, separados por vírgula (user_id e o id do app).
+const IG_ACCOUNT_IDS = (Deno.env.get('IG_ACCOUNT_ID') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+// O @ da conta, para reconhecer os comentários dela mesma (entry.id e from.id
+// são espaços de ID diferentes e nunca batem).
+const IG_USERNAME = Deno.env.get('IG_USERNAME')?.toLowerCase();
+
+async function signedWith(secret: string, raw: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(env('IG_APP_SECRET')),
+    new TextEncoder().encode(secret),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],
   );
   const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(raw)));
-  const expected = 'sha256=' + Array.from(sig, (b) => b.toString(16).padStart(2, '0')).join('');
-  return header.length === expected.length && header === expected;
+  return 'sha256=' + Array.from(sig, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Aceita a chave do app da conta (IG_APP_SECRET) ou a do creatIApp (IG_APP_SECRET_CREATIAPP). */
+async function validSignature(req: Request, raw: string): Promise<boolean> {
+  const header = req.headers.get('x-hub-signature-256') ?? '';
+  const secrets = [env('IG_APP_SECRET'), Deno.env.get('IG_APP_SECRET_CREATIAPP')].filter(Boolean) as string[];
+  for (const secret of secrets) {
+    const expected = await signedWith(secret, raw);
+    if (header.length === expected.length && header === expected) return true;
+  }
+  return false;
 }
 
 function newCode(): string {
@@ -186,7 +203,8 @@ async function handleAvaliacao(c: CommentValue) {
 }
 
 async function handleComment(accountId: string, c: CommentValue) {
-  if (c.from?.id === accountId) return; // ignora comentários da própria clínica
+  // ignora comentários da própria clínica
+  if (c.from?.id === accountId || (IG_USERNAME && c.from?.username?.toLowerCase() === IG_USERNAME)) return;
   if (!c.text) return;
   const text = normalize(c.text);
   console.log('instagram-webhook: comentário', c.id, c.from ? 'com autor' : 'sem autor', JSON.stringify(c.text));
@@ -285,6 +303,10 @@ Deno.serve(async (req) => {
   console.log('instagram-webhook: evento', body.object, JSON.stringify((body.entry ?? []).map((e: { changes?: { field: string }[]; messaging?: unknown[] }) => ({ changes: e.changes?.map((c) => c.field), messaging: e.messaging?.length ?? 0 }))));
   const jobs: Promise<void>[] = [];
   for (const entry of body.entry ?? []) {
+    if (IG_ACCOUNT_IDS.length && !IG_ACCOUNT_IDS.includes(String(entry.id))) {
+      console.log('instagram-webhook: entrada de outra conta ignorada', entry.id);
+      continue;
+    }
     for (const change of entry.changes ?? []) {
       if (change.field !== 'comments') continue;
       jobs.push(handleComment(entry.id, change.value).catch((e) => logError('comments', e)));
