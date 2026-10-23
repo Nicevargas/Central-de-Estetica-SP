@@ -30,11 +30,14 @@ As três têm RLS ligado e **nenhuma** política pública: só as Edge Functions
 6. A IA volta sozinha quando a cliente escreve e a consultora está há 10 minutos sem mandar mensagem naquela conversa (mude com o secret `CONSULTORA_PAUSA_MINUTOS`). Depois de uma transferência feita pela IA, ela só volta depois que a consultora tiver respondido pelo menos uma vez.
 7. Para devolver a conversa à IA na hora, a consultora envia `#bot` na conversa da cliente.
 
-**Avaliação grátis para seguidores:** quem comenta "AVALIAÇÃO" (configurável em `IG_KEYWORD_AVALIACAO`) recebe a resposta pública "Te mandei no Direct!" e, no Direct:
-- se já segue a @centraldaesteticasp: o link do WhatsApp com a mensagem "quero minha avaliação gratuita… Cód. XXXXXX";
-- se não segue (ou a Meta não informa): um pedido para seguir e responder "OK" no Direct. Quando ela responde, a função confere de novo (`is_user_follow_business`) e manda o link; se ainda não segue, lembra de seguir.
+**Avaliação grátis para seguidores:** começa quando a pessoa comenta "AVALIAÇÃO" num post (recebe também a resposta pública "Te mandei no Direct!") ou manda "AVALIAÇÃO" no Direct. A palavra é comparada sem acento nem maiúsculas e aceita variações (avaliacao, avaliar, avalia, aval…); mude com `IG_KEYWORD_AVALIACAO`. No Direct:
+- se já segue a @centraldaesteticasp: mensagem com o botão **Agendar no WhatsApp**, que abre a conversa com "quero minha avaliação gratuita… Cód. XXXXXX";
+- se não segue: mensagem com o botão **Seguir a clínica**, pedindo para responder "OK". Quando ela responde, a função confere de novo (`is_user_follow_business`) e manda o botão do WhatsApp; se ainda não segue, lembra de seguir.
+- se a Meta não informa se ela segue, ou o comentário chega sem autor: manda o botão do WhatsApp, para ninguém ficar sem resposta.
 
-O lead fica com `campanha = avaliacao_gratis` (migração `20261022000000_leads_campanha_avaliacao_gratis.sql`): a IA do WhatsApp confirma que a avaliação é gratuita e o aviso da consultora mostra a oferta. O Instagram não avisa quando alguém passa a seguir, por isso a campanha sempre começa por um comentário.
+As respostas usam o botão do Instagram (button template); se a Meta recusar, vão como texto com o link. O lead fica com `campanha = avaliacao_gratis` (migração `20261022000000_leads_campanha_avaliacao_gratis.sql`): a IA do WhatsApp confirma que a avaliação é gratuita e o aviso da consultora mostra a oferta. O Instagram não avisa quando alguém passa a seguir, por isso a campanha sempre começa por um comentário ou uma mensagem.
+
+**Diagnóstico:** cada chamada da Meta à `instagram-webhook` grava uma linha em `ig_webhook_log` (migração `20261023000000_ig_webhook_log.sql`): se a assinatura passou, os campos do evento e, se o processamento falhar, a mensagem de erro. Sem nenhuma linha, a Meta não está enviando o evento. Comentários só chegam se o token da conta tiver sido gerado com `instagram_business_manage_comments`; para clientes sem função no app, as permissões precisam de acesso avançado (análise do app).
 
 **Instagram:** quem comenta "EU QUERO" (configurável em `IG_KEYWORD`) recebe no Direct o link do WhatsApp com a mensagem pronta "Vim pelo Instagram… Cód. XXXXXX". Quando a cliente envia essa mensagem, o bot junta o cadastro do Instagram ao do WhatsApp (e já sabe de qual post ela veio).
 
