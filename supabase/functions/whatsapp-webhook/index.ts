@@ -60,6 +60,7 @@ async function linkInstagramLead(lead: Lead, text: string): Promise<Lead> {
     instagram_username: igLead.instagram_username,
     instagram_user_id: igLead.instagram_user_id,
     tratamento_interesse: lead.tratamento_interesse ?? igLead.tratamento_interesse,
+    campanha: lead.campanha ?? igLead.campanha,
   };
   await db.from('leads').delete().eq('id', igLead.id);
   await db.from('leads').update({ ...merged, codigo_indicacao: code }).eq('id', lead.id);
@@ -75,6 +76,7 @@ async function notifyConsultora(lead: Lead, transfer: { motivo: string; resumo: 
     `Interesse: ${lead.tratamento_interesse ?? '-'}\n` +
     `Melhor horário: ${lead.melhor_horario ?? '-'}\n` +
     (lead.instagram_username ? `Instagram: @${lead.instagram_username}\n` : '') +
+    (lead.campanha === 'avaliacao_gratis' ? `Oferta: avaliação gratuita (seguidora do Instagram)\n` : '') +
     `Motivo: ${transfer.motivo}\n\n${transfer.resumo}\n\n` +
     `A IA parou de responder esta cliente. Para devolver à IA, envie ${REATIVAR_BOT} na conversa dela.`;
   await sendWhatsAppText(normalizePhone(target), text);

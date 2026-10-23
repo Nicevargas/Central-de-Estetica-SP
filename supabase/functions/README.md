@@ -30,6 +30,15 @@ As três têm RLS ligado e **nenhuma** política pública: só as Edge Functions
 6. A IA volta sozinha quando a cliente escreve e a consultora está há 10 minutos sem mandar mensagem naquela conversa (mude com o secret `CONSULTORA_PAUSA_MINUTOS`). Depois de uma transferência feita pela IA, ela só volta depois que a consultora tiver respondido pelo menos uma vez.
 7. Para devolver a conversa à IA na hora, a consultora envia `#bot` na conversa da cliente.
 
+**Avaliação grátis para seguidores:** começa quando a pessoa comenta "AVALIAÇÃO" num post (recebe também a resposta pública "Te mandei no Direct!") ou manda "AVALIAÇÃO" no Direct. A palavra é comparada sem acento nem maiúsculas e aceita variações (avaliacao, avaliar, avalia, aval…); mude com `IG_KEYWORD_AVALIACAO`. No Direct:
+- se já segue a @centraldaesteticasp: mensagem com o botão **Agendar no WhatsApp**, que abre a conversa com "quero minha avaliação gratuita… Cód. XXXXXX";
+- se não segue: mensagem com o botão **Seguir a clínica**, pedindo para responder "OK". Quando ela responde, a função confere de novo (`is_user_follow_business`) e manda o botão do WhatsApp; se ainda não segue, lembra de seguir.
+- se a Meta não informa se ela segue, ou o comentário chega sem autor: manda o botão do WhatsApp, para ninguém ficar sem resposta.
+
+As respostas usam o botão do Instagram (button template); se a Meta recusar, vão como texto com o link. O lead fica com `campanha = avaliacao_gratis` (migração `20261022000000_leads_campanha_avaliacao_gratis.sql`): a IA do WhatsApp confirma que a avaliação é gratuita e o aviso da consultora mostra a oferta. O Instagram não avisa quando alguém passa a seguir, por isso a campanha sempre começa por um comentário ou uma mensagem.
+
+**Diagnóstico:** cada chamada da Meta à `instagram-webhook` grava uma linha em `ig_webhook_log` (migração `20261023000000_ig_webhook_log.sql`): se a assinatura passou, os campos do evento e, se o processamento falhar, a mensagem de erro. Sem nenhuma linha, a Meta não está enviando o evento. Comentários só chegam se o token da conta tiver sido gerado com `instagram_business_manage_comments`; para clientes sem função no app, as permissões precisam de acesso avançado (análise do app).
+
 **Instagram:** quem comenta "EU QUERO" (configurável em `IG_KEYWORD`) recebe no Direct o link do WhatsApp com a mensagem pronta "Vim pelo Instagram… Cód. XXXXXX". Quando a cliente envia essa mensagem, o bot junta o cadastro do Instagram ao do WhatsApp (e já sabe de qual post ela veio).
 
 ## Instalação
@@ -54,6 +63,7 @@ No painel do Supabase → Edge Functions → Secrets (ou `supabase secrets set N
 | `IG_VERIFY_TOKEN` | um texto aleatório, repetido no cadastro do webhook na Meta |
 | `KB_SYNC_TOKEN` | um texto aleatório, para proteger o kb-sync |
 | `IG_KEYWORD` | opcional; padrão `eu quero` |
+| `IG_KEYWORD_AVALIACAO` | opcional; expressão da palavra da avaliação grátis, padrão `avalia[cç][aã]o` |
 | `CONSULTORA_PAUSA_MINUTOS` | opcional; minutos sem resposta da consultora para a IA voltar (padrão `10`) |
 
 `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já existem automaticamente nas funções.
@@ -82,10 +92,10 @@ Na instância, configure o webhook:
 - Evento: `MESSAGES_UPSERT` (os outros podem ficar desligados)
 
 ### 6. Webhook do Instagram ("EU QUERO")
-No painel Meta (app 1315858633192552) → Instagram → Configuração da API → **Configurar webhooks**:
+No painel Meta (app centraldaesteticasp 2193346618194502) → Instagram → Configuração da API → **Configurar webhooks**:
 - URL de callback: `https://<projeto>.supabase.co/functions/v1/instagram-webhook`
 - Token de verificação: o valor de `IG_VERIFY_TOKEN`
-- Assine o campo **comments**.
+- Assine os campos **comments** e **messages** (o Direct é usado pela avaliação grátis). Confira também a assinatura da conta: `GET https://graph.instagram.com/v23.0/me/subscribed_apps` deve listar `comments, messages`; se faltar, `POST /me/subscribed_apps?subscribed_fields=comments,messages`.
 
 Permissões necessárias no token: `instagram_business_basic`, `instagram_business_manage_comments` e `instagram_business_manage_messages`. Gere o token de novo depois de adicioná-las.
 

@@ -23,6 +23,7 @@ Como responder:
 - Não faça diagnóstico, não prometa resultado e não indique tratamento como certo para o caso dela: quem define o plano é a avaliação. Quando falar de resultados, deixe claro que variam de pessoa para pessoa.
 - Ao longo da conversa, sem parecer formulário, descubra: o nome da cliente, o tratamento ou a queixa de interesse e o melhor dia/horário para a avaliação. Pergunte uma coisa por vez.
 - Sempre que a cliente informar um desses dados (ou e-mail), chame a ferramenta salvar_dados_cliente com o que ela disse.
+- Se o cadastro da cliente trouxer "oferta: avaliação gratuita", confirme que a avaliação dela é gratuita (benefício para quem segue a clínica no Instagram) e conduza para o agendamento. A gratuidade vale só para a avaliação, não para os tratamentos.
 
 Quando chamar transferir_para_consultora:
 - a cliente quer agendar, remarcar ou fechar um pacote, e você já sabe pelo menos o nome e o interesse dela;
@@ -120,6 +121,7 @@ function leadSnapshot(lead: Lead): string {
     melhor_horario: lead.melhor_horario,
     email: lead.email,
     origem: lead.instagram_username ? `Instagram (@${lead.instagram_username})` : lead.origem,
+    oferta: lead.campanha === 'avaliacao_gratis' ? 'avaliação gratuita (seguidora do Instagram)' : null,
   };
   return Object.entries(fields)
     .map(([k, v]) => `${k}: ${v ?? '(não informado)'}`)
