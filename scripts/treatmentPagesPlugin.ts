@@ -13,7 +13,7 @@ import type { Plugin } from 'vite';
 import { DEFAULT_CONTACT_INFO, OPENING_HOURS, GOOGLE_MAPS_URL, GOOGLE_REVIEW_URL } from '../src/data';
 import { SITE_URL, getTreatmentSeo, getTreatmentPath, getTreatmentUrl } from '../src/lib/treatmentPages';
 import { mapTreatmentRow, mapContactInfoRow, mapBlogRow } from '../src/lib/supabaseMappers';
-import { getBlogPostPath, getBlogPostUrl, parseBlogContent } from '../src/lib/blogPages';
+import { getBlogPostPath, getBlogPostUrl, parseBlogContent, parseInline } from '../src/lib/blogPages';
 import type { BlogPost, ContactInfo, Treatment } from '../src/types';
 
 interface SupabaseEnv {
@@ -148,14 +148,20 @@ function renderPage(template: string, t: Treatment, all: Treatment[], contact: C
   return html;
 }
 
+const inline = (text: string) =>
+  parseInline(text)
+    .map((part) => (part.bold ? `<strong>${escapeHtml(part.text)}</strong>` : escapeHtml(part.text)))
+    .join('');
+
 function renderBlogBody(post: BlogPost, all: BlogPost[]): string {
   const blocks = parseBlogContent(post.content)
     .map((b) => {
       if (b.type === 'h3') return `<h2>${escapeHtml(b.text)}</h2>`;
       if (b.type === 'ul' || b.type === 'ol') {
-        return `<${b.type}>${b.items.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</${b.type}>`;
+        return `<${b.type}>${b.items.map((i) => `<li>${inline(i)}</li>`).join('')}</${b.type}>`;
       }
-      return `<p>${escapeHtml(b.text)}</p>`;
+      if (b.type === 'callout') return `<blockquote>${inline(b.text)}</blockquote>`;
+      return `<p>${inline(b.text)}</p>`;
     })
     .join('\n');
   const others = all
