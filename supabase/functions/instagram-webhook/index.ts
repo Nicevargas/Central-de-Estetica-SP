@@ -7,11 +7,18 @@
 //   - segue: Direct com o link do WhatsApp e a oferta;
 //   - não segue (ou a Meta não informa): Direct pedindo para seguir e responder "OK";
 //     quando ela responde no Direct, confere de novo e manda o link.
+//
+// "LER MAIS" → link do artigo do blog por Direct, só para quem segue a @centraldaesteticasp
+//   (mesmo fluxo da avaliação: não segue → pede para seguir e responder "OK").
 import { db, env, normalizePhone } from '../_shared/supabase.ts';
 
 const GRAPH = 'https://graph.instagram.com/v23.0';
 const PERFIL_URL = 'https://instagram.com/centraldaesteticasp';
 const CAMPANHA_AVALIACAO = 'avaliacao_gratis';
+const CAMPANHA_BLOG = 'blog_melasma';
+// Artigo divulgado no carrossel atual; troque pelo secret BLOG_ARTIGO_URL a cada novo carrossel.
+const BLOG_URL =
+  Deno.env.get('BLOG_ARTIGO_URL') ?? 'https://centraldaestetica.com.br/blog/melasma-manchas-no-rosto-tratamento/';
 
 // Compara sem acento e sem maiúsculas: "Avaliação", "AVALIACAO", "avaliaçao" e "avaliar" valem igual.
 const normalize = (text: string) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -22,6 +29,8 @@ const fromEnv = (name: string, fallback: RegExp) => {
 const KEYWORD = fromEnv('IG_KEYWORD', /\beu\s*quero\b/);
 // avaliação, avaliacao, avaliaçao, avaliações, avaliar, avalia, avaliaçâo, avalicao, avaliasao, aval
 const KEYWORD_AVALIACAO = fromEnv('IG_KEYWORD_AVALIACAO', /\b(?:avalia\w*|avali[cs]ao|avaliasao|aval)\b/);
+// ler mais, lermais, "quero ler mais"
+const KEYWORD_LER_MAIS = fromEnv('IG_KEYWORD_LER_MAIS', /\bler\s*mais\b|\blermais\b/);
 
 type CommentValue = {
   id: string;
@@ -177,6 +186,26 @@ async function sendPedidoSeguir(recipient: Recipient, username: string | null | 
   );
 }
 
+async function sendBlog(recipient: Recipient, username: string | null | undefined) {
+  await sendButton(
+    recipient,
+    `Oi${username ? `, @${username}` : ''}! Obrigada por seguir a Central da Estética 💗\n\n` +
+      `Aqui está o guia completo sobre melasma e manchas no rosto: causas, cuidados e perguntas frequentes.`,
+    'Ler o artigo',
+    BLOG_URL,
+  );
+}
+
+async function sendPedidoSeguirBlog(recipient: Recipient, username: string | null | undefined) {
+  await sendButton(
+    recipient,
+    `Oi${username ? `, @${username}` : ''}! Quero muito te mandar o artigo 💗\n\n` +
+      `É só seguir a @centraldaesteticasp e me responder aqui com OK, que eu te envio o link.`,
+    'Seguir a clínica',
+    PERFIL_URL,
+  );
+}
+
 async function handleEuQuero(c: CommentValue) {
   const code = await upsertIgLead(c);
   // Resposta privada ao comentário (Direct). Só é permitida uma por comentário.
@@ -202,13 +231,23 @@ async function handleAvaliacao(c: CommentValue) {
   else await sendPedidoSeguir({ comment_id: c.id }, c.from.username);
 }
 
+async function handleLerMais(c: CommentValue) {
+  // Sem os dados de quem comentou não dá para conferir se segue: não manda o link.
+  if (!c.from) return;
+  const follows = await followsClinic(c.from.id);
+  await upsertIgLead(c, { campanha: CAMPANHA_BLOG, aguardando_seguir: follows !== true });
+  if (follows === true) await sendBlog({ comment_id: c.id }, c.from.username);
+  else await sendPedidoSeguirBlog({ comment_id: c.id }, c.from.username);
+}
+
 async function handleComment(accountId: string, c: CommentValue) {
   // ignora comentários da própria clínica
   if (c.from?.id === accountId || (IG_USERNAME && c.from?.username?.toLowerCase() === IG_USERNAME)) return;
   if (!c.text) return;
   const text = normalize(c.text);
   console.log('instagram-webhook: comentário', c.id, c.from ? 'com autor' : 'sem autor', JSON.stringify(c.text));
-  if (KEYWORD_AVALIACAO.test(text)) await handleAvaliacao(c);
+  if (KEYWORD_LER_MAIS.test(text)) await handleLerMais(c);
+  else if (KEYWORD_AVALIACAO.test(text)) await handleAvaliacao(c);
   else if (KEYWORD.test(text)) await handleEuQuero(c);
   else return;
   // Resposta pública curta, para outras pessoas verem que funciona.
@@ -235,6 +274,18 @@ async function handleAvaliacaoDirect(senderId: string) {
   else await sendAvaliacao({ id: senderId }, username, code);
 }
 
+/** "LER MAIS" mandado direto no Direct: confere se segue e responde na conversa. */
+async function handleLerMaisDirect(senderId: string) {
+  const follows = await followsClinic(senderId);
+  const username = await igUsername(senderId);
+  await upsertIgLead(
+    { id: '', from: { id: senderId, username: username ?? undefined } },
+    { campanha: CAMPANHA_BLOG, aguardando_seguir: follows !== true },
+  );
+  if (follows === true) await sendBlog({ id: senderId }, username);
+  else await sendPedidoSeguirBlog({ id: senderId }, username);
+}
+
 /**
  * Direct: "AVALIAÇÃO" inicia a campanha; qualquer resposta de quem estava aguardando
  * seguir confere de novo. As demais conversas ficam com a equipe.
@@ -245,13 +296,15 @@ async function handleDirect(accountId: string, m: MessagingEvent) {
 
   const { data: lead } = await db
     .from('leads')
-    .select('id, instagram_username, codigo_indicacao')
+    .select('id, instagram_username, codigo_indicacao, campanha')
     .eq('instagram_user_id', senderId)
     .eq('aguardando_seguir', true)
     .limit(1)
     .maybeSingle();
   if (!lead) {
-    if (KEYWORD_AVALIACAO.test(normalize(m.message.text))) await handleAvaliacaoDirect(senderId);
+    const text = normalize(m.message.text);
+    if (KEYWORD_LER_MAIS.test(text)) await handleLerMaisDirect(senderId);
+    else if (KEYWORD_AVALIACAO.test(text)) await handleAvaliacaoDirect(senderId);
     return;
   }
 
@@ -267,7 +320,8 @@ async function handleDirect(accountId: string, m: MessagingEvent) {
     return;
   }
   await db.from('leads').update({ aguardando_seguir: false }).eq('id', lead.id);
-  await sendAvaliacao({ id: senderId }, lead.instagram_username, lead.codigo_indicacao);
+  if (lead.campanha === CAMPANHA_BLOG) await sendBlog({ id: senderId }, lead.instagram_username);
+  else await sendAvaliacao({ id: senderId }, lead.instagram_username, lead.codigo_indicacao);
 }
 
 /** Registra a falha no log da função e na tabela de diagnóstico. */
