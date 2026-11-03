@@ -37,6 +37,7 @@ import {
   parseBeforeAfterImages,
 } from '../lib/treatmentUtils';
 import { getTreatmentPath } from '../lib/treatmentPages';
+import { LAVIEEN_TREATMENT_ID, LAVIEEN_VIDEOS } from '../lib/lavieenVideos';
 
 interface TreatmentDetailModalProps {
   treatment: Treatment | null;
@@ -127,7 +128,8 @@ export default function TreatmentDetailModal({
 
   const hasBeforeAfter = dbBeforeAfterImages.length > 0;
   const currentPair = dbBeforeAfterImages[selectedPairIndex] || dbBeforeAfterImages[0];
-  const hasVideo = Boolean(embedUrl || (treatment.videoUrl && treatment.videoUrl.trim().length > 0));
+  const lavieenVideos = treatment.id === LAVIEEN_TREATMENT_ID ? LAVIEEN_VIDEOS : [];
+  const hasVideo = Boolean(embedUrl || (treatment.videoUrl && treatment.videoUrl.trim().length > 0) || lavieenVideos.length > 0);
 
   return (
     <div className="fixed inset-0 z-50 bg-stone-100 dark:bg-stone-950 overflow-y-auto min-h-screen flex flex-col font-sans text-stone-800 dark:text-stone-100 animate-fade-in">
@@ -722,6 +724,31 @@ export default function TreatmentDetailModal({
                   </video>
                 </div>
               ) : null}
+
+              {lavieenVideos.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                  {lavieenVideos.map((v) => (
+                    <figure key={v.src} className="space-y-2">
+                      <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-stone-200 dark:border-stone-800 bg-black">
+                        <video
+                          src={v.src}
+                          poster={v.poster}
+                          controls
+                          preload="none"
+                          playsInline
+                          className="w-full h-full object-contain"
+                        >
+                          Seu navegador não suporta a tag de vídeo.
+                        </video>
+                      </div>
+                      <figcaption>
+                        <span className="text-sm font-bold text-stone-900 dark:text-stone-100 block">{v.title}</span>
+                        <span className="text-xs text-stone-500 block">{v.description}</span>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
 
               {/* Step-by-Step Protocol Stages */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
