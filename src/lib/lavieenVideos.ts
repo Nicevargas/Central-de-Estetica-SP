@@ -7,6 +7,7 @@ export interface LavieenVideo {
 }
 
 export const LAVIEEN_TREATMENT_ID = 'laser-lavieen';
+export const LAVIEEN_BLOG_SLUG = 'beneficios-laser-lavieen';
 
 const video = (file: string, title: string, description: string): LavieenVideo => ({
   src: `/videos/lavieen/${file}.mp4`,
