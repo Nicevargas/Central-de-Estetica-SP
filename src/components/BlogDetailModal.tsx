@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar, Clock, User, Tag, Share2, ArrowRight } from 'lucide-react';
 import { BlogPost } from '../types';
+import { LAVIEEN_BLOG_SLUG, LAVIEEN_VIDEOS } from '../lib/lavieenVideos';
 
 interface BlogDetailModalProps {
   post: BlogPost | null;
@@ -118,6 +119,28 @@ export const BlogDetailModal: React.FC<BlogDetailModalProps> = ({ post, onClose,
               return <p key={index}>{paragraph}</p>;
             })}
           </div>
+
+          {post.slug === LAVIEEN_BLOG_SLUG && (
+            <section className="pt-6 mt-6 border-t border-stone-200 dark:border-stone-800 space-y-5">
+              <div>
+                <h3 className="font-serif text-xl font-bold text-stone-900 dark:text-stone-100">Veja o procedimento na Central da Estética</h3>
+                <p className="text-xs text-stone-500">Vídeos do Lavieén realizado na clínica, em diferentes regiões do corpo.</p>
+              </div>
+              {LAVIEEN_VIDEOS.map((v) => (
+                <figure key={v.src} className="space-y-2">
+                  <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-stone-200 dark:border-stone-800 bg-black">
+                    <video src={v.src} poster={v.poster} controls preload="none" playsInline className="w-full h-full object-contain">
+                      Seu navegador não suporta a tag de vídeo.
+                    </video>
+                  </div>
+                  <figcaption>
+                    <span className="text-sm font-bold text-stone-900 dark:text-stone-100 block">{v.title}</span>
+                    <span className="text-xs text-stone-500 block">{v.description}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </section>
+          )}
 
           {/* Bottom Call to Action */}
           {onBookClick && (
