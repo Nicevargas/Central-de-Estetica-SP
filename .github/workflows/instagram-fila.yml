@@ -1,14 +1,23 @@
 name: Instagram — publicar fila
 
-# Cada pasta em instagram/publicar/<nome>/ com fotos .jpg (ordem alfabética)
-# e legenda.txt vira um post. Após publicar, o workflow grava publicado.txt
-# na pasta para que ela nunca seja publicada de novo (inclusive após merge).
+# Cada pasta em instagram/publicar/<nome>/ com legenda.txt vira um post:
+#   - fotos .jpg (ordem alfabética): post simples ou carrossel;
+#   - um vídeo .mp4: Reels (capa opcional em capa-ms.txt, em milissegundos).
+# Com agendar.txt ("AAAA-MM-DD HH:MM", horário de Brasília), a pasta só é
+# publicada a partir desse horário; sem ele, sai na próxima execução.
+# Após publicar, o workflow grava publicado.txt na pasta para que ela nunca
+# seja publicada de novo (inclusive após merge).
 on:
   push:
     paths:
       - instagram/publicar/**
       - scripts/instagram/**
       - .github/workflows/instagram-fila.yml
+  # Confere a fila a cada 30 min para soltar os posts agendados. Nunca no
+  # minuto zero: é o pico do agendador do GitHub, que adia ou até pula o
+  # evento `schedule` (aconteceu no natacao-treinos em 29/08/2026).
+  schedule:
+    - cron: "17,47 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -20,6 +29,7 @@ permissions:
 jobs:
   publicar:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,18 +43,48 @@ jobs:
         run: |
           set -o pipefail
           shopt -s nullglob
+          agora=$(date +%s)
+          git fetch --quiet origin "${{ github.ref_name }}" || true
           for dir in instagram/publicar/*/; do
             dir="${dir%/}"
             [ -f "$dir/publicado.txt" ] && continue
+            # outra execução pode ter publicado depois deste checkout
+            if git cat-file -e "origin/${{ github.ref_name }}:$dir/publicado.txt" 2>/dev/null; then
+              echo "$dir já publicado em outra execução"; continue
+            fi
             [ -f "$dir/legenda.txt" ] || { echo "::warning::$dir sem legenda.txt, ignorada"; continue; }
+            if [ -f "$dir/agendar.txt" ]; then
+              quando=$(head -n1 "$dir/agendar.txt" | tr -d '\r')
+              # Brasília é UTC-3 o ano inteiro (sem horário de verão desde 2019)
+              alvo=$(date -d "$quando -03:00" +%s) || { echo "::warning::$dir: agendar.txt inválido ($quando)"; continue; }
+              if [ "$agora" -lt "$alvo" ]; then
+                echo "$dir agendado para $quando (Brasília); ainda não."
+                continue
+              fi
+            fi
+            videos=("$dir"/*.mp4)
             imgs=("$dir"/*.jpg)
-            [ ${#imgs[@]} -gt 0 ] || { echo "::warning::$dir sem fotos .jpg, ignorada"; continue; }
-            echo "== $dir (${#imgs[@]} imagem(ns))"
-            node scripts/instagram/publish.mjs post --caption "$(cat "$dir/legenda.txt")" "${imgs[@]}" | tee /tmp/resultado.txt
-            mv /tmp/resultado.txt "$dir/publicado.txt"
-            echo "PUBLICOU=1" >> "$GITHUB_ENV"
-            echo "### $dir" >> "$GITHUB_STEP_SUMMARY"
-            cat "$dir/publicado.txt" >> "$GITHUB_STEP_SUMMARY"
+            if [ ${#videos[@]} -eq 1 ]; then
+              echo "== $dir (Reels)"
+              capa=()
+              [ -f "$dir/capa-ms.txt" ] && capa=(--thumb-ms "$(tr -d '\r\n' < "$dir/capa-ms.txt")")
+              cmd=(node scripts/instagram/publish.mjs reel --caption "$(cat "$dir/legenda.txt")" "${capa[@]}" "${videos[0]}")
+            elif [ ${#imgs[@]} -gt 0 ]; then
+              echo "== $dir (${#imgs[@]} imagem(ns))"
+              cmd=(node scripts/instagram/publish.mjs post --caption "$(cat "$dir/legenda.txt")" "${imgs[@]}")
+            else
+              echo "::warning::$dir sem fotos .jpg nem um vídeo .mp4, ignorada"; continue
+            fi
+            # só marca como publicado se a publicação deu certo
+            if "${cmd[@]}" | tee /tmp/resultado.txt; then
+              mv /tmp/resultado.txt "$dir/publicado.txt"
+              echo "PUBLICOU=1" >> "$GITHUB_ENV"
+              echo "### $dir" >> "$GITHUB_STEP_SUMMARY"
+              cat "$dir/publicado.txt" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "::error::$dir: falha ao publicar (veja o log acima)"
+              echo "FALHOU=1" >> "$GITHUB_ENV"
+            fi
           done
       - name: Marcar como publicado
         if: always() && env.PUBLICOU == '1'
@@ -53,4 +93,8 @@ jobs:
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add instagram/publicar/*/publicado.txt
           git commit -m "chore(instagram): marca posts publicados [skip ci]"
+          git pull --rebase --quiet origin "${{ github.ref_name }}"
           git push
+      - name: Falhou alguma publicação
+        if: env.FALHOU == '1'
+        run: exit 1
