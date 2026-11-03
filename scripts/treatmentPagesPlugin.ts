@@ -12,8 +12,9 @@ import path from 'path';
 import type { Plugin } from 'vite';
 import { DEFAULT_CONTACT_INFO, OPENING_HOURS, GOOGLE_MAPS_URL, GOOGLE_REVIEW_URL } from '../src/data';
 import { SITE_URL, getTreatmentSeo, getTreatmentPath, getTreatmentUrl } from '../src/lib/treatmentPages';
-import { mapTreatmentRow, mapContactInfoRow } from '../src/lib/supabaseMappers';
-import type { ContactInfo, Treatment } from '../src/types';
+import { mapTreatmentRow, mapContactInfoRow, mapBlogRow } from '../src/lib/supabaseMappers';
+import { getBlogPostPath, getBlogPostUrl, parseBlogContent } from '../src/lib/blogPages';
+import type { BlogPost, ContactInfo, Treatment } from '../src/types';
 
 interface SupabaseEnv {
   url?: string;
@@ -147,13 +148,94 @@ function renderPage(template: string, t: Treatment, all: Treatment[], contact: C
   return html;
 }
 
-function renderSitemap(treatments: Treatment[]): string {
+function renderBlogBody(post: BlogPost, all: BlogPost[]): string {
+  const blocks = parseBlogContent(post.content)
+    .map((b) => {
+      if (b.type === 'h3') return `<h2>${escapeHtml(b.text)}</h2>`;
+      if (b.type === 'ul' || b.type === 'ol') {
+        return `<${b.type}>${b.items.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</${b.type}>`;
+      }
+      return `<p>${escapeHtml(b.text)}</p>`;
+    })
+    .join('\n');
+  const others = all
+    .filter((o) => o.id !== post.id)
+    .map((o) => `<li><a href="${getBlogPostPath(o)}">${escapeHtml(o.title)}</a></li>`)
+    .join('');
+
+  return `<main style="max-width:760px;margin:0 auto;padding:24px 16px;font-family:system-ui,sans-serif;line-height:1.6;color:#1c1b1f">
+<nav aria-label="Breadcrumb"><a href="/">Início</a> › Blog › ${escapeHtml(post.title)}</nav>
+<article>
+<h1>${escapeHtml(post.title)}</h1>
+<p><small>${escapeHtml(post.author)} · ${escapeHtml(post.date)} · ${escapeHtml(post.readTime)}</small></p>
+<p><em>${escapeHtml(post.excerpt)}</em></p>
+${blocks}
+</article>
+${others ? `<h2>Mais artigos do blog</h2><ul>${others}</ul>` : ''}
+</main>`;
+}
+
+function renderBlogPage(template: string, post: BlogPost, all: BlogPost[]): string {
+  const url = getBlogPostUrl(post);
+  const title = `${post.title} | Blog Central da Estética`;
+  let html = template;
+
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
+  html = setMeta(html, 'name', 'title', title);
+  html = setMeta(html, 'name', 'description', post.excerpt);
+  html = setMeta(html, 'property', 'og:type', 'article');
+  html = setMeta(html, 'property', 'og:url', url);
+  html = setMeta(html, 'property', 'og:title', title);
+  html = setMeta(html, 'property', 'og:description', post.excerpt);
+  html = setMeta(html, 'name', 'twitter:url', url);
+  html = setMeta(html, 'name', 'twitter:title', title);
+  html = setMeta(html, 'name', 'twitter:description', post.excerpt);
+  const image = post.image?.startsWith('http') ? post.image : post.image ? `${SITE_URL}${post.image}` : '';
+  if (image) {
+    html = setMeta(html, 'property', 'og:image', image);
+    html = setMeta(html, 'name', 'twitter:image', image);
+  }
+  html = html.replace(/<link rel="canonical" href="[^"]*"/, `<link rel="canonical" href="${url}"`);
+
+  const structuredData = jsonLd({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description: post.excerpt,
+        image: image || undefined,
+        author: { '@type': 'Organization', name: post.author },
+        publisher: { '@id': `${SITE_URL}/#clinic` },
+        mainEntityOfPage: url,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Início', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: post.title, item: url },
+        ],
+      },
+    ],
+  });
+
+  html = html.replace('</head>', `    ${structuredData}\n  </head>`);
+  html = html.replace('<div id="root"></div>', `<div id="root">${renderBlogBody(post, all)}</div>`);
+  return html;
+}
+
+function renderSitemap(treatments: Treatment[], posts: BlogPost[]): string {
   const today = new Date().toISOString().slice(0, 10);
   const urls = [
     { loc: `${SITE_URL}/`, priority: '1.0', changefreq: 'weekly' },
     ...treatments.map((t) => ({
       loc: getTreatmentUrl(t),
       priority: '0.9',
+      changefreq: 'monthly',
+    })),
+    ...posts.map((p) => ({
+      loc: getBlogPostUrl(p),
+      priority: '0.7',
       changefreq: 'monthly',
     })),
   ];
@@ -202,12 +284,14 @@ export function treatmentPagesPlugin(env: SupabaseEnv): Plugin {
     },
     async closeBundle() {
       let treatments: Treatment[] = [];
+      let posts: BlogPost[] = [];
       let contact: ContactInfo = DEFAULT_CONTACT_INFO;
 
       if (env.url && env.anonKey) {
         // Se o banco falhar, o build falha: melhor manter o deploy anterior no ar do que publicar sem as páginas
         const creds = { url: env.url, anonKey: env.anonKey };
         treatments = (await fetchRows(creds, 'treatments?select=*&order=name')).map(mapTreatmentRow);
+        posts = (await fetchRows(creds, 'blog_posts?select=*&order=created_at.desc').catch(() => [])).map(mapBlogRow);
         const settings = await fetchRows(creds, 'site_settings?select=*&id=eq.default').catch(() => []);
         if (settings[0]) contact = { ...DEFAULT_CONTACT_INFO, ...mapContactInfoRow(settings[0]) };
       } else {
@@ -229,10 +313,22 @@ export function treatmentPagesPlugin(env: SupabaseEnv): Plugin {
         fs.mkdirSync(dir, { recursive: true });
         fs.writeFileSync(path.join(dir, 'index.html'), renderPage(template, t, withPages, contact));
       }
-      fs.writeFileSync(path.join(outDir, 'sitemap.xml'), renderSitemap(withPages));
+      const seenPosts = new Set<string>();
+      const postsWithPages = posts.filter((p) => {
+        const dir = getBlogPostPath(p);
+        if (seenPosts.has(dir)) return false;
+        seenPosts.add(dir);
+        return true;
+      });
+      for (const p of postsWithPages) {
+        const dir = path.join(outDir, getBlogPostPath(p));
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'index.html'), renderBlogPage(template, p, postsWithPages));
+      }
+      fs.writeFileSync(path.join(outDir, 'sitemap.xml'), renderSitemap(withPages, postsWithPages));
       fs.mkdirSync(path.join(outDir, 'avaliar'), { recursive: true });
       fs.writeFileSync(path.join(outDir, 'avaliar', 'index.html'), renderReviewRedirect());
-      this.info?.(`${withPages.length} páginas de tratamento geradas a partir do Supabase + sitemap.xml`);
+      this.info?.(`${withPages.length} páginas de tratamento e ${postsWithPages.length} posts do blog gerados a partir do Supabase + sitemap.xml`);
     },
   };
 }

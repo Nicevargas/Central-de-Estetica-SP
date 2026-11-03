@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { getBlogPostUrl } from '../lib/blogPages';
 import { BlogPost, Treatment, ContactInfo } from '../types';
 import { getTreatmentSeo, getTreatmentUrl } from '../lib/treatmentPages';
 
@@ -27,7 +28,7 @@ export function SEOHead({
     if (selectedBlogPost) {
       pageTitle = `${selectedBlogPost.title} | Blog Central da Estética`;
       pageDescription = selectedBlogPost.excerpt || `Leia nosso artigo completo sobre ${selectedBlogPost.title} no blog da Central da Estética.`;
-      pageUrl = `https://centraldaestetica.com.br/#blog/${selectedBlogPost.slug || selectedBlogPost.id}`;
+      pageUrl = getBlogPostUrl(selectedBlogPost);
       if (selectedBlogPost.image) pageImage = selectedBlogPost.image;
       pageType = 'article';
     } else if (selectedTreatment) {
