@@ -2,7 +2,7 @@
  * Conversão das linhas do Supabase para os tipos do site.
  * Módulo sem dependência do cliente Supabase: usado pelo site e pelo gerador de páginas no build.
  */
-import { Treatment, ContactInfo } from '../types';
+import { Treatment, ContactInfo, BlogPost } from '../types';
 import { sanitizeTreatmentObject, formatGoogleDriveImageUrl, formatVideoEmbedUrl, parseBeforeAfterImages } from './treatmentUtils';
 
 export function mapTreatmentRow(row: any): Treatment {
@@ -36,5 +36,21 @@ export function mapContactInfoRow(data: any): ContactInfo {
     cep: data.cep,
     instagramUrl: data.instagram_url,
     facebookUrl: data.facebook_url,
+  };
+}
+
+export function mapBlogRow(row: any): BlogPost {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    category: row.category,
+    author: row.author,
+    date: row.date,
+    readTime: row.read_time,
+    featured: row.featured,
+    image: row.image,
+    excerpt: row.excerpt,
+    content: row.content,
   };
 }

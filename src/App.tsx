@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { openCookiePreferences, trackEvent, trackWhatsAppOpen } from './lib/analytics';
 import { findTreatmentByPath, getTreatmentPath, isTreatmentLikePath } from './lib/treatmentPages';
+import { findBlogPostByPath, getBlogPostPath, isBlogPostPath } from './lib/blogPages';
 import { FAQS, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
@@ -74,7 +75,7 @@ import ActiveBookingsList from './components/ActiveBookingsList';
 import PromoBanner from './components/PromoBanner';
 import { BlogSection } from './components/BlogSection';
 import { BlogPage } from './components/BlogPage';
-import { BlogDetailModal } from './components/BlogDetailModal';
+import { BlogPostPage } from './components/BlogPostPage';
 import { AdminArea } from './components/AdminArea';
 import TreatmentDetailModal from './components/TreatmentDetailModal';
 import { SEOHead } from './components/SEOHead';
@@ -226,6 +227,36 @@ export default function App() {
     }
     window.history.replaceState(null, '', url.toString());
   }, [selectedTreatmentForDetail, treatments]);
+
+  // Post do blog pedido pelo endereço (/blog/<slug>/), resolvido quando a lista de posts estiver disponível
+  const pendingBlogPathFromUrl = useRef<string | null>(
+    typeof window !== 'undefined' && isBlogPostPath(window.location.pathname) ? window.location.pathname : null
+  );
+
+  // Abre o post pedido pela URL e mantém a barra de endereço sincronizada com a página aberta
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const pending = pendingBlogPathFromUrl.current;
+    if (pending) {
+      if (blogPosts.length === 0) return; // aguardando dados
+      pendingBlogPathFromUrl.current = null;
+      const match = findBlogPostByPath(pending, blogPosts);
+      if (match) {
+        setSelectedBlogPost(match);
+        return;
+      }
+    }
+
+    const url = new URL(window.location.href);
+    if (selectedBlogPost) {
+      url.pathname = getBlogPostPath(selectedBlogPost);
+      window.history.replaceState(null, '', url.toString());
+    } else if (isBlogPostPath(url.pathname)) {
+      url.pathname = '/';
+      window.history.replaceState(null, '', url.toString());
+    }
+  }, [selectedBlogPost, blogPosts]);
 
   // Save Handlers
   const handleSaveTreatments = (data: Treatment[]) => {
@@ -1451,12 +1482,20 @@ export default function App() {
         />
       )}
 
-      {/* Blog Article Detail Modal */}
-      <BlogDetailModal
-        post={selectedBlogPost}
-        onClose={() => setSelectedBlogPost(null)}
-        onBookClick={() => triggerBooking()}
-      />
+      {/* Página do artigo do blog */}
+      {selectedBlogPost && (
+        <BlogPostPage
+          post={selectedBlogPost}
+          posts={blogPosts}
+          onClose={() => setSelectedBlogPost(null)}
+          onBookClick={() => {
+            setSelectedBlogPost(null);
+            triggerBooking();
+          }}
+          onSelectPost={(post) => setSelectedBlogPost(post)}
+          whatsappNumber={contactInfo.whatsappNumber}
+        />
+      )}
 
       {/* Admin Panel Modal Overlay */}
       {isAdminOpen && (
