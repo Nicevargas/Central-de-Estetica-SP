@@ -31,22 +31,51 @@ export function findBlogPostByPath<T extends BlogRef>(pathname: string, posts: T
   return posts.find((p) => slugOf(p) === slug) || null;
 }
 
-/** Quebra o texto do post em blocos (parágrafos, títulos "### ", listas "- " e numeradas) */
+/** Blocos do artigo: parágrafos, títulos "### ", listas "- ", numeradas e destaques "> " */
 export type BlogBlock =
   | { type: 'h3'; text: string }
   | { type: 'ul'; items: string[] }
   | { type: 'ol'; items: string[] }
+  | { type: 'callout'; text: string }
   | { type: 'p'; text: string };
+
+/** Parágrafos longos viram blocos de até ~2 frases, para leitura mais leve */
+function splitLongParagraph(text: string, max = 300): string[] {
+  if (text.length <= max) return [text];
+  const sentences = text.match(/[^.!?]+[.!?]+(?:["”)]+)?\s*|[^.!?]+$/g) || [text];
+  const chunks: string[] = [];
+  let current = '';
+  for (const sentence of sentences) {
+    if (current && (current + sentence).length > max) {
+      chunks.push(current.trim());
+      current = '';
+    }
+    current += sentence;
+  }
+  if (current.trim()) chunks.push(current.trim());
+  return chunks;
+}
 
 export function parseBlogContent(content: string): BlogBlock[] {
   return content
-    .split(/\n\n+/)
+    .replace(/\r\n?/g, '\n')
+    .split(/\n\s*\n/)
     .map((raw) => raw.trim())
     .filter(Boolean)
-    .map((p): BlogBlock => {
-      if (p.startsWith('### ')) return { type: 'h3', text: p.slice(4) };
-      if (p.startsWith('- ')) return { type: 'ul', items: p.split('\n').map((i) => i.replace(/^- /, '')) };
-      if (/^\d+\.\s/.test(p)) return { type: 'ol', items: p.split('\n').map((i) => i.replace(/^\d+\.\s*/, '')) };
-      return { type: 'p', text: p };
+    .flatMap((p): BlogBlock[] => {
+      const lines = p.split('\n');
+      if (p.startsWith('### ')) return [{ type: 'h3', text: p.slice(4) }];
+      if (p.startsWith('> ')) return [{ type: 'callout', text: lines.map((l) => l.replace(/^>\s?/, '')).join(' ') }];
+      if (p.startsWith('- ')) return [{ type: 'ul', items: lines.map((i) => i.replace(/^-\s*/, '')) }];
+      if (/^\d+\.\s/.test(p)) return [{ type: 'ol', items: lines.map((i) => i.replace(/^\d+\.\s*/, '')) }];
+      return splitLongParagraph(lines.join(' ')).map((text): BlogBlock => ({ type: 'p', text }));
     });
+}
+
+/** Trechos do texto, separando o que está entre **asteriscos duplos** (destaque em negrito) */
+export function parseInline(text: string): { text: string; bold: boolean }[] {
+  return text
+    .split(/\*\*(.+?)\*\*/g)
+    .map((part, i) => ({ text: part, bold: i % 2 === 1 }))
+    .filter((part) => part.text);
 }

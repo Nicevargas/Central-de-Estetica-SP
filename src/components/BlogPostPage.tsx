@@ -5,6 +5,7 @@ import {
   Calendar,
   Check,
   Clock,
+  Info,
   Link2,
   List,
   MessageCircle,
@@ -14,7 +15,7 @@ import {
   User,
 } from 'lucide-react';
 import { BlogPost } from '../types';
-import { getBlogPostUrl, parseBlogContent } from '../lib/blogPages';
+import { getBlogPostUrl, parseBlogContent, parseInline } from '../lib/blogPages';
 import { LAVIEEN_BLOG_SLUG, LAVIEEN_VIDEOS } from '../lib/lavieenVideos';
 
 interface BlogPostPageProps {
@@ -25,6 +26,20 @@ interface BlogPostPageProps {
   onSelectPost: (post: BlogPost) => void;
   whatsappNumber?: string;
 }
+
+const Inline: React.FC<{ text: string }> = ({ text }) => (
+  <>
+    {parseInline(text).map((part, i) =>
+      part.bold ? (
+        <strong key={i} className="font-bold text-stone-900 dark:text-stone-50 bg-rose-100/70 dark:bg-rose-900/30 px-0.5 rounded box-decoration-clone">
+          {part.text}
+        </strong>
+      ) : (
+        <React.Fragment key={i}>{part.text}</React.Fragment>
+      ),
+    )}
+  </>
+);
 
 const anchorId = (text: string) =>
   'secao-' +
@@ -228,7 +243,7 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({
                       {block.items.map((item, j) => (
                         <li key={j} className="flex items-start gap-2.5 text-sm sm:text-base text-stone-700 dark:text-stone-300">
                           <Check className="h-4 w-4 text-rose-600 mt-1 shrink-0" />
-                          <span>{item}</span>
+                          <span><Inline text={item} /></span>
                         </li>
                       ))}
                     </ul>
@@ -242,15 +257,25 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({
                           <span className="h-6 w-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                             {j + 1}
                           </span>
-                          <span>{item}</span>
+                          <span><Inline text={item} /></span>
                         </li>
                       ))}
                     </ol>
                   );
                 }
+                if (block.type === 'callout') {
+                  return (
+                    <div key={i} className="flex items-start gap-3 rounded-2xl p-5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60">
+                      <Info className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+                      <p className="text-sm sm:text-base font-semibold text-stone-900 dark:text-stone-100 leading-relaxed">
+                        <Inline text={block.text} />
+                      </p>
+                    </div>
+                  );
+                }
                 return (
-                  <p key={i} className="text-sm sm:text-base leading-relaxed text-stone-700 dark:text-stone-300">
-                    {block.text}
+                  <p key={i} className="text-base sm:text-[17px] leading-8 text-stone-700 dark:text-stone-300">
+                    <Inline text={block.text} />
                   </p>
                 );
               })}
