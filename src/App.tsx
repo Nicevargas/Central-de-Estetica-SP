@@ -41,7 +41,7 @@ import {
 import { openCookiePreferences, trackEvent, trackWhatsAppOpen } from './lib/analytics';
 import { findTreatmentByPath, getTreatmentPath, isTreatmentLikePath } from './lib/treatmentPages';
 import { findBlogPostByPath, getBlogPostPath, isBlogPostPath } from './lib/blogPages';
-import { FAQS, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS } from './data';
+import { FAQS, GOOGLE_MAPS_URL, GOOGLE_MAPS_EMBED_URL, OPENING_HOURS, googleMapsRouteUrl } from './data';
 import { BookingRequest, Treatment, Promotion, Testimonial, BlogPost, ContactInfo } from './types';
 import {
   getStoredTreatments,
@@ -849,26 +849,76 @@ export default function App() {
                 <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12">
                     <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary mb-2">Conheça nosso espaço</h2>
-                    <p className="text-on-surface-variant text-sm sm:text-base">Atendimento próximo, ambiente acolhedor e avaliação cuidadosa em cada etapa.</p>
+                    <p className="text-on-surface-variant text-sm sm:text-base">Atendimento próximo, ambiente acolhedor e fácil de encontrar no Jardim Paulista.</p>
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[
-                      { src: '/clinica/atendimento-conversa.jpg', alt: 'Conversa de avaliação com a especialista da Central da Estética', span: '' },
-                      { src: '/clinica/avaliacao-facial.jpg', alt: 'Avaliação facial personalizada na Central da Estética', span: '' },
-                      { src: '/clinica/consultorio.jpg', alt: 'Consultório da Central da Estética no Jardim Paulista', span: '' },
-                      { src: '/clinica/tratamento-maca.jpg', alt: 'Cliente em atendimento na sala de tratamento', span: '' },
-                      { src: '/clinica/ficha-avaliacao.jpg', alt: 'Ficha de avaliação preenchida durante a consulta', span: '' },
-                      { src: '/clinica/fachada.jpg', alt: 'Fachada da Central da Estética no Jardim Paulista', span: '' },
-                    ].map((photo) => (
-                      <div key={photo.src} className={`overflow-hidden rounded-2xl shadow-sm border border-outline-variant/10 aspect-[3/4] ${photo.span}`}>
-                        <img
-                          src={photo.src}
-                          alt={photo.alt}
+                  <div className="grid lg:grid-cols-2 gap-6 items-stretch">
+                    <div className="overflow-hidden rounded-3xl shadow-premium border border-outline-variant/10 aspect-[3/4] lg:aspect-auto lg:min-h-[520px]">
+                      <img
+                        src="/clinica/fachada.jpg"
+                        alt="Fachada da Central da Estética no Jardim Paulista"
+                        loading="lazy"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <div className="w-full flex-1 min-h-[320px] rounded-3xl overflow-hidden shadow-premium border border-outline-variant/20">
+                        <iframe
+                          title="Mapa - Central da Estética, Rua Artur Frazão 33, São Paulo"
+                          src={GOOGLE_MAPS_EMBED_URL}
+                          className="w-full h-full min-h-[320px] border-0"
                           loading="lazy"
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          referrerPolicy="no-referrer-when-downgrade"
                         />
                       </div>
-                    ))}
+                      <div className="bg-surface-container-low rounded-2xl p-5 space-y-4">
+                        <p className="flex items-start gap-2 text-sm text-on-surface-variant">
+                          <MapPin className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
+                          <span>
+                            <strong className="text-on-surface">{contactInfo.addressLine1}</strong> – {contactInfo.addressLine2}
+                            <br />CEP {contactInfo.cep}
+                          </span>
+                        </p>
+                        <p className="flex items-start gap-2 text-sm text-on-surface-variant">
+                          <Clock className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
+                          <span>{OPENING_HOURS.join(' · ')}</span>
+                        </p>
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Como chegar</p>
+                          <p className="text-xs text-on-surface-variant mb-3">
+                            Escolha como você vai e o Google Maps traça a rota a partir de onde você está.
+                          </p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {([
+                              ['driving', 'De carro ou app'],
+                              ['transit', 'Transporte público'],
+                              ['walking', 'A pé'],
+                            ] as const).map(([mode, label]) => (
+                              <a
+                                key={mode}
+                                href={googleMapsRouteUrl(mode)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="border-2 border-primary text-primary px-2 py-3 rounded-xl font-semibold text-xs sm:text-sm hover:bg-primary hover:text-white transition-all text-center"
+                              >
+                                {label}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-xs text-on-surface-variant">
+                          Ficou com dúvida para chegar? Chame a gente no{' '}
+                          <a
+                            href={`https://wa.me/${contactInfo.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent('Olá! Preciso de ajuda para chegar na clínica.')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary font-semibold underline"
+                          >
+                            WhatsApp
+                          </a>
+                          .
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </section>
