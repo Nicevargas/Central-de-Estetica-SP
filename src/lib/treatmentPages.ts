@@ -31,7 +31,7 @@ export const TREATMENT_SEO_OVERRIDES: Record<string, TreatmentPageSeo> = {
     description:
       'Secagem de vasinhos nas pernas com laser vascular e PEIM no Jardim Paulista, SP. Sem repouso e sem cirurgia. Agende sua avaliação pelo WhatsApp.',
   },
-  'botox-dysport': {
+  botox: {
     slug: 'botox-jardins-sp',
     title: 'Botox nos Jardins, SP (3 Regiões com Retoque) | Central da Estética',
     heading: 'Botox e Dysport nos Jardins, São Paulo',
@@ -52,7 +52,7 @@ export const TREATMENT_SEO_OVERRIDES: Record<string, TreatmentPageSeo> = {
     description:
       'Laser Lavieén (efeito BB Laser) para manchas, melasma, poros e viço da pele no Jardim Paulista, SP. Agende sua avaliação.',
   },
-  'co2-hibrido': {
+  'treatment-1786999223217': {
     slug: 'laser-co2-fracionado-sp',
     title: 'Laser CO2 Fracionado em SP (Full Face) | Central da Estética',
     heading: 'Laser CO2 Híbrido Full Face em São Paulo',
@@ -80,7 +80,7 @@ export const TREATMENT_SEO_OVERRIDES: Record<string, TreatmentPageSeo> = {
     description:
       'Glúteo Max: harmonização glútea para volume, firmeza e contorno no Jardim Paulista, SP. Agende sua avaliação.',
   },
-  'terapia-capilar': {
+  'tratamento-queda-capilar': {
     slug: 'tratamento-queda-de-cabelo-sp',
     title: 'Tratamento para Queda de Cabelo em SP | Central da Estética',
     heading: 'Tratamento para Queda de Cabelo em São Paulo',
