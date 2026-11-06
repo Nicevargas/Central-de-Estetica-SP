@@ -1263,9 +1263,9 @@ export default function App() {
         </section>
       </main>
 
-      {/* Google Meu Negócio - destaque: mapa, como chegar e avaliações */}
+      {/* Google Meu Negócio - destaque: como chegar e avaliações (o mapa fica em "Conheça nosso espaço") */}
       <section id="google" aria-labelledby="google-heading" className="py-16 bg-white border-t border-outline-variant/20">
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
+        <div className="max-w-3xl mx-auto px-6 text-center">
           <div className="space-y-6">
             <span className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
               <MapPin className="h-3.5 w-3.5" /> Encontre-nos no Google
@@ -1274,16 +1274,16 @@ export default function App() {
               Central da Estética no Jardim Paulista
             </h2>
             <div className="space-y-3 text-sm text-on-surface-variant">
-              <p className="flex items-start gap-2">
+              <p className="flex items-start justify-center gap-2">
                 <MapPin className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
                 <span>{contactInfo.addressLine1} – {contactInfo.addressLine2} – CEP {contactInfo.cep}</span>
               </p>
-              <p className="flex items-start gap-2">
+              <p className="flex items-start justify-center gap-2">
                 <Clock className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
                 <span>{OPENING_HOURS.join(' · ')}</span>
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
               <a
                 href={GOOGLE_MAPS_URL}
                 target="_blank"
@@ -1301,15 +1301,6 @@ export default function App() {
                 <Star className="h-4 w-4 fill-current" /> Avaliar no Google
               </a>
             </div>
-          </div>
-          <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-premium border border-outline-variant/20">
-            <iframe
-              title="Mapa - Central da Estética, Rua Artur Frazão 33, São Paulo"
-              src={GOOGLE_MAPS_EMBED_URL}
-              className="w-full h-full border-0"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
           </div>
         </div>
       </section>
