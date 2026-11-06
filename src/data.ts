@@ -20,6 +20,9 @@ export const GOOGLE_MAPS_URL =
   'https://www.google.com/maps/search/?api=1&query=Central+da+Est%C3%A9tica+Rua+Artur+Fraz%C3%A3o+33+S%C3%A3o+Paulo';
 export const GOOGLE_MAPS_EMBED_URL =
   'https://www.google.com/maps?q=Central+da+Est%C3%A9tica,+Rua+Artur+Fraz%C3%A3o,+33,+Jardim+Paulista,+S%C3%A3o+Paulo+-+SP&output=embed';
+/** Rota no Google Maps até a clínica, a partir de onde a pessoa estiver (driving, transit ou walking). */
+export const googleMapsRouteUrl = (mode: 'driving' | 'transit' | 'walking') =>
+  `https://www.google.com/maps/dir/?api=1&destination=Central+da+Est%C3%A9tica+Rua+Artur+Fraz%C3%A3o+33+S%C3%A3o+Paulo&travelmode=${mode}`;
 export const OPENING_HOURS = ['Seg a Sex: 8h às 20h', 'Sábado: 8h às 16h'];
 
 export const FAQS: FAQ[] = [
