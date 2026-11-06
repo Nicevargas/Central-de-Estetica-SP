@@ -73,6 +73,7 @@ import BookingModal from './components/BookingModal';
 import TreatmentCard from './components/TreatmentCard';
 import ActiveBookingsList from './components/ActiveBookingsList';
 import PromoBanner from './components/PromoBanner';
+import HeroBanner from './components/HeroBanner';
 import { BlogSection } from './components/BlogSection';
 import { BlogPage } from './components/BlogPage';
 import { BlogPostPage } from './components/BlogPostPage';
@@ -582,7 +583,7 @@ export default function App() {
                   <div className="space-y-6">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-wider">
                       <Sparkles className="h-4 w-4 text-primary" />
-                      12 Anos de Excelência no Jardim Paulista
+                      20 Anos de Excelência no Jardim Paulista
                     </div>
                     <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-on-surface leading-tight">
                       Sua melhor versão, com o <span className="gradient-text">cuidado</span> que você merece
@@ -610,15 +611,7 @@ export default function App() {
                   <div className="relative">
                     <div className="absolute inset-0 bg-secondary/10 rounded-[40px] rotate-3 -z-10 scale-105" />
                     <div className="w-full aspect-[4/3] sm:aspect-[16/11] lg:h-[480px] rounded-[40px] overflow-hidden shadow-2xl relative">
-                      <img
-                        className="w-full h-full object-cover"
-                        src="/banner.png"
-                        alt="Tratamento de estética e cuidados com a pele de alta performance"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
-                        }}
-                      />
+                      <HeroBanner />
                       {/* Floating Badge */}
                       <div className="absolute bottom-6 left-6 glass-card p-4 rounded-2xl flex items-center gap-3 animate-bounce-slow shadow-lg">
                         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
@@ -783,10 +776,10 @@ export default function App() {
                     />
                     {/* Floating badge */}
                     <div className="absolute -bottom-6 -right-6 glass-card p-6 rounded-2xl z-20 max-w-xs shadow-xl">
-                      <div className="font-serif text-primary text-5xl font-bold mb-1">12+</div>
+                      <div className="font-serif text-primary text-5xl font-bold mb-1">20+</div>
                       <div className="text-xs font-bold uppercase tracking-wider text-on-surface mb-1">Anos de Tradição</div>
                       <p className="text-xs text-on-surface-variant font-medium leading-relaxed">
-                        Clínica de saúde, beleza e bem-estar há mais de 12 anos no Mercado com uma carteira sólida de clientes.
+                        Clínica de saúde, beleza e bem-estar há mais de 20 anos no Mercado com uma carteira sólida de clientes.
                       </p>
                     </div>
                   </div>
@@ -839,7 +832,7 @@ export default function App() {
                           className="bg-white rounded-2xl p-6 border border-outline-variant/15 text-sm text-on-surface-variant space-y-3 leading-relaxed mt-4"
                         >
                           <p>
-                            Com mais de 12 anos de atuação no mercado, a Central da Estética se consolidou como referência em saúde, beleza e bem-estar no Jardim Paulista, contando com uma carteira sólida de clientes satisfeitos. Acreditamos que a beleza é a expressão exterior de uma saúde equilibrada.
+                            Com mais de 20 anos de atuação no mercado, a Central da Estética se consolidou como referência em saúde, beleza e bem-estar no Jardim Paulista, contando com uma carteira sólida de clientes satisfeitos. Acreditamos que a beleza é a expressão exterior de uma saúde equilibrada.
                           </p>
                           <p>
                             Nossos profissionais realizam constantes especializações internacionais para trazer as técnicas de rejuvenescimento facial e remodelagem corporal mais modernas do mundo, garantindo segurança clínica absoluta.
@@ -847,6 +840,35 @@ export default function App() {
                         </motion.div>
                       )}
                     </AnimatePresence>
+                  </div>
+                </div>
+              </section>
+
+              {/* Nosso espaço / atendimento */}
+              <section id="nosso-espaco" className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-6">
+                  <div className="text-center mb-12">
+                    <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary mb-2">Conheça nosso espaço</h2>
+                    <p className="text-on-surface-variant text-sm sm:text-base">Atendimento próximo, ambiente acolhedor e avaliação cuidadosa em cada etapa.</p>
+                  </div>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      { src: '/clinica/atendimento-conversa.jpg', alt: 'Conversa de avaliação com a especialista da Central da Estética', span: '' },
+                      { src: '/clinica/avaliacao-facial.jpg', alt: 'Avaliação facial personalizada na Central da Estética', span: '' },
+                      { src: '/clinica/consultorio.jpg', alt: 'Consultório da Central da Estética no Jardim Paulista', span: '' },
+                      { src: '/clinica/tratamento-maca.jpg', alt: 'Cliente em atendimento na sala de tratamento', span: '' },
+                      { src: '/clinica/ficha-avaliacao.jpg', alt: 'Ficha de avaliação preenchida durante a consulta', span: '' },
+                      { src: '/clinica/fachada.jpg', alt: 'Fachada da Central da Estética no Jardim Paulista', span: '' },
+                    ].map((photo) => (
+                      <div key={photo.src} className={`overflow-hidden rounded-2xl shadow-sm border border-outline-variant/10 aspect-[3/4] ${photo.span}`}>
+                        <img
+                          src={photo.src}
+                          alt={photo.alt}
+                          loading="lazy"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </section>
@@ -916,11 +938,15 @@ export default function App() {
             >
               <section className="max-w-7xl mx-auto px-6">
                 {/* Treatments Header */}
-                <div className="text-center max-w-2xl mx-auto mb-12">
+                <div className="relative overflow-hidden rounded-[32px] mb-12 min-h-[260px] flex items-center justify-center text-center shadow-lg">
+                  <img src="/clinica/consultorio.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/60 to-white/80" />
+                  <div className="relative z-10 max-w-2xl mx-auto px-6 py-12">
                   <h1 className="font-serif text-4xl sm:text-5xl font-bold text-primary mb-4">Nossos Tratamentos</h1>
-                  <p className="text-on-surface-variant text-sm sm:text-base leading-relaxed">
+                  <p className="text-on-surface text-sm sm:text-base leading-relaxed">
                     Descubra nossa curadoria exclusiva de tratamentos estéticos corporais, faciais e bem-estar. Escolha o ideal para suas necessidades e agende uma avaliação personalizada.
                   </p>
+                </div>
                 </div>
 
                 {/* Sub Tab filters */}
