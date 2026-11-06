@@ -73,6 +73,7 @@ import BookingModal from './components/BookingModal';
 import TreatmentCard from './components/TreatmentCard';
 import ActiveBookingsList from './components/ActiveBookingsList';
 import PromoBanner from './components/PromoBanner';
+import HeroBanner from './components/HeroBanner';
 import { BlogSection } from './components/BlogSection';
 import { BlogPage } from './components/BlogPage';
 import { BlogPostPage } from './components/BlogPostPage';
@@ -610,15 +611,7 @@ export default function App() {
                   <div className="relative">
                     <div className="absolute inset-0 bg-secondary/10 rounded-[40px] rotate-3 -z-10 scale-105" />
                     <div className="w-full aspect-[4/3] sm:aspect-[16/11] lg:h-[480px] rounded-[40px] overflow-hidden shadow-2xl relative">
-                      <img
-                        className="w-full h-full object-cover"
-                        src="/banner.png"
-                        alt="Tratamento de estética e cuidados com a pele de alta performance"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80';
-                        }}
-                      />
+                      <HeroBanner />
                       {/* Floating Badge */}
                       <div className="absolute bottom-6 left-6 glass-card p-4 rounded-2xl flex items-center gap-3 animate-bounce-slow shadow-lg">
                         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
@@ -945,11 +938,15 @@ export default function App() {
             >
               <section className="max-w-7xl mx-auto px-6">
                 {/* Treatments Header */}
-                <div className="text-center max-w-2xl mx-auto mb-12">
+                <div className="relative overflow-hidden rounded-[32px] mb-12 min-h-[260px] flex items-center justify-center text-center shadow-lg">
+                  <img src="/clinica/consultorio.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/60 to-white/80" />
+                  <div className="relative z-10 max-w-2xl mx-auto px-6 py-12">
                   <h1 className="font-serif text-4xl sm:text-5xl font-bold text-primary mb-4">Nossos Tratamentos</h1>
-                  <p className="text-on-surface-variant text-sm sm:text-base leading-relaxed">
+                  <p className="text-on-surface text-sm sm:text-base leading-relaxed">
                     Descubra nossa curadoria exclusiva de tratamentos estéticos corporais, faciais e bem-estar. Escolha o ideal para suas necessidades e agende uma avaliação personalizada.
                   </p>
+                </div>
                 </div>
 
                 {/* Sub Tab filters */}
