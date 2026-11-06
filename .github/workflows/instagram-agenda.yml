@@ -1,0 +1,61 @@
+name: Instagram — fila agendada
+
+# Publica as pastas de instagram/agenda/ quando chega o horário de agendamento.txt.
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: instagram-publish
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publicar o que já está na hora
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          PUBLIC_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}
+        run: |
+          set -o pipefail
+          shopt -s nullglob
+          now=$(date +%s)
+          for dir in instagram/agenda/*/; do
+            dir="${dir%/}"
+            [ -f "$dir/publicado.txt" ] && continue
+            [ -f "$dir/agendamento.txt" ] && [ -f "$dir/legenda.txt" ] || { echo "::warning::$dir incompleta, ignorada"; continue; }
+            quando=$(date -d "$(cat "$dir/agendamento.txt")" +%s) || { echo "::warning::$dir data inválida"; continue; }
+            [ "$now" -ge "$quando" ] || continue
+            if [ $((now - quando)) -gt 86400 ]; then
+              echo "::warning::$dir atrasada em mais de 24h, ignorada"; continue
+            fi
+            echo "== $dir"
+            if [ -f "$dir/video.mp4" ]; then
+              node scripts/instagram/publish.mjs reel --caption "$(cat "$dir/legenda.txt")" "$dir/video.mp4" | tee /tmp/resultado.txt
+            else
+              imgs=("$dir"/*.jpg)
+              node scripts/instagram/publish.mjs post --caption "$(cat "$dir/legenda.txt")" "${imgs[@]}" | tee /tmp/resultado.txt
+            fi
+            mv /tmp/resultado.txt "$dir/publicado.txt"
+            echo "PUBLICOU=1" >> "$GITHUB_ENV"
+            echo "### $dir" >> "$GITHUB_STEP_SUMMARY"
+            cat "$dir/publicado.txt" >> "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Marcar como publicado
+        if: always() && env.PUBLICOU == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add instagram/agenda/*/publicado.txt
+          git commit -m "chore(instagram): marca posts da agenda como publicados [skip ci]"
+          git pull --rebase
+          git push

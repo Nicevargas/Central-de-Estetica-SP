@@ -15,6 +15,7 @@
  *   node scripts/instagram/publish.mjs check
  *   node scripts/instagram/publish.mjs post --caption "Legenda" img1.jpg [img2.jpg ...]
  *   node scripts/instagram/publish.mjs post --caption "Legenda" --dry-run https://site/foto.jpg
+ *   node scripts/instagram/publish.mjs reel --caption "Legenda" video.mp4
  *   node scripts/instagram/publish.mjs refresh   (renova o token de 60 dias)
  *
  * Imagens: URL pública (https://...) ou arquivo local JPEG. A API do Instagram
@@ -79,7 +80,7 @@ async function toPublicUrl(src) {
 }
 
 async function waitReady(containerId) {
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 60; i++) {
     const { status_code } = await api('GET', `/${containerId}`, { fields: 'status_code' });
     if (status_code === 'FINISHED') return;
     if (status_code === 'ERROR' || status_code === 'EXPIRED') {
@@ -134,6 +135,31 @@ async function post(images, caption, dryRun) {
   console.log(`Publicado! ${permalink}`);
 }
 
+async function reel(video, caption, dryRun) {
+  if (!/^https:\/\//.test(video)) {
+    if (!/\.mp4$/i.test(video)) fail(`${video}: o Reel precisa ser .mp4.`);
+    if (!existsSync(video)) fail(`${video}: arquivo não encontrado.`);
+  }
+  const me = await getUser();
+  const igId = me.user_id;
+  console.log(`Conta: @${me.username} (${igId}) — Reel ${video}`);
+  if (dryRun) {
+    console.log('[dry-run] Token e conta OK. Nada foi publicado.');
+    return;
+  }
+  const video_url = await toPublicUrl(video);
+  const { id: creationId } = await api('POST', `/${igId}/media`, {
+    media_type: 'REELS',
+    video_url,
+    caption,
+    share_to_feed: 'true',
+  });
+  await waitReady(creationId);
+  const { id: mediaId } = await api('POST', `/${igId}/media_publish`, { creation_id: creationId });
+  const { permalink } = await api('GET', `/${mediaId}`, { fields: 'permalink' });
+  console.log(`Publicado! ${permalink}`);
+}
+
 async function main() {
   const [cmd, ...rest] = process.argv.slice(2);
   if (!TOKEN) fail('INSTAGRAM_ACCESS_TOKEN não definido.');
@@ -163,7 +189,20 @@ async function main() {
     await post(images, caption, dryRun);
     return;
   }
-  fail('Comando desconhecido. Use: check | post | refresh');
+  if (cmd === 'reel') {
+    let caption = '';
+    let dryRun = false;
+    let video;
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--caption') caption = rest[++i] ?? '';
+      else if (rest[i] === '--dry-run') dryRun = true;
+      else video = rest[i];
+    }
+    if (!video) fail('Informe o vídeo .mp4 do Reel.');
+    await reel(video, caption, dryRun);
+    return;
+  }
+  fail('Comando desconhecido. Use: check | post | reel | refresh');
 }
 
 main().catch((e) => fail(e.message));
