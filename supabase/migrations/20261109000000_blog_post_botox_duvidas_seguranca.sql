@@ -88,6 +88,22 @@ Por isso, antes de se submeter ao procedimento:
 
 Existem situações em que o procedimento não é indicado ou exige cuidado especial, como gestação, amamentação, alergia a componentes da fórmula, infecção na região a ser tratada e algumas doenças neuromusculares. Quem decide é o profissional, **na avaliação**.
 
+### Mitos e verdades sobre o Botox
+
+Como o procedimento é muito popular, circulam várias ideias equivocadas. Vale separar o que é informação do que é boato.
+
+- **"Botox preenche rugas":** não. Ele **relaxa o músculo** que forma a linha de expressão. Quem preenche volume são outros procedimentos, como os preenchedores
+- **"Quem faz uma vez não pode parar":** não existe obrigação. Quando o efeito passa, o músculo **volta a se movimentar normalmente**
+- **"Todo Botox deixa o rosto sem expressão":** o resultado depende da **dose e da técnica**. O planejamento correto busca manter a naturalidade
+- **"Funciona no mesmo dia":** o efeito é **gradual** e costuma aparecer ao longo dos primeiros dias
+- **"Serve para qualquer tipo de ruga":** a toxina atua nas linhas de **expressão dinâmica**. Rugas profundas, flacidez e perda de volume podem pedir outras abordagens, definidas na avaliação
+
+### Botox e o cuidado diário com a pele
+
+A toxina age no músculo, mas a **qualidade da pele** também depende dos hábitos do dia a dia.
+
+Manter o **protetor solar diário**, a hidratação e uma rotina de cuidados orientada por profissional ajuda a pele a ter um aspecto saudável. Lembre-se de que o Botox **não substitui** esses cuidados: ele trabalha em conjunto com eles.
+
 ### Agende sua avaliação
 
 Quer saber se o Botox ou o Dysport faz sentido para você? Na **Central da Estética**, no Jardim Paulista, em São Paulo, a primeira etapa é uma **avaliação individual**, com todas as suas dúvidas esclarecidas.
