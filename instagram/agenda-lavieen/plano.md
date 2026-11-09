@@ -10,7 +10,7 @@ CTA fixo em todas as legendas: **Comente AVALIAÇÃO e receba o link no Direct.*
 | 1 | seg 09/11 | 16h | Reel | Laser Lavieén parte 1 (manchas de sol / melanose solar) |
 | 2 | qua 11/11 | 17h | Reel | Laser Lavieén parte 2 (pós-Lavieén) |
 | 3 | sex 13/11 | 15h | Carrossel | Benefícios do Laser Lavieén |
-| 4 | seg 16/11 | 17h | Reel | Estrias (inclusive sobre tatuagem) |
+| 4 | qui 12/11 | 16h | Reel | Estrias (inclusive sobre tatuagem) |
 | 5 | qua 18/11 | 16h | Carrossel | Lavieén nas estrias: o que esperar |
 | 6 | sex 20/11 | 15h | Reel | Anete parte 1 (qualquer tipo de pele) |
 | 7 | seg 23/11 | 17h | Reel | Anete parte 2 (colo, papada, o que evitar) |
