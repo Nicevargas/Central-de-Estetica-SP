@@ -6,10 +6,14 @@
  * - Google Analytics 4 (propriedade "Central da Estética", ID G-F6JB9Z88VY). A variável
  *   VITE_GA_MEASUREMENT_ID, se definida no Vercel, substitui o ID padrão. Registra também os eventos de conversão abaixo.
  *   Cookies do GA só são gravados após a visitante aceitar o aviso (components/CookieBanner.tsx).
+ * - Google Ads (conta 493-943-0997, tag AW-18571950133): cada clique para falar com a clínica no
+ *   WhatsApp vira a conversão "Clique no WhatsApp (site)". Cookies de anúncios também dependem do aceite.
  */
 
 const DEFAULT_GA_ID = 'G-F6JB9Z88VY';
 const GA_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID || DEFAULT_GA_ID).trim();
+const ADS_ID = 'AW-18571950133';
+const WHATSAPP_CONVERSION = 'AW-18571950133/yLiICO3tuLcdELXw5ZdF';
 
 declare global {
   interface Window {
@@ -21,6 +25,16 @@ declare global {
 export function trackEvent(name: string, params: Record<string, string | number | undefined> = {}): void {
   if (typeof window === 'undefined' || !window.gtag) return;
   window.gtag('event', name, params);
+}
+
+/** Conversão do Google Ads: só conta conversa com a clínica, não o "compartilhar no WhatsApp" */
+function trackWhatsAppConversion(): void {
+  trackEvent('conversion', { send_to: WHATSAPP_CONVERSION });
+}
+
+/** wa.me/<número> abre conversa com a clínica; wa.me/?text= é só compartilhamento */
+function isWhatsAppContact(href: string): boolean {
+  return /wa\.me\/\d|api\.whatsapp\.com\/send\?(?:.*&)?phone=\d/i.test(href);
 }
 
 /** Identifica cliques de conversão pelo destino do link */
@@ -39,7 +53,8 @@ function classifyLink(href: string): { event: string; params: Record<string, str
 // =============================
 export type CookieConsent = 'granted' | 'denied';
 
-const CONSENT_KEY = 'central_cookie_consent_v1';
+// v2: o aceite passou a incluir a medição do Google Ads, então quem aceitou só a análise vê o aviso de novo
+const CONSENT_KEY = 'central_cookie_consent_v2';
 export const OPEN_COOKIE_PREFERENCES_EVENT = 'central:open-cookie-preferences';
 
 export function getCookieConsent(): CookieConsent | null {
@@ -52,9 +67,9 @@ export function getCookieConsent(): CookieConsent | null {
 }
 
 function consentState(consent: CookieConsent | null) {
-  const analytics = consent === 'granted' ? 'granted' : 'denied';
-  // O site não usa anúncios: armazenamento e personalização de anúncios ficam sempre negados
-  return { analytics_storage: analytics, ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' };
+  const granted = consent === 'granted' ? 'granted' : 'denied';
+  // Medição de anúncios (Google Ads) segue a mesma escolha; anúncios personalizados (remarketing) ficam sempre negados
+  return { analytics_storage: granted, ad_storage: granted, ad_user_data: granted, ad_personalization: 'denied' };
 }
 
 export function setCookieConsent(consent: CookieConsent): void {
@@ -87,6 +102,7 @@ export function initAnalytics(): void {
     window.gtag('consent', 'default', consentState(getCookieConsent()));
     window.gtag('js', new Date());
     window.gtag('config', GA_ID);
+    window.gtag('config', ADS_ID);
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`;
@@ -102,6 +118,7 @@ export function initAnalytics(): void {
       if (!anchor) return;
       const match = classifyLink(anchor.href);
       if (match) trackEvent(match.event, { ...match.params, link_text: anchor.textContent?.trim().slice(0, 60) });
+      if (match?.event === 'whatsapp_click' && isWhatsAppContact(anchor.href)) trackWhatsAppConversion();
     },
     { capture: true }
   );
@@ -110,4 +127,5 @@ export function initAnalytics(): void {
 /** Para botões que abrem o WhatsApp com window.open (não são links <a>) */
 export function trackWhatsAppOpen(label: string): void {
   trackEvent('whatsapp_click', { link_text: label });
+  trackWhatsAppConversion();
 }
