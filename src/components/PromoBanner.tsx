@@ -28,7 +28,7 @@ const FALLBACK_PROMOTIONS: Promotion[] = [
     promoPrice: 'R$ 899',
     couponCode: 'BOTOXAGOSTO',
     expiresInDays: 7,
-    treatmentId: 'botox-dysport',
+    treatmentId: 'botox',
     active: true,
   },
   {
@@ -67,7 +67,7 @@ const FALLBACK_PROMOTIONS: Promotion[] = [
     promoPrice: '6x de R$ 366',
     couponCode: 'CO2FULLFACE',
     expiresInDays: 6,
-    treatmentId: 'co2-hibrido',
+    treatmentId: 'treatment-1786999223217',
     active: true,
   },
 ];
