@@ -47,9 +47,9 @@ export default function CookieBanner() {
           <div className="text-sm leading-relaxed text-on-surface-variant">
             <p className="font-semibold text-on-surface">Sua privacidade é importante para nós</p>
             <p>
-              Usamos cookies do Google Analytics para entender como o site é usado e melhorar seu atendimento.
-              Não usamos cookies de anúncios. Você pode aceitar ou recusar, e mudar de ideia quando quiser em
-              "Privacidade e cookies", no rodapé.
+              Usamos cookies do Google para entender como o site é usado e medir quantas pessoas chegam pelos
+              nossos anúncios. Não fazemos anúncios personalizados com seus dados. Você pode aceitar ou recusar, e
+              mudar de ideia quando quiser em "Privacidade e cookies", no rodapé.
             </p>
             {current && (
               <p className="mt-1 text-xs">
