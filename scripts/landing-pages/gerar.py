@@ -10,6 +10,8 @@ Regras ao editar:
 - Nunca cite nomes de medicamentos (Botox, Dysport, toxina botulínica etc.). O teste
   no fim do script falha se algum aparecer.
 - Mantenha preços e promessas iguais aos dos anúncios.
+- Use só fotos da própria clínica (public/clinica/): o Google Ads pede declaração de
+  direitos sobre as imagens das páginas de destino (imagens dinâmicas).
 
 Uso: python scripts/landing-pages/gerar.py
 """
@@ -46,8 +48,8 @@ PAGINAS = [
         "h1": "Secagem de vasinhos com laser + PEIM",
         "sub": "Para vasinhos e microvarizes nas pernas e coxas. Sem cirurgia e sem repouso: você volta à rotina no mesmo dia.",
         "oferta": "Pacote com laser e aplicações (PEIM) a partir de <strong>R$ 289</strong>",
-        "foto": "/clinica/tratamento-maca.jpg",
-        "foto_alt": "Sala de procedimentos da Central da Estética",
+        "foto": "/clinica/ficha-avaliacao.jpg",
+        "foto_alt": "Avaliação com a especialista da Central da Estética",
         "beneficios": [
             ("Duas técnicas juntas", "O laser trata os vasinhos mais finos e o PEIM (aplicações) seca os maiores."),
             ("Sem cirurgia e sem repouso", "Sai da sessão e segue o dia normalmente."),
@@ -100,8 +102,8 @@ PAGINAS = [
         "h1": "Bioestimulador de colágeno: Radiesse ou Sculptra",
         "sub": "Estimula o seu próprio colágeno para devolver firmeza ao rosto, pescoço, colo e braços. Resultado progressivo e duradouro.",
         "oferta": "Condição especial em <strong>6x de R$ 365</strong>",
-        "foto": "/radiesse-sculptra.jpeg",
-        "foto_alt": "Tratamento com bioestimulador de colágeno",
+        "foto": "/clinica/consulta-sorriso.jpg",
+        "foto_alt": "Avaliação do contorno do rosto na Central da Estética",
         "beneficios": [
             ("Menos flacidez, mais firmeza", "O colágeno novo sustenta a pele de dentro para fora."),
             ("Resultado natural", "A melhora aparece aos poucos, sem mudar seus traços."),
@@ -136,8 +138,8 @@ PAGINAS = [
         "h1": "Drenagem linfática e massagens",
         "sub": "Drenagem linfática, massagem modeladora e relaxante com aromaterapia. Reduz o inchaço e a retenção de líquidos e alivia o estresse.",
         "oferta": "Sessões <strong>avulsas ou em pacotes</strong>",
-        "foto": "/drenagemlinfatica.jpg",
-        "foto_alt": "Drenagem linfática na Central da Estética",
+        "foto": "/clinica/tratamento-maca.jpg",
+        "foto_alt": "Cliente na maca da Central da Estética",
         "beneficios": [
             ("Desincha já na 1ª sessão", "Sensação de leveza nas pernas e no corpo."),
             ("Modeladora", "Ajuda a definir o contorno e melhora o aspecto da pele."),
@@ -170,7 +172,7 @@ h1{font-family:'Playfair Display',Georgia,serif;font-size:42px;line-height:1.12;
 .btn.ligar{border:2px solid var(--roxo);color:var(--roxo);background:#fff}
 .nota{margin-top:16px;font-size:14px;color:var(--cinza)}
 .nota b{color:#e8a400}
-.hero img.foto{width:100%;height:420px;object-fit:cover;border-radius:20px;box-shadow:0 20px 40px rgba(111,46,124,.18)}
+.hero img.foto{width:100%;height:420px;object-fit:cover;object-position:center 30%;border-radius:20px;box-shadow:0 20px 40px rgba(111,46,124,.18)}
 section{padding:56px 0}
 h2{font-family:'Playfair Display',Georgia,serif;font-size:30px;color:var(--roxo);margin-bottom:24px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
