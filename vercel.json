@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    { "source": "/botox-sp", "destination": "/botox-jardins-sp/", "permanent": true },
+    { "source": "/botox-sp/", "destination": "/botox-jardins-sp/", "permanent": true },
+    { "source": "/co2-hibrido-full-face-02-sessoes-sp", "destination": "/laser-co2-fracionado-sp/", "permanent": true },
+    { "source": "/co2-hibrido-full-face-02-sessoes-sp/", "destination": "/laser-co2-fracionado-sp/", "permanent": true },
+    { "source": "/tratamento-para-queda-capilar-sp", "destination": "/tratamento-queda-de-cabelo-sp/", "permanent": true },
+    { "source": "/tratamento-para-queda-capilar-sp/", "destination": "/tratamento-queda-de-cabelo-sp/", "permanent": true }
+  ]
+}
