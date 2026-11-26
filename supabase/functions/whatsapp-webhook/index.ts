@@ -17,18 +17,29 @@ type EvolutionMessage = {
     extendedTextMessage?: { text?: string };
     imageMessage?: { caption?: string };
     videoMessage?: { caption?: string };
+    audioMessage?: unknown;
+    documentMessage?: unknown;
   };
 };
 
+// Espera a cliente terminar de escrever: se chegar outra mensagem dela nesse tempo, só a última é respondida.
+const ESPERA_RESPOSTA_MS = Number(Deno.env.get('ESPERA_RESPOSTA_SEGUNDOS') || 8) * 1000;
+
 function extractText(m: EvolutionMessage): string | null {
   const msg = m.message ?? {};
-  return (
+  const text = (
     msg.conversation ??
     msg.extendedTextMessage?.text ??
     msg.imageMessage?.caption ??
     msg.videoMessage?.caption ??
     null
-  )?.trim() || null;
+  )?.trim();
+  if (text) return text;
+  // Sem texto: avisa a IA que veio mídia, para ela pedir que a cliente escreva em vez de ficar sem responder.
+  if (msg.audioMessage) return '[áudio]';
+  if (msg.imageMessage || msg.videoMessage) return '[imagem]';
+  if (msg.documentMessage) return '[documento]';
+  return null;
 }
 
 async function findOrCreateLead(whatsapp: string, pushName?: string): Promise<Lead> {
@@ -137,6 +148,19 @@ async function handleMessage(m: EvolutionMessage) {
     lead.status = 'bot';
   }
   if (lead.status !== 'bot') return; // consultora atendendo: IA em silêncio
+
+  // Cliente que manda várias mensagens seguidas recebe uma resposta só, à última delas.
+  await new Promise((r) => setTimeout(r, ESPERA_RESPOSTA_MS));
+  const { data: own } = await db.from('wa_messages').select('created_at').eq('wa_message_id', m.key.id).maybeSingle();
+  if (own) {
+    const { data: newer } = await db
+      .from('wa_messages')
+      .select('id')
+      .eq('lead_id', lead.id)
+      .gt('created_at', own.created_at)
+      .limit(1);
+    if (newer?.length) return; // chegou outra mensagem depois desta (ou alguém já respondeu)
+  }
 
   const { reply, transfer } = await runAgent(lead, text);
 
