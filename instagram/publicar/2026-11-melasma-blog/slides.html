@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Melasma — carrossel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#FBF5F2; --ink:#1E1B1B; --rose:#C8304A; --blush:#F3D3CF; --soft:#5A5050; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#ddd; }
+  .slide { width:1080px; height:1350px; position:relative; overflow:hidden; background:var(--bg);
+           font-family:'Outfit',sans-serif; color:var(--ink); }
+  .wave { position:absolute; inset:0; pointer-events:none; }
+  .pill { position:absolute; top:52px; left:84px; border:2px solid var(--rose); border-radius:40px;
+          padding:10px 34px; font-size:30px; color:var(--rose); letter-spacing:2px; }
+  .content { position:absolute; left:96px; right:110px; top:210px; }
+  h1 { font-family:'Playfair Display',serif; font-weight:500; font-size:104px; line-height:1.04; letter-spacing:-2px; }
+  h1.md { font-size:84px; }
+  em { font-family:'Playfair Display',serif; font-style:italic; color:var(--rose); }
+  .rule { width:220px; height:2px; background:var(--rose); margin:48px 0 44px; }
+  p { font-size:44px; line-height:1.35; font-weight:300; }
+  p + p { margin-top:28px; }
+  b { font-weight:500; color:var(--rose); }
+  .num { font-family:'Playfair Display',serif; font-style:italic; font-size:150px; line-height:1; color:var(--rose); opacity:.9; margin-bottom:10px; }
+  .list { margin-top:44px; list-style:none; }
+  .list li { font-size:42px; line-height:1.3; font-weight:300; padding:24px 34px; margin-bottom:20px; background:#fff;
+             border-radius:30px; border:2px solid var(--blush); }
+  .list li b { font-weight:500; }
+  .note { position:absolute; left:96px; right:110px; bottom:240px; font-size:26px; line-height:1.4; color:var(--soft); font-weight:300; }
+  .logo { position:absolute; bottom:44px; left:50%; transform:translateX(-50%); width:220px; }
+  .cta { display:inline-block; margin-top:50px; background:var(--rose); color:#fff; border-radius:60px;
+         padding:26px 52px; font-size:38px; font-weight:500; }
+  .swipe { position:absolute; right:96px; top:1130px; font-size:32px; color:var(--rose); letter-spacing:2px; }
+</style>
+</head>
+<body>
+
+<!-- 1 — capa -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M0 1350 C 250 1000, 650 1050, 1080 600 L1080 1350 Z" fill="#F6E1DD"/><path d="M270 42 H950 Q1005 42 1005 100 V760" stroke="#C8304A" stroke-width="2" fill="none"/></svg>
+  <div class="pill">✦ Cuidados com a pele</div>
+  <div class="content" style="top:230px">
+    <h1>Manchas no rosto?</h1>
+    <h1 style="margin-top:10px">Entenda o <em>melasma.</em></h1>
+    <div class="rule"></div>
+    <p>O que causa, o que piora e como cuidar.</p>
+  </div>
+  <div class="swipe">ARRASTE →</div>
+  <img class="logo" src="../../../public/logo.png">
+</section>
+
+<!-- 2 — o que é -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M1080 0 C 880 300, 1020 700, 760 1350 L1080 1350 Z" fill="#F8E4E0"/></svg>
+  <div class="pill">O QUE É</div>
+  <div class="content">
+    <div class="num">01</div>
+    <h1 class="md">Excesso de <em>melanina</em> em algumas áreas.</h1>
+    <div class="rule"></div>
+    <p>Manchas escuras de contorno irregular, mais comuns na <b>testa, bochechas e buço</b>.</p>
+    <p>É uma condição <b>crônica e que pode voltar</b>. O foco do tratamento é controlar.</p>
+  </div>
+  <img class="logo" src="../../../public/logo.png">
+</section>
+
+<!-- 3 — o que piora -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M680 0 C 820 200, 960 380, 1080 470 L1080 0 Z" fill="#F7DCD7"/><path d="M0 1110 C 300 1120, 500 1250, 700 1350 L0 1350 Z" fill="#F8E4E0"/></svg>
+  <div class="pill">O QUE PIORA</div>
+  <div class="content">
+    <div class="num">02</div>
+    <h1 class="md">Não tem uma causa <em>só.</em></h1>
+    <ul class="list">
+      <li><b>Sol</b> sem proteção</li>
+      <li><b>Hormônios:</b> gravidez e anticoncepcional</li>
+      <li><b>Calor</b> e predisposição familiar</li>
+    </ul>
+  </div>
+  <img class="logo" src="../../../public/logo.png">
+</section>
+
+<!-- 4 — protetor -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M780 0 C 820 150, 960 280, 1080 330 L1080 0 Z" fill="#F7DCD7"/><path d="M0 1020 C 150 1080, 250 1250, 300 1350 L0 1350 Z" fill="#F6DEDA"/></svg>
+  <div class="pill">A BASE DE TUDO</div>
+  <div class="content">
+    <div class="num">03</div>
+    <h1 class="md">Protetor solar <em>todo dia.</em></h1>
+    <ul class="list">
+      <li>FPS <b>50 ou mais</b>, até em dia nublado</li>
+      <li>Prefira o <b>protetor com cor</b>: protege também da luz visível</li>
+      <li><b>Reaplique</b> ao longo do dia</li>
+    </ul>
+  </div>
+  <img class="logo" src="../../../public/logo.png">
+</section>
+
+<!-- 5 — evite -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M1080 0 C 880 300, 1020 700, 760 1350 L1080 1350 Z" fill="#F8E4E0"/></svg>
+  <div class="pill">CUIDADO</div>
+  <div class="content">
+    <div class="num">04</div>
+    <h1 class="md">O que <em>evitar.</em></h1>
+    <ul class="list">
+      <li>Receitas caseiras, como <b>limão</b></li>
+      <li><b>Ácidos em excesso</b> por conta própria</li>
+      <li>Sol sem proteção <b>após procedimentos</b></li>
+    </ul>
+  </div>
+  <img class="logo" src="../../../public/logo.png">
+</section>
+
+<!-- 6 — CTA -->
+<section class="slide">
+  <svg class="wave" viewBox="0 0 1080 1350"><path d="M0 1350 C 250 1000, 650 1050, 1080 600 L1080 1350 Z" fill="#F6E1DD"/></svg>
+  <div class="pill">✦ Guia completo</div>
+  <div class="content" style="top:240px">
+    <h1 class="md">Leia o artigo <em>completo</em> no nosso blog.</h1>
+    <div class="rule"></div>
+    <p>Link na bio do <b>@centraldaesteticasp</b>.</p>
+    <p>E agende sua avaliação para saber o melhor tratamento para o seu caso.</p>
+    <div class="cta">Link na bio →</div>
+  </div>
+  <div class="note">O resultado varia de pessoa para pessoa. A indicação depende de avaliação individual.</div>
+  <img class="logo" src="../../../public/logo.png">
+</section>
+
+</body>
+</html>
